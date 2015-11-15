@@ -1,0 +1,16 @@
+{
+  "name": "nanostack-border-router",
+  "version": "0.0.1",
+  "description": "Nanostack Border Router",
+  "keywords": [
+    "Nanostack",
+    "Border router"
+  ],
+  "author": "Devaraj Ranganna <Devaraj.Ranganna@arm.com>",
+  "homepage": "https://github.com/ARMmbed/nanostack-border-router",
+  "license": "Apache-2.0",
+  "dependencies": {
+      "sal-stack-nanostack-slip": "~0.0.1",
+      "atmel-rf-driver": "~1.0.0"
+  }
+}
