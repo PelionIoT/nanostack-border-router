@@ -69,7 +69,7 @@ interface_bootstarp_state_e net_backhaul_state = INTERFACE_IDLE_PHY_NOT_READY;
 
 static int8_t br_tasklet_id = -1;
 static int8_t net_6lowpan_id = -1;
-static int8_t slip_if_id = -1;
+static int8_t backhaul_if_id = -1;
 
 const uint8_t app_multicast_addr[16] = {0xff, 0x05, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02};
 uint8_t tls_psk_test_key[16] = {1,2,3,4,5,6,7,9,10,11,12,13,14,15,16};
@@ -101,20 +101,20 @@ void borderrouter_backhaul_phy_status_cb(uint8_t link_up, int8_t driver_id)
 static int app_ipv6_interface_up(int8_t driver_id)
 {
 	int retval = -1;
-	if(slip_if_id != -1)
+	if(backhaul_if_id != -1)
 	{
 		tr_debug("Border RouterInterface already at active state\n");
 	}
 	else
 	{
-		slip_if_id = arm_nwk_interface_init(NET_INTERFACE_ETHERNET, driver_id, "BackHaulNet");
-		if(slip_if_id >= 0)
+		backhaul_if_id = arm_nwk_interface_init(NET_INTERFACE_ETHERNET, driver_id, "BackHaulNet");
+		if(backhaul_if_id >= 0)
 		{
-            tr_debug("SLIP interface id: %d", slip_if_id);
+            tr_debug("SLIP interface id: %d", backhaul_if_id);
             if (memcmp(br_ipv6_prefix, (const uint8_t[8]) { 0 }, 8) == 0)
 				memcpy(br_ipv6_prefix, rpl_setup_info.DODAG_ID, 8);
-			arm_nwk_interface_configure_ipv6_bootstrap_set(slip_if_id, ipv6_bootstrap_mode, br_ipv6_prefix);
-			arm_nwk_interface_up(slip_if_id);
+			arm_nwk_interface_configure_ipv6_bootstrap_set(backhaul_if_id, ipv6_bootstrap_mode, br_ipv6_prefix);
+			arm_nwk_interface_up(backhaul_if_id);
 			retval = 0;
 		}
 	}
@@ -125,10 +125,10 @@ static int app_ipv6_interface_up(int8_t driver_id)
 static int app_ipv6_interface_down(void)
 {
 	int retval = -1;
-	if(slip_if_id != -1)
+	if(backhaul_if_id != -1)
 	{
-		arm_nwk_interface_down(slip_if_id);
-		slip_if_id = -1;
+		arm_nwk_interface_down(backhaul_if_id);
+		backhaul_if_id = -1;
 		retval = 0;
 	}
 	return retval;
@@ -182,7 +182,7 @@ void borderrouter_tasklet(arm_event_s *event)
 			else
 			{
 				tr_debug("Ipv6 backhaul interface Down\n");
-				slip_if_id = -1;
+				backhaul_if_id = -1;
 				net_backhaul_state = INTERFACE_IDLE_STATE;
 			}
 		}
@@ -221,7 +221,7 @@ void borderrouter_tasklet(arm_event_s *event)
 void start_6lowpan(void)
 {
     uint8_t p[16];
-    if (0 == arm_net_address_get(slip_if_id, ADDR_IPV6_GP, p)) {
+    if (0 == arm_net_address_get(backhaul_if_id, ADDR_IPV6_GP, p)) {
 
         uint32_t lifetime = 0xffffffff;
         uint8_t t_flags = 0;
@@ -333,7 +333,7 @@ void app_parse_network_event(arm_event_s *event)
 			    gp_address_available = false;
 			}
 
-			if (slip_if_id == event->event_id) {
+			if (backhaul_if_id == event->event_id) {
 
     			if (gp_address_available) {
     			    tr_debug("Backhaul interface bootstrap ready, IP=%s", buf);
@@ -372,7 +372,7 @@ void app_parse_network_event(arm_event_s *event)
         /* Network authentication fail */
         break;
 		case ARM_NWK_DUPLICATE_ADDRESS_DETECTED:
-		if (slip_if_id == event->event_id)
+		if (backhaul_if_id == event->event_id)
 		{
 			tr_debug("Backhaul interface IPv6 DAD detected!!!!\n");
 		}
