@@ -110,7 +110,7 @@ static int app_ipv6_interface_up(int8_t driver_id)
 		backhaul_if_id = arm_nwk_interface_init(NET_INTERFACE_ETHERNET, driver_id, "BackHaulNet");
 		if(backhaul_if_id >= 0)
 		{
-            tr_debug("SLIP interface id: %d", backhaul_if_id);
+            tr_debug("Backhaul interface id: %d", backhaul_if_id);
             if (memcmp(br_ipv6_prefix, (const uint8_t[8]) { 0 }, 8) == 0)
 				memcpy(br_ipv6_prefix, rpl_setup_info.DODAG_ID, 8);
 			arm_nwk_interface_configure_ipv6_bootstrap_set(backhaul_if_id, ipv6_bootstrap_mode, br_ipv6_prefix);
