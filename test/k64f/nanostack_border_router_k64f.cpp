@@ -26,7 +26,8 @@
 #include "platform/arm_hal_timer.h"
 #include "nanostack-border-router/borderrouter_tasklet.h"
 #include "sal-stack-nanostack-slip/Slip.h"
-#include "nanostack-border-router/config_def.h"
+#include "nanostack-border-router/cfg_parser.h"
+#include "static_config.h"
 #include "ip6string.h"
 #define HAVE_DEBUG 1
 #include "ns_trace.h"

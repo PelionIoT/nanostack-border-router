@@ -40,6 +40,8 @@
 #ifndef CFG_PARSER_H
 #define CFG_PARSER_H
 
+#include "config_def.h"
+
 #ifdef __cplusplus
 extern "C"
 {
