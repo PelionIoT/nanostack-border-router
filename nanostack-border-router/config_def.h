@@ -17,14 +17,12 @@
 #ifndef CONFIG_DEF_H
 #define CONFIG_DEF_H
 
-#include "cfg_parser.h"
-
 struct conf_t {
   const char *name;
   const char *svalue;
   const int ivalue;
 };
 
-extern conf_t *global_config;
+extern struct conf_t *global_config;
 
 #endif /* CONFIG_DEF_H */

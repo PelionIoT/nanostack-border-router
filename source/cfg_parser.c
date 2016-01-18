@@ -15,7 +15,7 @@
  */
 
 #include <string.h>
-#include "nanostack-border-router/config_def.h"
+#include "nanostack-border-router/cfg_parser.h"
 
 const char *cfg_string(conf_t *conf, const char *key, const char *default_value)
 {

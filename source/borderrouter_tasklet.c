@@ -19,11 +19,10 @@
 #include "multicast_api.h"
 #include "whiteboard_api.h"
 #include "nanostack-border-router/borderrouter_tasklet.h"
-#include "nanostack-border-router/config_def.h"
+#include "nanostack-border-router/cfg_parser.h"
 #include "atmel-rf-driver/driverRFPhy.h"
 //Static bootsrap
 #define NET_IPV6_BOOTSTRAP_MODE_S
-#include "nanostack-border-router/static_config.h"
 #include "ip6string.h"
 
 #define HAVE_DEBUG 1
