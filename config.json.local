@@ -1,0 +1,46 @@
+/*
+ * Applications using the "nanostack-border-router" yotta module
+ * should use a configuration file, which overrides the parameters
+ * for border router (as shown below).
+ */
+{
+  "border-router": {
+    "name": "EmbeddedRouter",
+	"model": "Nanorouter4",
+	"manufacturer": "ARM",
+	"network-mode": "ND_WITH_MLE",
+	"security-mode": "NONE",
+	"pana-mode": "NONE",
+	"psk-key": "{0xa0, 0xa1, 0xa2, 0xa3, 0xa4, 0xa5, 0xa6, 0xa7, 0xa8, 0xa9, 0xaa, 0xab, 0xac, 0xad, 0xae, 0xaf}",
+	"br-pan-id": "0x0700",
+	"networkid": "network000000000",
+	"prefix": "2a01:348:2e0:1::",
+	"backhaul-prefix": "2a01:348:2e0:81::",
+	"nsp-port": "5683U",
+	"nsp-lifetime": 120,
+	"register-with-templates": 0,
+	"edtls-mode": "NONE",
+	"edtls-psk-key": "1234567890123456",
+	"edtls-psk-key-id": "0x0f0fU",
+	"br-subghz-channel": 1,
+	"br-2-4-ghz-channel": 12,
+	"br-channel": 12,
+	"br-rpl-flags": "BR_DODAG_PREF_7 | BR_DODAG_MOP_NON_STORING",
+	"br-rpl-instance-id": 1,
+	"br-nd-route-lifetime": 1024,
+	"br-beacon-protocol-id": 4,
+	"br-dag-dio-int-doub": 12,
+	"br-dag-dio-int-min": 9,
+	"br-dag-dio-redu": 10,
+	"br-dag-max-rank-inc": 16,
+	"br-dag-min-hop-rank-inc": 128,
+	"br-life-in-seconds": 64,
+	"br-lifetime-unit": 60,
+	"br-dag-sec-pcs": 1,
+	"br-dag-ocp": 1,
+	"app-short-address-suffix": "{0x00, 0x00, 0x00, 0xff, 0xfe, 0x00}",
+	"tls-psk-key": "{0xcf, 0xce, 0xcd, 0xcc, 0xcb, 0xca, 0xc9, 0xc8, 0xc7, 0xc6, 0xc5, 0xc4, 0xc3, 0xc2, 0xc1, 0xc0}",
+	"tls-psk-key-id": "0x30U",
+	"ipv6-bootstrap-mode": "NET_IPV6_BOOTSTRAP_STATIC"
+  }
+}

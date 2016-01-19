@@ -14,20 +14,19 @@
  * limitations under the License.
  */
 
-#ifndef CFG_PARSER_H
-#define CFG_PARSER_H
-
-#include "config_def.h"
+#ifndef BORDERROUTER_HELPERS_H
+#define BORDERROUTER_HELPERS_H
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-const char *cfg_string(conf_t *conf, const char *key, const char *default_value);
-int	cfg_int(conf_t *conf, const char *key, int default_value);
+char *print_ipv6(const void *addr_ptr);
+char *print_ipv6_prefix(const uint8_t *prefix, uint8_t prefix_len);
 
 #ifdef __cplusplus
 }
 #endif
-#endif /* CFG_PARSER_H */
+
+#endif /* BORDERROUTER_HELPERS_H */
