@@ -29,6 +29,10 @@
 #include "ns_trace.h"
 #define TRACE_GROUP  "brro"
 
+#ifdef YOTTA_CFG_BORDER_ROUTER
+#include "nanostack-border-router/yotta_config.h"
+#endif
+
 /**
  * /enum address_type_t
  * /brief Address types
