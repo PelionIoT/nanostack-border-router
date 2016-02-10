@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2015 ARM Limited. All rights reserved.
+ * Copyright (c) 2016 ARM Limited. All rights reserved.
  * SPDX-License-Identifier: Apache-2.0
  * Licensed under the Apache License, Version 2.0 (the License); you may
  * not use this file except in compliance with the License.
@@ -17,12 +17,12 @@
 #ifndef CONFIG_DEF_H
 #define CONFIG_DEF_H
 
-struct conf_t {
+typedef struct conf_t {
   const char *name;
   const char *svalue;
   const int ivalue;
-};
+} conf_t;
 
-extern struct conf_t *global_config;
+extern conf_t *global_config;
 
 #endif /* CONFIG_DEF_H */

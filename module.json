@@ -10,8 +10,7 @@
   "homepage": "https://github.com/ARMmbed/nanostack-border-router",
   "license": "Apache-2.0",
   "dependencies": {
-      "sal-stack-nanostack": "^3.0.0",
-      "sal-stack-nanostack-slip": "~0.0.1",
-      "atmel-rf-driver": "~1.0.0"
+      "sal-stack-nanostack": "ARMmbed/sal-stack-nanostack-private#master",
+	  "atmel-rf-driver": "ARMmbed/atmel-rf-driver#master"
   }
 }
