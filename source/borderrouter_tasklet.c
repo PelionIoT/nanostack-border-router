@@ -207,7 +207,7 @@ static void load_config(void)
     stoip6(prefix, strlen(prefix), backhaul_prefix);
     memset(&backhaul_prefix[8], 0, 8);
 
-    prefix = cfg_string(global_config, "APP_MULTICAST_ADDR", NULL);
+    prefix = cfg_string(global_config, "MULTICAST_ADDR", NULL);
     if (!prefix) {
         tr_error("No multicast address in configuration!");
         return;
@@ -340,13 +340,13 @@ static void borderrouter_backhaul_phy_status_cb(uint8_t link_up, int8_t driver_i
     eventOS_event_send(&event);
 }
 
-static int app_ipv6_interface_up(int8_t driver_id)
+static int backhaul_interface_up(int8_t driver_id)
 {
     int retval = -1;
     if (backhaul_if_id != -1) {
         tr_debug("Border RouterInterface already at active state\n");
     } else {
-        backhaul_if_id = arm_nwk_interface_init(NET_INTERFACE_ETHERNET, driver_id, "BackHaulNet");
+        backhaul_if_id = arm_nwk_interface_init(NET_INTERFACE_ETHERNET, driver_id, "bh0");
         if (backhaul_if_id >= 0) {
             tr_debug("Backhaul interface ID: %d", backhaul_if_id);
             if (memcmp(backhaul_prefix, (const uint8_t[8]) {
@@ -362,7 +362,7 @@ static int app_ipv6_interface_up(int8_t driver_id)
     return retval;
 }
 
-static int app_ipv6_interface_down(void)
+static int backhaul_interface_down(void)
 {
     int retval = -1;
     if (backhaul_if_id != -1) {
@@ -399,17 +399,17 @@ static void borderrouter_tasklet(arm_event_s *event)
                     net_backhaul_state = INTERFACE_IDLE_STATE;
                 }
 
-                if (app_ipv6_interface_up(net_backhaul_id) != 0) {
-                    tr_debug("Backhaul bootstrap start fail");
+                if (backhaul_interface_up(net_backhaul_id) != 0) {
+                    tr_debug("Backhaul bootstrap start failed");
                 } else {
                     tr_debug("Backhaul bootstrap started");
                     net_backhaul_state = INTERFACE_BOOTSTRAP_ACTIVE;
                 }
             } else if (event->event_id == NR_BACKHAUL_INTERFACE_PHY_DOWN) {
-                if (app_ipv6_interface_down() != 0) {
-                    tr_debug("Ipv6 backhaul interface set Down fail\n");
+                if (backhaul_interface_down() != 0) {
+                    tr_error("Backhaul interface down failed");
                 } else {
-                    tr_debug("Ipv6 backhaul interface Down\n");
+                    tr_debug("Backhaul interface is down");
                     backhaul_if_id = -1;
                     net_backhaul_state = INTERFACE_IDLE_STATE;
                 }
@@ -423,7 +423,7 @@ static void borderrouter_tasklet(arm_event_s *event)
 
             net_6lowpan_id = rf_interface_init();
             if (net_6lowpan_id < 0) {
-                tr_error("RF interface initialization failed.");
+                tr_error("RF interface initialization failed");
                 return;
             }
             net_6lowpan_state = INTERFACE_IDLE_STATE;
