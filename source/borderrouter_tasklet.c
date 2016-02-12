@@ -580,17 +580,20 @@ static void app_parse_network_event(arm_event_s *event)
 				
 				if (backhaul_bootstrap_mode == NET_IPV6_BOOTSTRAP_STATIC) {
 					int8_t retval;
+					uint8_t *next_hop_ptr;
 					
 					if (memcmp(backhaul_route.next_hop, (const uint8_t[16]) {0}, 16) == 0) {
-						tr_warn("Static backhaul bootstrap, but no next hop address set.");
-					}					
+						next_hop_ptr = NULL;
+					} else {
+						next_hop_ptr = backhaul_route.next_hop;
+					}
 					
 					tr_debug("Backhaul default route:");
 					tr_debug("   prefix:   %s", print_ipv6_prefix(backhaul_route.prefix, backhaul_route.prefix_len));
-					tr_debug("   next hop: %s", print_ipv6(backhaul_route.next_hop));
+					tr_debug("   next hop: %s", next_hop_ptr ? print_ipv6(backhaul_route.next_hop) : "on-link");
 
 					retval = arm_net_route_add(backhaul_route.prefix, backhaul_route.prefix_len,
-						backhaul_route.next_hop, 0xffffffff, 0, backhaul_if_id);
+						next_hop_ptr, 0xffffffff, 128, backhaul_if_id);
 						
 					if (retval < 0) {
 						tr_error("Failed to add backhaul default route, retval = %d", retval);
