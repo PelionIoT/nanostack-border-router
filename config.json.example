@@ -1,0 +1,48 @@
+# Applications using the "nanostack-border-router" yotta module
+# should introduce a yotta configuration file (config.json), which
+# defines all the border router parameters (as shown below).
+{
+  "border-router": {
+	"debug-traces": 1, # Turn on/off debug prints
+    "name": "mbed OS Border Router", # Name of the BR application
+	"model": "K64F-BR", # Model name of the BR application
+	"manufacturer": "ARM", # Name of manufacturer 
+	"network-mode": "ND_WITH_MLE", # 6LoWPAN default
+	"security-mode": "PSK", # Mode of security, allowed values: (NONE, PSK, PANA)
+	"psk-key-id": 1, # Index of the PSK key (if unsure set to 1)
+	"psk-key": "{0xa0, 0xa1, 0xa2, 0xa3, 0xa4, 0xa5, 0xa6, 0xa7, 0xa8, 0xa9, 0xaa, 0xab, 0xac, 0xad, 0xae, 0xaf}",
+	    # 16-byte long private shared key (PSK) value
+	"pana-mode": "", # The PANA mode of operation, allowed values: (PSK, ECC, ECC+PSK)
+	"tls-psk-key": "{0xcf, 0xce, 0xcd, 0xcc, 0xcb, 0xca, 0xc9, 0xc8, 0xc7, 0xc6, 0xc5, 0xc4, 0xc3, 0xc2, 0xc1, 0xc0}",
+	    # 16-byte long TLS private shared key (PSK) value (used with PANA)
+	"tls-psk-key-id": 1, # Index of the TLS PSK key (used with PANA; if unsure set to 1)
+	"br-pan-id": "0x0700", # Identifies the 6LoWPAN mesh network
+	"networkid": "network000000000", # Human-readable indentifier for the 6LoWPAN network (used in beacons)
+	"br-beacon-protocol-id": 4, # The protocol number in beacons (6LoWPAN shoud always use 4)
+	"prefix": "fd00:db8::", # The global prefix to be assigned to all the nodes in the 6LoWPAN mesh network
+	"rf-channel": 24, # The radio channel the BR application listens on, allowed values 11-26
+	"br-short-address": "0xface", # The short (16-bit) MAC address used on the short global address
+	"backhaul-bootstrap-mode": "NET_IPV6_BOOTSTRAP_STATIC", # Defines how the backhaul interface should be configured,
+        # allowed values: (NET_IPV6_BOOTSTRAP_STATIC, NET_IPV6_BOOTSTRAP_AUTONOMOUS)
+	"backhaul-driver": "ETH", # Which driver should be used, allowed values: (ETH, SLIP)
+	"backhaul-prefix": "fd00:db8:ff1::", The global prefix to be used on the address attached to the backhaul interface
+	"backhaul-mac-src": "CONFIG", # Defines how the MAC address of the Ethernet device should be obtained, allowed values: (BOARD, CONFIG)
+	"backhaul-mac48": "{0x02, 0x00, 0x00, 0x00, 0x00, 0x01}", # If backhaul Ethernet MAC is configured by this file, this the MAC value used
+	"backhaul-default-route": "::/0", # The deault route (prefix & prefix length) on the backhaul interface
+	"backhaul-next-hop": "", # The next hop value of the default route (should be a link-local address of a neighboring router)
+	"br-rpl-flags": "RPL_GROUNDED | BR_DODAG_MOP_NON_STORING | RPL_DODAG_PREF(0)", # RPL: the operation mode of RPL routing (do NOT change)
+	"br-rpl-instance-id": 1, # RPL: The RPL instance ID value (identifies the RPL instance)
+	"br-nd-route-lifetime": 1024, # ND: The router lifetime value used in transmitted Router Advertisements
+	"br-dag-dio-int-doub": 12, # RPL Trickle: DIOIntervalDoublings value
+	"br-dag-dio-int-min": 9, # RPL Trickle: DIOIntervalMin value
+	"br-dag-dio-redu": 10, # RPL Trickle: the redundacy constant k
+	"br-dag-max-rank-inc": 2048, # RPL: maximum rank increase
+	"br-dag-min-hop-rank-inc": 128, # RPL: minumum rank increase
+	"br-life-in-seconds": 64, # RPL: valid lifetime for the RPL messages
+	"br-lifetime-unit": 60, # RPL: value of the unit the lifetime is described in
+	"br-dag-sec-pcs": 1, # RPL: the number of bits that may be allocated to the path control field
+	"br-dag-ocp": 1, # RPL: the objective function to use, allowed_values (1: OF0, 2: MRHOF)
+	"multicast-addr": "{0xff, 0x05, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x07}"
+	    # The MPL multicast address the BR application listens to and forwards multicast packets for
+  }
+}
