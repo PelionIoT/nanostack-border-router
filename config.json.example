@@ -24,10 +24,7 @@
 	"br-short-address": "0xface", # The short (16-bit) MAC address used on the short global address
 	"backhaul-bootstrap-mode": "NET_IPV6_BOOTSTRAP_STATIC", # Defines how the backhaul interface should be configured,
         # allowed values: (NET_IPV6_BOOTSTRAP_STATIC, NET_IPV6_BOOTSTRAP_AUTONOMOUS)
-	"backhaul-driver": "ETH", # Which driver should be used, allowed values: (ETH, SLIP)
 	"backhaul-prefix": "fd00:db8:ff1::", The global prefix to be used on the address attached to the backhaul interface
-	"backhaul-mac-src": "CONFIG", # Defines how the MAC address of the Ethernet device should be obtained, allowed values: (BOARD, CONFIG)
-	"backhaul-mac48": "{0x02, 0x00, 0x00, 0x00, 0x00, 0x01}", # If backhaul Ethernet MAC is configured by this file, this the MAC value used
 	"backhaul-default-route": "::/0", # The deault route (prefix & prefix length) on the backhaul interface
 	"backhaul-next-hop": "", # The next hop value of the default route (should be a link-local address of a neighboring router)
 	"br-rpl-flags": "RPL_GROUNDED | BR_DODAG_MOP_NON_STORING | RPL_DODAG_PREF(0)", # RPL: the operation mode of RPL routing (do NOT change)
