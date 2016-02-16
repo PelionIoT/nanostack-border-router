@@ -26,7 +26,6 @@
 
 static const char psk_key[] = YOTTA_CFG_BORDER_ROUTER_PSK_KEY;
 static const char tls_psk_key[] = YOTTA_CFG_BORDER_ROUTER_TLS_PSK_KEY;
-static const char multicast_addr[16] = YOTTA_CFG_BORDER_ROUTER_MULTICAST_ADDR;
 
 static conf_t yotta_config[] = {
 	/* NAME, STRING_VALUE, INT_VALUE */
@@ -62,7 +61,7 @@ static conf_t yotta_config[] = {
 	{"TLS_PSK_KEY_ID", NULL, YOTTA_CFG_BORDER_ROUTER_TLS_PSK_KEY_ID},
 	{"BACKHAUL_BOOTSTRAP_MODE", NULL, YOTTA_CFG_BORDER_ROUTER_BACKHAUL_BOOTSTRAP_MODE},
 	{"BR_SHORT_ADDRESS", NULL, YOTTA_CFG_BORDER_ROUTER_BR_SHORT_ADDRESS},
-	{"MULTICAST_ADDR", multicast_addr, 0},
+	{"MULTICAST_ADDR", STR(YOTTA_CFG_BORDER_ROUTER_MULTICAST_ADDR), 0},
 	/* Array must end on {NULL, NULL, 0} field */
 	{NULL, NULL, 0}
 };
