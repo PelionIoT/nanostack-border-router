@@ -39,7 +39,6 @@
 	"br-lifetime-unit": 60, # RPL: value of the unit the lifetime is described in
 	"br-dag-sec-pcs": 1, # RPL: the number of bits that may be allocated to the path control field
 	"br-dag-ocp": 1, # RPL: the objective function to use, allowed_values (1: OF0, 2: MRHOF)
-	"multicast-addr": "{0xff, 0x05, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x07}"
-	    # The MPL multicast address the BR application listens to and forwards multicast packets for
+	"multicast-addr": "ff05::7" # The MPL multicast address the BR application listens to and forwards multicast packets for
   }
 }

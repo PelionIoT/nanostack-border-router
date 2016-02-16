@@ -111,7 +111,7 @@ static net_6lowpan_link_layer_sec_mode_e link_security_mode;
 static net_link_layer_psk_security_info_s link_layer_psk;
 static net_tls_cipher_e pana_security_suite;
 
-extern const char multicast_addr[16];
+static uint8_t multicast_addr[16] = {0};
 
 /* Function forward declarations */
 static void app_parse_network_event(arm_event_s *event);
@@ -212,6 +212,8 @@ static void load_config(void)
         tr_error("No multicast address in configuration!");
         return;
     }
+
+    stoip6(prefix, strlen(prefix), multicast_addr);
 
     prefix = cfg_string(global_config, "NETWORKID", "NETWORK000000000");
     memcpy(br.network_id, prefix, 16);
@@ -547,7 +549,7 @@ static void start_6lowpan(void)
         net_6lowpan_state = INTERFACE_BOOTSTRAP_ACTIVE;
 
         multicast_set_parameters(10, 0, 20, 3, 75);
-        multicast_add_address((const uint8_t *)multicast_addr, 1);
+        multicast_add_address(multicast_addr, 1);
     }
 }
 
