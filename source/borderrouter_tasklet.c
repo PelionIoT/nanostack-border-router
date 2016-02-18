@@ -247,6 +247,31 @@ static void load_config(void)
     dodag_config.DAG_SEC_PCS = cfg_int(global_config, "BR_DAG_SEC_PCS", 1);
     dodag_config.DAG_OCP = cfg_int(global_config, "BR_DAG_OCP", 1);
 
+	/* Bootstrap mode for the backhaul interface */
+    backhaul_bootstrap_mode = (net_ipv6_mode_e)cfg_int(global_config,
+		"BACKHAUL_BOOTSTRAP_MODE", NET_IPV6_BOOTSTRAP_STATIC);
+	
+	/* Backhaul default route */
+	memset(&backhaul_route, 0, sizeof(backhaul_route));
+	psk = cfg_string(global_config, "BACKHAUL_NEXT_HOP", NULL);
+	
+	if (psk) {
+		stoip6(psk, strlen(psk), backhaul_route.next_hop);
+	} 
+
+	psk = cfg_string(global_config, "BACKHAUL_DEFAULT_ROUTE", NULL);
+
+	if (psk) {
+		char *prefix, route_buf[255] = {0};
+
+		/* copy the config value to a non-const buffer */
+		strncpy(route_buf, psk, sizeof(route_buf)-1);	
+		prefix = strtok(route_buf, "/");
+		backhaul_route.prefix_len = atoi(strtok(NULL, "/"));
+
+		stoip6(prefix, strlen(prefix), backhaul_route.prefix);
+	}
+	
     prefix = cfg_string(global_config, "SECURITY_MODE", "NONE");
 
     if (strcmp(prefix, "NONE") == 0) {
@@ -279,31 +304,6 @@ static void load_config(void)
             pana_security_suite = NET_TLS_PSK_CIPHER;
         }
     }
-
-	/* Bootstrap mode for the backhaul interface */
-    backhaul_bootstrap_mode = (net_ipv6_mode_e)cfg_int(global_config,
-		"BACKHAUL_BOOTSTRAP_MODE", NET_IPV6_BOOTSTRAP_STATIC);
-	
-	/* Backhaul default route */
-	memset(&backhaul_route, 0, sizeof(backhaul_route));
-	psk = cfg_string(global_config, "BACKHAUL_NEXT_HOP", NULL);
-
-	if (psk) {
-		stoip6(psk, strlen(psk), backhaul_route.next_hop);
-	} 
-
-	psk = cfg_string(global_config, "BACKHAUL_DEFAULT_ROUTE", NULL);
-
-	if (psk) {
-		char *prefix, route_buf[255] = {0};
-
-		/* copy the config value to a non-const buffer */
-		strncpy(route_buf, psk, sizeof(route_buf)-1);	
-		prefix = strtok(route_buf, "/");
-		backhaul_route.prefix_len = atoi(strtok(NULL, "/"));
-
-		stoip6(prefix, strlen(prefix), backhaul_route.prefix);
-	}
 }
 
 static int8_t rf_interface_init(void)
