@@ -25,7 +25,7 @@ extern "C"
 #endif
 
 const char *cfg_string(conf_t *conf, const char *key, const char *default_value);
-int	cfg_int(conf_t *conf, const char *key, int default_value);
+int cfg_int(conf_t *conf, const char *key, int default_value);
 
 #ifdef __cplusplus
 }

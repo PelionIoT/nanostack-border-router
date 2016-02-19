@@ -25,7 +25,7 @@ extern "C"
 /**
  * Initializes the backhaul driver. MUST be implemented by the application.
  */
-void backhaul_driver_init(void (*backhaul_driver_status_cb)(uint8_t,int8_t));
+void backhaul_driver_init(void (*backhaul_driver_status_cb)(uint8_t, int8_t));
 
 /**
  * Initializes the border router module: loads configuration and

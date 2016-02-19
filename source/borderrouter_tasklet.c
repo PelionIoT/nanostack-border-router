@@ -156,32 +156,32 @@ static void initialize_channel_list(uint32_t channel)
     const int_fast8_t word_index = channel / 32;
     const int_fast8_t bit_index = channel % 32;
 
-	memset(&channel_list, 0, sizeof(channel_list));
+    memset(&channel_list, 0, sizeof(channel_list));
     channel_list.channel_page = CHANNEL_PAGE_0;
 
-	rf_trx_part_e type = rf_radio_type_read();
+    rf_trx_part_e type = rf_radio_type_read();
 
-	switch (type) {
-		case ATMEL_AT86RF212:
-			tr_debug("Using SUBGHZ radio, type = %d, channel = %d", type, channel);
-			channel_list.channel_mask[0] = channel_mask_0_subghz;
-			break;
-		case ATMEL_AT86RF231:
+    switch (type) {
+        case ATMEL_AT86RF212:
+            tr_debug("Using SUBGHZ radio, type = %d, channel = %d", type, channel);
+            channel_list.channel_mask[0] = channel_mask_0_subghz;
+            break;
+        case ATMEL_AT86RF231:
             tr_debug("Using 24GHZ radio, type = %d, channel = %d", type, channel);
-			channel_list.channel_mask[0] = channel_mask_0_2_4ghz;
-			break;
-		default:
+            channel_list.channel_mask[0] = channel_mask_0_2_4ghz;
+            break;
+        default:
             tr_debug("Using UNKNOWN radio, type = %d, channel = %d", type, channel);
             /* Use the 24GHZ channel mask for unknown radio types */
-			channel_list.channel_mask[0] = channel_mask_0_2_4ghz;
-			break;
-	}
+            channel_list.channel_mask[0] = channel_mask_0_2_4ghz;
+            break;
+    }
 
-	if (channel > 0) {
-		/* Zero channel value means listen all channels */
-	    memset(&channel_list.channel_mask, 0, sizeof(channel_list.channel_mask));
-	    channel_list.channel_mask[word_index] |= ((uint32_t) 1 << bit_index);
-	}
+    if (channel > 0) {
+        /* Zero channel value means listen all channels */
+        memset(&channel_list.channel_mask, 0, sizeof(channel_list.channel_mask));
+        channel_list.channel_mask[word_index] |= ((uint32_t) 1 << bit_index);
+    }
 }
 
 static void load_config(void)
@@ -247,31 +247,31 @@ static void load_config(void)
     dodag_config.DAG_SEC_PCS = cfg_int(global_config, "BR_DAG_SEC_PCS", 1);
     dodag_config.DAG_OCP = cfg_int(global_config, "BR_DAG_OCP", 1);
 
-	/* Bootstrap mode for the backhaul interface */
+    /* Bootstrap mode for the backhaul interface */
     backhaul_bootstrap_mode = (net_ipv6_mode_e)cfg_int(global_config,
-		"BACKHAUL_BOOTSTRAP_MODE", NET_IPV6_BOOTSTRAP_STATIC);
-	
-	/* Backhaul default route */
-	memset(&backhaul_route, 0, sizeof(backhaul_route));
-	psk = cfg_string(global_config, "BACKHAUL_NEXT_HOP", NULL);
-	
-	if (psk) {
-		stoip6(psk, strlen(psk), backhaul_route.next_hop);
-	} 
+                              "BACKHAUL_BOOTSTRAP_MODE", NET_IPV6_BOOTSTRAP_STATIC);
 
-	psk = cfg_string(global_config, "BACKHAUL_DEFAULT_ROUTE", NULL);
+    /* Backhaul default route */
+    memset(&backhaul_route, 0, sizeof(backhaul_route));
+    psk = cfg_string(global_config, "BACKHAUL_NEXT_HOP", NULL);
 
-	if (psk) {
-		char *prefix, route_buf[255] = {0};
+    if (psk) {
+        stoip6(psk, strlen(psk), backhaul_route.next_hop);
+    }
 
-		/* copy the config value to a non-const buffer */
-		strncpy(route_buf, psk, sizeof(route_buf)-1);	
-		prefix = strtok(route_buf, "/");
-		backhaul_route.prefix_len = atoi(strtok(NULL, "/"));
+    psk = cfg_string(global_config, "BACKHAUL_DEFAULT_ROUTE", NULL);
 
-		stoip6(prefix, strlen(prefix), backhaul_route.prefix);
-	}
-	
+    if (psk) {
+        char *prefix, route_buf[255] = {0};
+
+        /* copy the config value to a non-const buffer */
+        strncpy(route_buf, psk, sizeof(route_buf) - 1);
+        prefix = strtok(route_buf, "/");
+        backhaul_route.prefix_len = atoi(strtok(NULL, "/"));
+
+        stoip6(prefix, strlen(prefix), backhaul_route.prefix);
+    }
+
     prefix = cfg_string(global_config, "SECURITY_MODE", "NONE");
 
     if (strcmp(prefix, "NONE") == 0) {
@@ -351,11 +351,9 @@ static int backhaul_interface_up(int8_t driver_id)
         backhaul_if_id = arm_nwk_interface_init(NET_INTERFACE_ETHERNET, driver_id, "bh0");
         if (backhaul_if_id >= 0) {
             tr_debug("Backhaul interface ID: %d", backhaul_if_id);
-            if (memcmp(backhaul_prefix, (const uint8_t[8]) {
-            0
-        }, 8) == 0) {
-            memcpy(backhaul_prefix, rpl_setup_info.DODAG_ID, 8);
-		}
+            if (memcmp(backhaul_prefix, (const uint8_t[8]) {0}, 8) == 0) {
+                memcpy(backhaul_prefix, rpl_setup_info.DODAG_ID, 8);
+            }
             arm_nwk_interface_configure_ipv6_bootstrap_set(backhaul_if_id, backhaul_bootstrap_mode, backhaul_prefix);
             arm_nwk_interface_up(backhaul_if_id);
             retval = 0;
@@ -457,10 +455,10 @@ static void start_6lowpan(void)
         uint8_t t_flags = 0;
         int8_t retval = -1;
 
-		/* Channel list: listen to a channel (default: all channels) */
+        /* Channel list: listen to a channel (default: all channels) */
         uint32_t channel = cfg_int(global_config, "RF_CHANNEL", 0);
         initialize_channel_list(channel);
-		
+
         // configure as border router and set the operation mode
         retval = arm_nwk_interface_configure_6lowpan_bootstrap_set(net_6lowpan_id,
                  operating_mode, operating_mode_extension);
@@ -485,8 +483,8 @@ static void start_6lowpan(void)
         }
 
         /* configure both /64 and /128 context prefixes */
-        retval = arm_nwk_6lowpan_border_router_context_update(net_6lowpan_id, ((1<<4)|0x03),
-                		128, 0xffff, rpl_setup_info.DODAG_ID);
+        retval = arm_nwk_6lowpan_border_router_context_update(net_6lowpan_id, ((1 << 4) | 0x03),
+                 128, 0xffff, rpl_setup_info.DODAG_ID);
 
         if (retval < 0) {
             tr_error("Setting ND context failed, retval = %d", retval);
@@ -496,18 +494,18 @@ static void start_6lowpan(void)
         // configure the RPL routing protocol for the 6LoWPAN mesh network
         if (arm_nwk_6lowpan_rpl_dodag_init(net_6lowpan_id, rpl_setup_info.DODAG_ID,
                                            &dodag_config, rpl_setup_info.rpl_instance_id,
-										   rpl_setup_info.rpl_setups) == 0) {
+                                           rpl_setup_info.rpl_setups) == 0) {
             prefix_len = 64;
             t_flags = RPL_PREFIX_ROUTER_ADDRESS_FLAG;
             /* add "/64" prefix with the full BR address (DODAG ID) */
             arm_nwk_6lowpan_rpl_dodag_prefix_update(net_6lowpan_id, rpl_setup_info.DODAG_ID,
-            		prefix_len, t_flags, lifetime);
+                                                    prefix_len, t_flags, lifetime);
 
             t_flags = 0;
             prefix_len = 0;
             /* add default route "::/0" */
             arm_nwk_6lowpan_rpl_dodag_route_update(net_6lowpan_id, rpl_setup_info.DODAG_ID,
-            		prefix_len, t_flags, lifetime);
+                                                   prefix_len, t_flags, lifetime);
         }
 
         if (link_security_mode == NET_SEC_MODE_PANA_LINK_SECURITY) {
@@ -534,10 +532,10 @@ static void start_6lowpan(void)
         retval = arm_nwk_set_channel_list(net_6lowpan_id, &channel_list);
 
         if (retval) {
-             tr_error("Failed to set channel list, retval = %d", retval);
-             return;
+            tr_error("Failed to set channel list, retval = %d", retval);
+            return;
         }
-  		
+
         retval = arm_nwk_interface_up(net_6lowpan_id);
 
         if (retval < 0) {
@@ -579,29 +577,30 @@ static void app_parse_network_event(arm_event_s *event)
                 } else {
                     tr_debug("Backhaul interface in ULA Mode");
                 }
-				
-				if (backhaul_bootstrap_mode == NET_IPV6_BOOTSTRAP_STATIC) {
-					int8_t retval;
-					uint8_t *next_hop_ptr;
-					
-					if (memcmp(backhaul_route.next_hop, (const uint8_t[16]) {0}, 16) == 0) {
-						next_hop_ptr = NULL;
-					} else {
-						next_hop_ptr = backhaul_route.next_hop;
-					}
-					
-					tr_debug("Backhaul default route:");
-					tr_debug("   prefix:   %s", print_ipv6_prefix(backhaul_route.prefix, backhaul_route.prefix_len));
-					tr_debug("   next hop: %s", next_hop_ptr ? print_ipv6(backhaul_route.next_hop) : "on-link");
 
-					retval = arm_net_route_add(backhaul_route.prefix, backhaul_route.prefix_len,
-						next_hop_ptr, 0xffffffff, 128, backhaul_if_id);
-						
-					if (retval < 0) {
-						tr_error("Failed to add backhaul default route, retval = %d", retval);
-					}
-				}
-				
+                if (backhaul_bootstrap_mode == NET_IPV6_BOOTSTRAP_STATIC) {
+                    int8_t retval;
+                    uint8_t *next_hop_ptr;
+
+                    if (memcmp(backhaul_route.next_hop, (const uint8_t[16]) {0}, 16) == 0) {
+                        next_hop_ptr = NULL;
+                    }
+                    else {
+                        next_hop_ptr = backhaul_route.next_hop;
+                    }
+
+                    tr_debug("Backhaul default route:");
+                    tr_debug("   prefix:   %s", print_ipv6_prefix(backhaul_route.prefix, backhaul_route.prefix_len));
+                    tr_debug("   next hop: %s", next_hop_ptr ? print_ipv6(backhaul_route.next_hop) : "on-link");
+
+                    retval = arm_net_route_add(backhaul_route.prefix, backhaul_route.prefix_len,
+                                               next_hop_ptr, 0xffffffff, 128, backhaul_if_id);
+
+                    if (retval < 0) {
+                        tr_error("Failed to add backhaul default route, retval = %d", retval);
+                    }
+                }
+
                 tr_debug("Backhaul interface addresses:");
                 print_interface_addr(backhaul_if_id);
 
