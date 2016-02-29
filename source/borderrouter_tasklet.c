@@ -176,6 +176,7 @@ static void initialize_channel_list(uint32_t channel)
             channel_list.channel_mask[0] = channel_mask_0_subghz;
             break;
         case ATMEL_AT86RF231:
+        case ATMEL_AT86RF233:
             tr_debug("Using 24GHZ radio, type = %d, channel = %d", type, channel);
             channel_list.channel_mask[0] = channel_mask_0_2_4ghz;
             break;
