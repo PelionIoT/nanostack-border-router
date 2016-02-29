@@ -34,6 +34,12 @@
 
 #ifdef YOTTA_CFG_BORDER_ROUTER
 #include "nanostack-border-router/yotta_config.h"
+#else
+#warning No yotta configuration: using empty config
+static conf_t static_config[] = {
+    {NULL, NULL, 0}
+};
+static conf_t *global_config = static_config;
 #endif
 
 #ifdef YOTTA_CFG_BORDER_ROUTER_DEBUG_TRACES
@@ -49,6 +55,9 @@
 
 #define NR_BACKHAUL_INTERFACE_PHY_DRIVER_READY 2
 #define NR_BACKHAUL_INTERFACE_PHY_DOWN  3
+
+/* The border router tasklet runs in grounded/non-storing mode */
+#define RPL_FLAGS RPL_GROUNDED | BR_DODAG_MOP_NON_STORING | RPL_DODAG_PREF(0)
 
 typedef enum interface_bootstrap_state {
     INTERFACE_IDLE_PHY_NOT_READY,
@@ -167,6 +176,7 @@ static void initialize_channel_list(uint32_t channel)
             channel_list.channel_mask[0] = channel_mask_0_subghz;
             break;
         case ATMEL_AT86RF231:
+        case ATMEL_AT86RF233:
             tr_debug("Using 24GHZ radio, type = %d, channel = %d", type, channel);
             channel_list.channel_mask[0] = channel_mask_0_2_4ghz;
             break;
@@ -215,20 +225,20 @@ static void load_config(void)
 
     stoip6(prefix, strlen(prefix), multicast_addr);
 
-    prefix = cfg_string(global_config, "NETWORKID", "NETWORK000000000");
+    prefix = cfg_string(global_config, "NETWORK_ID", "NETWORK000000000");
     memcpy(br.network_id, prefix, 16);
 
-    br.mac_panid = cfg_int(global_config, "BR_PAN_ID", 0x0691);
-    br.mac_short_adr = cfg_int(global_config, "BR_SHORT_ADDRESS", 0xffff);
-    br.ra_life_time = cfg_int(global_config, "BR_ND_ROUTE_LIFETIME", 1024);
-    br.beacon_protocol_id = cfg_int(global_config, "BR_BEACON_PROTOCOL_ID", 4);
+    br.mac_panid = cfg_int(global_config, "PAN_ID", 0x0691);
+    br.mac_short_adr = cfg_int(global_config, "SHORT_MAC_ADDRESS", 0xffff);
+    br.ra_life_time = cfg_int(global_config, "RA_ROUTER_LIFETIME", 1024);
+    br.beacon_protocol_id = cfg_int(global_config, "BEACON_PROTOCOL_ID", 4);
 
     memcpy(br.lowpan_nd_prefix, nd_prefix, 8);
     br.abro_version_num = 0;
 
     /* RPL routing setup */
-    rpl_setup_info.rpl_instance_id = cfg_int(global_config, "BR_RPL_INSTANCE_ID", 1);
-    rpl_setup_info.rpl_setups = cfg_int(global_config, "BR_RPL_FLAGS", 0);
+    rpl_setup_info.rpl_instance_id = cfg_int(global_config, "RPL_INSTANCE_ID", 1);
+    rpl_setup_info.rpl_setups = RPL_FLAGS;
 
     /* generate DODAG ID */
     memcpy(rpl_setup_info.DODAG_ID, nd_prefix, 8);
@@ -237,15 +247,15 @@ static void load_config(void)
     rpl_setup_info.DODAG_ID[15] = br.mac_short_adr;
 
     /* DODAG configuration */
-    dodag_config.DAG_DIO_INT_DOUB = cfg_int(global_config, "BR_DAG_DIO_INT_DOUB", 12);
-    dodag_config.DAG_DIO_INT_MIN = cfg_int(global_config, "BR_DAG_DIO_INT_MIN", 9);
-    dodag_config.DAG_DIO_REDU = cfg_int(global_config, "BR_DAG_DIO_REDU", 10);
-    dodag_config.DAG_MAX_RANK_INC = cfg_int(global_config, "BR_DAG_MAX_RANK_INC", 2048);
-    dodag_config.DAG_MIN_HOP_RANK_INC = cfg_int(global_config, "BR_DAG_MIN_RANK_INC", 128);
-    dodag_config.LIFE_IN_SECONDS = cfg_int(global_config, "BR_LIFE_IN_SECONDS", 64);
-    dodag_config.LIFETIME_UNIT = cfg_int(global_config, "BR_LIFETIME_UNIT", 60);
-    dodag_config.DAG_SEC_PCS = cfg_int(global_config, "BR_DAG_SEC_PCS", 1);
-    dodag_config.DAG_OCP = cfg_int(global_config, "BR_DAG_OCP", 1);
+    dodag_config.DAG_DIO_INT_DOUB = cfg_int(global_config, "RPL_IDOUBLINGS", 12);
+    dodag_config.DAG_DIO_INT_MIN = cfg_int(global_config, "RPL_IMIN", 9);
+    dodag_config.DAG_DIO_REDU = cfg_int(global_config, "RPL_K", 10);
+    dodag_config.DAG_MAX_RANK_INC = cfg_int(global_config, "RPL_MAX_RANK_INC", 2048);
+    dodag_config.DAG_MIN_HOP_RANK_INC = cfg_int(global_config, "RPL_MIN_HOP_RANK_INC", 128);
+    dodag_config.LIFE_IN_SECONDS = cfg_int(global_config, "RPL_LIFETIME_UNIT", 64);
+    dodag_config.LIFETIME_UNIT = cfg_int(global_config, "RPL_DEFAULT_LIFETIME", 60);
+    dodag_config.DAG_SEC_PCS = cfg_int(global_config, "RPL_PCS", 1);
+    dodag_config.DAG_OCP = cfg_int(global_config, "RPL_OCP", 1);
 
     /* Bootstrap mode for the backhaul interface */
     backhaul_bootstrap_mode = (net_ipv6_mode_e)cfg_int(global_config,
