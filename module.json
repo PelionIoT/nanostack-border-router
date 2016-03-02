@@ -1,6 +1,6 @@
 {
   "name": "nanostack-border-router",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "Nanostack Border Router",
   "keywords": [
     "Nanostack",
@@ -10,7 +10,7 @@
   "homepage": "https://github.com/ARMmbed/nanostack-border-router",
   "license": "Apache-2.0",
   "dependencies": {
-      "sal-stack-nanostack": "^4.0.0",
-	    "atmel-rf-driver": "^2.0.0"
+    "sal-stack-nanostack": "^4.0.2",
+    "atmel-rf-driver": "^2.0.0"
   }
 }
