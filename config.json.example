@@ -33,7 +33,7 @@
     "rpl-imin": 9, # RPL Trickle: DIOIntervalMin value
     "rpl-k": 10, # RPL Trickle: the redundacy constant k
     "rpl-max-rank-inc": 2048, # RPL: maximum rank increase
-    "rpl-min-hop-rank-inc": 128, # RPL: minumum rank increase
+    "rpl-min-hop-rank-inc": 128, # RPL: minimum rank increase
     "rpl-default-lifetime": 64, # RPL: default lifetime for the RPL routes
     "rpl-lifetime-unit": 60, # RPL: value of the unit the lifetime is described in
     "rpl-pcs": 1, # RPL: the number of bits that may be allocated to the path control field
