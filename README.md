@@ -1,7 +1,7 @@
 # Nanostack Border Router
 Nanostack Border Router is a yotta module that provides the 6LoWPAN mesh network (1 RF interface) and backhaul network (1 backhaul interface) connectivity. It is a building block for 3rd party border router applications that implement their own backhaul driver or use some 3rd party driver.
 
-For an example of an application using the Nanostack Border Router module, see [FRDM-K64F Border Router](https://github.com/ARMmbed/k64f-border-router).
+For an example of an application using the Nanostack Border Router module, see [FRDM-K64F border router](https://github.com/ARMmbed/k64f-border-router).
 
 #### Configuring Nanostack Border Router
 Applications using the Nanostack Border Router should use a `config.json` file for configuration. The file should contain a   *border-router* section under which the Nanostack Border Router specific configuration options are defined. The complete list of all configuration options can be found in the [config.json.example](config.json.example) file.
@@ -73,7 +73,7 @@ Steps to create a border router application using the Nanostack Border Router mo
 
 4. Start the backhaul driver and invoke the `backhaul_driver_status_cb()` callback (performed by your code or the driver code).
 
-For a complete application using Nanostack Border Router, please refer to [FRDM-K64F Border Router](https://github.com/ARMmbed/k64f-border-router).
+For a complete application using Nanostack Border Router, please refer to [FRDM-K64F border router](https://github.com/ARMmbed/k64f-border-router).
 
 #### The routing protocol RPL
 Nanostack Border Router uses [RPL](https://tools.ietf.org/html/rfc6550) as the routing protocol on the mesh network side (RF interface). Currently, only the `grounded/non-storing` operation mode is supported.
