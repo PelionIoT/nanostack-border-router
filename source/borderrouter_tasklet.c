@@ -39,7 +39,7 @@
 static conf_t static_config[] = {
     {NULL, NULL, 0}
 };
-static conf_t *global_config = static_config;
+conf_t *global_config = static_config;
 #endif
 
 #ifdef YOTTA_CFG_BORDER_ROUTER_DEBUG_TRACES
@@ -172,16 +172,16 @@ static void initialize_channel_list(uint32_t channel)
 
     switch (type) {
         case ATMEL_AT86RF212:
-            tr_debug("Using SUBGHZ radio, type = %d, channel = %d", type, channel);
+            tr_debug("Using SUBGHZ radio, type = %d, channel = %lu", type, channel);
             channel_list.channel_mask[0] = channel_mask_0_subghz;
             break;
         case ATMEL_AT86RF231:
         case ATMEL_AT86RF233:
-            tr_debug("Using 24GHZ radio, type = %d, channel = %d", type, channel);
+            tr_debug("Using 24GHZ radio, type = %d, channel = %lu", type, channel);
             channel_list.channel_mask[0] = channel_mask_0_2_4ghz;
             break;
         default:
-            tr_debug("Using UNKNOWN radio, type = %d, channel = %d", type, channel);
+            tr_debug("Using UNKNOWN radio, type = %d, channel = %lu", type, channel);
             /* Use the 24GHZ channel mask for unknown radio types */
             channel_list.channel_mask[0] = channel_mask_0_2_4ghz;
             break;
