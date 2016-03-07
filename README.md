@@ -288,6 +288,7 @@ void backhaul_driver_init(void (*backhaul_driver_status_cb)(uint8_t, int8_t));
 To create a border router application using the Nanostack Border Router module:
 
 **Step 1.** Call `ns_dyn_mem_init()` to set the heap size and a handler for memory errors of your application.
+
 **Step 2.** Set up the Nanostack tracing library. [OPTIONAL]
 
 ```
@@ -303,6 +304,7 @@ To create a border router application using the Nanostack Border Router module:
 **Note**: You must call these functions before you call any Nanostack Border Router functions. For the detailed description of the above Nanostack functions, read [the Nanostack documentation](https://docs.mbed.com/docs/arm-ipv66lowpan-stack/en/latest/).
 
 **Step 3.** Call the `start_border_router()` function. Nanostack will call your `backhaul_driver_init()` function to register your backhaul driver.
+
 **Step 4.** Start the backhaul driver and invoke the `backhaul_driver_status_cb()` callback (performed by your code or the driver code).
 
 For a complete application using Nanostack Border Router, read the [FRDM-K64F border router](https://github.com/ARMmbed/k64f-border-router) documentation.
