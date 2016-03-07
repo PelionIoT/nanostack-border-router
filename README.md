@@ -1,25 +1,27 @@
 # Nanostack Border Router
-Nanostack Border Router is a generic mbed border router implementation which provides the main IPv6/6LoWPAN border-router logic that is portable to any hardware platform. An example of such a port is [FRDM-K64F Border Router](https://github.com/ARMmbed/k64f-border-router).    
+
+Nanostack Border Router is a generic mbed border router implementation that provides the main IPv6/6LoWPAN border router logic  portable to any hardware platform. An example of such a port is [FRDM-K64F border router](https://github.com/ARMmbed/k64f-border-router).    
 
 The steps involved in porting a target platform are:
 
 - Creating an mbedOS application with yotta
-- Selecting a target platform
+- Selecting the target platform
 - Installing dependencies
 - Adding source files
-- Building & flashing
+- Building and flashing
 
-### Creating mbedOS Application
-The regular way of creating an application for ARM mbed OS includes using yotta. Click [here](http://yottadocs.mbed.com/tutorial/tutorial.html)  to learn how to install & use yotta.
+### Creating an mbedOS application
 
-Working with ARM mbed OS is fairly straight forward as most of the bits you need to develop an application are already in place for you. Howver, to get the best out of ARM mbed OS, you need to know at least the followings:
+The regular way of creating an application for ARM mbed OS includes using yotta. Read the [yotta tutorial document](http://yottadocs.mbed.com/tutorial/tutorial.html) to learn how to install and use yotta.
+
+Working with ARM mbed OS is fairly straightforward as most of the bits you need to develop an application are already in place for you. However, to get the best out of ARM mbed OS, you need to know at least the following:
 
 - Interfacing to hardware
 - Asynchronous programming with MINAR
 - Memory management with mbed OS
 - Networking with mbed OS
 
-You can find all this information in  [ARM mbed OS User Guide](https://docs.mbed.com/docs/getting-started-mbed-os/en/latest/Full_Guide/app_on_yotta/). 
+You can find all this information in the [ARM mbed OS User Guide](https://docs.mbed.com/docs/getting-started-mbed-os/en/latest/Full_Guide/app_on_yotta/). 
 
 Initializing your project:
 
@@ -32,10 +34,12 @@ $ cd <your_project>
 $ yotta init 
 ```
 
-### Selecting a Target Platform
+### Selecting the target platform
 
-A target platform is the hardware you want to use over which the border router will run. There are hundreds of target platforms already available for you out of the box. However, if you wish to write your own target please follow the instructions at [Writing yotta targets](http://yottadocs.mbed.com/tutorial/targets.html). You can even inherit from an existing yotta target.  
-Some useful commands to dig target information are:
+Target platform is the hardware on which the border router will run. There are hundreds of target platforms already available for you out of the box. However, if you wish to write your own target please follow the instructions in [Writing yotta targets](http://yottadocs.mbed.com/tutorial/targets.html). You can even inherit from an existing yotta target.  
+
+Some useful commands:
+
 ```
 #display the current target
 yotta target
@@ -49,20 +53,20 @@ yotta target <target name>
 
 ### Installing dependencies
 
-In this step you install all the dependencies for your application. You can do that in two ways. Installation through yotta:
+To install all dependencies for your application with yotta:
 ```
 #for example if mbed-drivers is the name of your dependency 
 $ yotta install mbed-drivers
 ``` 
 
-Or you can manually add dependency in your `module.json` file. Generally, what you need for a ARM mbed Border Router can be listed as:
+Alternatively, you can manually add a dependency in your `module.json` file. For ARM mbed Border Router you need the following:
 
-- Nanostack Border Router Module (this repo)
-- Any backhaul drivers (Ethernet/SLIP/WLAN etc.)
-- IEEE 802.15.4 RF Module Drivers (6LoWPAN end)
-- Networking stack (ARM mbed IPv6/6LowPAN stack aka. Nanostack)
+- Nanostack Border Router module (this repository).
+- The backhaul drivers (Ethernet/SLIP/WLAN).
+- IEEE 802.15.4 RF module drivers (6LoWPAN end).
+- Networking stack (ARM mbed IPv6/6LowPAN stack, Nanostack).
 
-As an example, `module.json` file for [FRDM-K64F Border Router](https://github.com/ARMmbed/k64f-border-router) is shown here.     
+An example of the `module.json` file for [FRDM-K64F border router](https://github.com/ARMmbed/k64f-border-router):     
 
 ```
 {
@@ -86,20 +90,20 @@ As an example, `module.json` file for [FRDM-K64F Border Router](https://github.c
   }
 }
 ```
-The diagram below gives us a conceptual model for a  [FRDM-K64F Border Router Application](https://github.com/ARMmbed/k64f-border-router). Underneath the application, the content of this repository, i.e., Nanostack Border Router resides.   
+The diagram below introduces a conceptual model for a [FRDM-K64F border router application](https://github.com/ARMmbed/k64f-border-router).
 
 ![](/images/BorderRouter.png) 
 
-### Adding Source Files to Application
+### Adding source files to an application
 
-After initializing your new project directory with yotta, you would have noticed that you have certain folders and files inside your directory.  For more details, please visit  [ARM mbed OS User Guide](https://docs.mbed.com/docs/getting-started-mbed-os/en/latest/Full_Guide/app_on_yotta/). Your header files go in the folder which has the same name as your project directory. All your source files go to the folder named **source**. 
+After initializing your new project directory with yotta, you have certain folders and files in your directory. For more details, read the [ARM mbed OS User Guide](https://docs.mbed.com/docs/getting-started-mbed-os/en/latest/Full_Guide/app_on_yotta/). Your header files are located in a folder with the same name as your project directory. The source files are located in the `source` folder. 
 
-Your Border Router application, say `BR_App.cpp` must implement at least the following two routines:
+Your border router application, for example `BR_App.cpp`, must implement at least the following two routines:
 
-	1. backhaul_driver_init()
-	2. app_start()
+- `backhaul_driver_init()`
+- `app_start()`
 
-The former is needed by Nanostack Border Router (this repo) and the later is needed by mbed OS. All mbed OS applications start with the function app_start (instead of main). The main job of *backhaul_driver_init()* is to register any available backhaul interface to the networking stack. The driver for the backhaul interface must implement a routine which would register the backhaul driver to the networking stack. The *Device Driver API* of ARM mbed IPv6/6LoWPAN stack (Nanostack) implements a routine to register the interface to the networking stack.
+The former is needed by Nanostack Border Router (this repo) and the later is needed by mbed OS. All mbed OS applications start with the function `app_start` (instead of main). The main task of `backhaul_driver_init()` is to register any available backhaul interface to the networking stack. The driver for the backhaul interface must implement a routine that would register the backhaul driver to the networking stack. The *Device Driver API* of ARM mbed IPv6/6LoWPAN stack (Nanostack) implements a routine to register the interface to the networking stack.
 
 ```
 typedef struct phy_device_driver_s
@@ -120,7 +124,7 @@ typedef struct phy_device_driver_s
 
 int8_t arm_net_phy_register(phy_device_driver_s *phy_driver)
 ```
-As an example, a routine implementing the registraion for an ethernet interface is presented below:
+An example of a routine implementing the registration for an Ethernet interface:
 
 ```
 static phy_device_driver_s eth_device_driver;
@@ -163,12 +167,13 @@ void arm_eth_phy_device_register(uint8_t *mac_ptr, void (*driver_status_cb)(uint
 
 ```
 
-In *app_start()* you should implement your application logic and start the  generic border router module (provided by this repository) by calling *border_router_start()*. 
+In `app_start()` you implement your application logic and start the generic border router module (provided in this repository) by calling `border_router_start()`. 
+
 ```C
  tr_info("Starting K64F border router...");
  border_router_start();
 ```
-Also, you should initialize the memory heap depending upon the memory available at your hardware. For example:
+You also need to initialize the memory heap depending on the memory available on your hardware. For example:
 
 ```C
 /*Heap size of 32K for targets like FRDM-k64f*/
@@ -191,9 +196,10 @@ ns_dyn_mem_init(app_stack_heap, APP_DEFINED_HEAP_SIZE, app_heap_error_handler, 0
 ``` 
 
 ### Configuring Nanostack Border Router
-Applications using the Nanostack Border Router should use a `config.json` file for configuration. The file should contain a   *border-router* section under which the Nanostack Border Router specific configuration options are defined. The complete list of all configuration options can be found in the [config.json.example](config.json.example) file. `config.json`is the file that contains all compile-time configurations for your border router application.
 
-The minimum set of configuration options required are explained in the table below.
+Applications using Nanostack Border Router need to use a `config.json` file for the configuration. The file needs to contain a   *border-router* section under which the Nanostack Border Router specific configuration options are defined. The complete list of all configuration options is in the [config.json.example](config.json.example) file. The `config.json` file contains all compile-time configurations for your border router application.
+
+The minimum set of configuration options required are explained here:
 
 | Field                               | Description                                                   |
 |-------------------------------------|---------------------------------------------------------------|
@@ -206,10 +212,10 @@ The minimum set of configuration options required are explained in the table bel
 | psk-key                             | 16 bytes long private shared key to be used when the security mode is PSK. Example format (hexadecimal byte values separated by commas inside brackets): `{0x00, ..., 0x0f}` |
 | multicast-addr                      | Multicast forwarding is supported by default. This defines the multicast address to which the border router application forwards multicast packets (on the backhaul and RF interface). Example format: `ff05::5` |
 
-An example `config.json` file is shown below:
+An example of a `config.json` file:
 
 ```
-# An Application using the "nanostack-border-router" yotta module should introduce a yotta configuration file (config.json), which defines all the border router parameters (as shown below).
+# An Application using the "nanostack-border-router" yotta module should introduce a yotta configuration file (config.json), that defines all the border router parameters (as shown below).
 
 {
   "border-router": {
@@ -253,18 +259,19 @@ An example `config.json` file is shown below:
 }
 
 ```
-### Building & Flashing
+### Building and flashing
 
-Finally you build your Border Router Application by giving the following command:
+To build your border router application use:
 
 ```
 $ yotta build
 ```
 
-And you flash your hardware by just dragging and dropping the .bin file from /build folder.
+To flash your hardware, just drag and drop the `.bin` file from the `/build` folder.
 
 
-### Summary of Using Nanostack Border Router in your application
+### Using Nanostack Border Router in your application
+
 To run a 6LoWPAN border router/gateway, your application needs to:
 
 - Implement a callback for registering a backhaul network driver.
@@ -278,7 +285,7 @@ void border_router_start(void);
 void backhaul_driver_init(void (*backhaul_driver_status_cb)(uint8_t, int8_t));
 ```
 
-Steps to create a border router application using the Nanostack Border Router module:
+To create a border router application using the Nanostack Border Router module:
 
 1. Call `ns_dyn_mem_init()` to set the heap size and a handler for memory errors for your application.
 
@@ -296,15 +303,16 @@ Steps to create a border router application using the Nanostack Border Router mo
   
 ```
 
-   **Note**: These functions must be called before any Nanostack Border Router functions are called. For the detailed descriptions of the above Nanostack functions, pelase refer to [the Nanostack documentation](https://docs.mbed.com/docs/arm-ipv66lowpan-stack/en/latest/).
+   **Note**: These functions must be called before any Nanostack Border Router functions are called. For the detailed descriptions of the above Nanostack functions, read [the Nanostack documentation](https://docs.mbed.com/docs/arm-ipv66lowpan-stack/en/latest/).
 
-3. Call the `start_border_router()` function; Nanostack will call your `backhaul_driver_init()` function to register your backhaul driver.
+3. Call the `start_border_router()` function. Nanostack will call your `backhaul_driver_init()` function to register your backhaul driver.
 
 4. Start the backhaul driver and invoke the `backhaul_driver_status_cb()` callback (performed by your code or the driver code).
 
-For a complete application using Nanostack Border Router, please refer to [FRDM-K64F border router](https://github.com/ARMmbed/k64f-border-router).
+For a complete application using Nanostack Border Router, read the [FRDM-K64F border router](https://github.com/ARMmbed/k64f-border-router) documentation.
 
 #### The routing protocol RPL
+
 Nanostack Border Router uses [RPL](https://tools.ietf.org/html/rfc6550) as the routing protocol on the mesh network side (RF interface). Currently, only the `grounded/non-storing` operation mode is supported.
 
 Nanostack Border Router offers the following yotta configuration options for RPL:
