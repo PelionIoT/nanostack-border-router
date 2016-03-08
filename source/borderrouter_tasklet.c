@@ -82,7 +82,6 @@ typedef struct {
 static channel_list_s channel_list;
 
 /* Channel masks for different RF types */
-static const uint32_t channel_mask_0_subghz = 0x000007ff;
 static const uint32_t channel_mask_0_2_4ghz = 0x07fff800;
 
 /* Border router settings */
@@ -165,25 +164,18 @@ static void initialize_channel_list(uint32_t channel)
     const int_fast8_t word_index = channel / 32;
     const int_fast8_t bit_index = channel % 32;
 
-    memset(&channel_list, 0, sizeof(channel_list));
-    channel_list.channel_page = CHANNEL_PAGE_0;
-
     rf_trx_part_e type = rf_radio_type_read();
 
     switch (type) {
         case ATMEL_AT86RF212:
             tr_debug("Using SUBGHZ radio, type = %d, channel = %lu", type, channel);
-            channel_list.channel_mask[0] = channel_mask_0_subghz;
             break;
         case ATMEL_AT86RF231:
         case ATMEL_AT86RF233:
             tr_debug("Using 24GHZ radio, type = %d, channel = %lu", type, channel);
-            channel_list.channel_mask[0] = channel_mask_0_2_4ghz;
             break;
         default:
             tr_debug("Using UNKNOWN radio, type = %d, channel = %lu", type, channel);
-            /* Use the 24GHZ channel mask for unknown radio types */
-            channel_list.channel_mask[0] = channel_mask_0_2_4ghz;
             break;
     }
 
@@ -224,6 +216,11 @@ static void load_config(void)
     }
 
     stoip6(prefix, strlen(prefix), multicast_addr);
+
+    /* Set up channel page and channgel mask */
+    memset(&channel_list, 0, sizeof(channel_list));
+    channel_list.channel_page = (channel_page_e)cfg_int(global_config, "RF_CHANNEL_PAGE", CHANNEL_PAGE_0);
+    channel_list.channel_mask[0] = cfg_int(global_config, "RF_CHANNEL_MASK", channel_mask_0_2_4ghz);
 
     prefix = cfg_string(global_config, "NETWORK_ID", "NETWORK000000000");
     memcpy(br.network_id, prefix, 16);
