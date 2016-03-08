@@ -20,7 +20,9 @@
     "network-id": "network000000000", # 16 bytes long human-readable indentifier for the 6LoWPAN network (used in beacons)
     "beacon-protocol-id": 4, # The protocol number in beacons (6LoWPAN shoud always use 4)
     "prefix": "fd00:db8::", # The global prefix to be assigned to all the nodes in the 6LoWPAN mesh network
-    "rf-channel": 24, # The radio channel the application listens on, allowed values 11-26
+    "rf-channel": 0, # The radio channel the application listens on (non-zero value overrides channel mask), values: 1-26
+    "rf-channel-page": 2, # The radio channel page to be used
+    "rf-channel-mask": "0x07fff800", # The channel mask to set multiple channels
     "short-mac-address": "0xface", # The short (16-bit) MAC address used on the short global address
     "backhaul-bootstrap-mode": "NET_IPV6_BOOTSTRAP_STATIC", # Defines how the backhaul interface should be configured,
         # allowed values: (NET_IPV6_BOOTSTRAP_STATIC, NET_IPV6_BOOTSTRAP_AUTONOMOUS)
