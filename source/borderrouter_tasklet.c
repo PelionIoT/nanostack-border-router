@@ -99,6 +99,9 @@ static uint8_t backhaul_prefix[16] = {0};
 /* Backhaul default route information */
 static route_info_t backhaul_route;
 
+/* Should prefix on the backhaul used for PAN as well? */
+static uint8_t rf_prefix_from_backhaul = 0;
+
 static net_6lowpan_mode_e operating_mode = NET_6LOWPAN_BORDER_ROUTER;
 static net_6lowpan_mode_extension_e operating_mode_extension = NET_6LOWPAN_ND_WITH_MLE;
 static interface_bootstrap_state_e net_6lowpan_state = INTERFACE_IDLE_PHY_NOT_READY;
@@ -125,7 +128,7 @@ static uint8_t multicast_addr[16] = {0};
 static void app_parse_network_event(arm_event_s *event);
 static void borderrouter_tasklet(arm_event_s *event);
 static void initialize_channel_list(uint32_t channel);
-static void start_6lowpan(void);
+static void start_6lowpan(const uint8_t *backhaul_address);
 static void load_config(void);
 
 void border_router_start(void)
@@ -257,6 +260,8 @@ static void load_config(void)
     /* Bootstrap mode for the backhaul interface */
     backhaul_bootstrap_mode = (net_ipv6_mode_e)cfg_int(global_config,
                               "BACKHAUL_BOOTSTRAP_MODE", NET_IPV6_BOOTSTRAP_STATIC);
+
+    rf_prefix_from_backhaul = cfg_int(global_config, "PREFIX_FROM_BACKHAUL", 0);
 
     /* Backhaul default route */
     memset(&backhaul_route, 0, sizeof(backhaul_route));
@@ -452,7 +457,7 @@ static void borderrouter_tasklet(arm_event_s *event)
     }
 }
 
-static void start_6lowpan(void)
+static void start_6lowpan(const uint8_t *backhaul_address)
 {
     uint8_t p[16] = {0};
 
@@ -480,6 +485,12 @@ static void start_6lowpan(void)
         if (retval < 0) {
             tr_error("Failed to set link layer security mode, retval = %d", retval);
             return;
+        }
+
+        /* Should we use the backhaul prefix on the PAN as well? */
+        if (backhaul_address && rf_prefix_from_backhaul) {
+            memcpy(br.lowpan_nd_prefix, p, 8);
+            memcpy(rpl_setup_info.DODAG_ID, br.lowpan_nd_prefix, 8);
         }
 
         retval = arm_nwk_6lowpan_border_router_init(net_6lowpan_id, &br);
@@ -614,7 +625,7 @@ static void app_parse_network_event(arm_event_s *event)
                 net_backhaul_state = INTERFACE_CONNECTED;
                 if (net_6lowpan_state == INTERFACE_IDLE_STATE) {
                     //Start 6lowpan
-                    start_6lowpan();
+                    start_6lowpan(p);
                 }
             } else {
                 tr_debug("RF bootstrap ready, IPv6 = %s", buf);
