@@ -20,6 +20,7 @@
     "network-id": "network000000000", # 16 bytes long human-readable indentifier for the 6LoWPAN network (used in beacons)
     "beacon-protocol-id": 4, # The protocol number in beacons (6LoWPAN shoud always use 4)
     "prefix": "fd00:db8::", # The global prefix to be assigned to all the nodes in the 6LoWPAN mesh network
+    "prefix-from-backhaul": false, # Whether or not the backhaul prefix should be used on the PAN prefix as well
     "rf-channel": 0, # The radio channel the application listens on (non-zero value overrides channel mask), values: 1-26
     "rf-channel-page": 2, # The radio channel page to be used
     "rf-channel-mask": "0x07fff800", # The channel mask to set multiple channels
@@ -28,7 +29,7 @@
         # allowed values: (NET_IPV6_BOOTSTRAP_STATIC, NET_IPV6_BOOTSTRAP_AUTONOMOUS)
     "backhaul-prefix": "fd00:db8:ff1::", The global prefix of the address attached to the backhaul interface
     "backhaul-default-route": "::/0", # The deault route (prefix & prefix length) on the backhaul interface
-    "backhaul-next-hop": "fe80::1", # The next hop value of the default route (should be a link-local address of a neighboring router)
+    "backhaul-next-hop": "fe80::1", # The next hop value of the default route (should be a link-local address of a neighboring router) 
     "ra-router-lifetime": 1024, # ND: The router lifetime value used in transmitted Router Advertisements
     "rpl-instance-id": 1, # RPL: The RPL instance ID value (identifies the RPL instance)
     "rpl-idoublings": 12, # RPL Trickle: DIOIntervalDoublings value
