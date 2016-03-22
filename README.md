@@ -30,7 +30,7 @@ $ mkdir <your_project>
 
 $ cd <your_project>
 
-# Make sure that you selsect "executable"  as module type when prompted 
+# Make sure that you select "executable" as the module type when prompted 
 $ yotta init 
 ```
 
@@ -40,7 +40,7 @@ Target platform is the hardware on which the border router will run. There are h
 
 Some useful commands:
 
-```bash
+```shell
 #display the current target
 yotta target
 
@@ -146,17 +146,17 @@ void arm_eth_phy_device_register(uint8_t *mac_ptr, void (*driver_status_cb)(uint
 
 ```
 
-In `app_start()` you implement your application logic and start the generic border router module (provided in this repository) by calling the `border_router_start()` function.
+In the `app_start()` function, you implement your application logic and start the generic border router module (provided in this repository) by calling the `border_router_start()` function.
 
 ```C
-tr_info("Starting K64F border router...");
+tr_info("Starting border router...");
 border_router_start();
 ```
 
-You also need to initialize the memory heap depending on the memory available on your hardware. For example:
+You also need to initialise the memory heap depending on the memory available on your hardware. For example:
 
 ```C
-/* Heap size of 32K for targets like FRDM-K64F */
+/* Se the heap size to ~32 KB */
 static uint8_t app_stack_heap[32500];
 
 /* Structure defining memory related errors */
@@ -169,7 +169,7 @@ typedef enum {
     NS_DYN_MEM_HEAP_SECTOR_UNITIALIZED  /**< ns_dyn_mem_free(), ns_dyn_mem_temporary_alloc() or ns_dyn_mem_alloc() called before ns_dyn_mem_init() */
 } heap_fail_t;
 
-/* Initialize dynamic memory
+/* Initialise dynamic memory
 app_heap_error_handler() is the callback function if any memory related error takes place */
 ns_dyn_mem_init(app_stack_heap, APP_DEFINED_HEAP_SIZE, app_heap_error_handler, 0);
 ``` 
@@ -193,11 +193,12 @@ The minimum set of configuration options required are explained here:
 | multicast-addr                      | Multicast forwarding is supported by default. This defines the multicast address to which the border router application forwards multicast packets (on the backhaul and RF interface). Example format: `ff05::5` |
 
 ```
+
 ### Building and flashing
 
 To build your border router application use:
 
-```
+```shell
 $ yotta build
 ```
 
@@ -205,7 +206,7 @@ To flash your hardware, just drag and drop the `.bin` file from the `/build` fol
 
 ### Using Nanostack Border Router in your application
 
-As a recap, to run a 6LoWPAN border router/gateway, your application needs to:
+Here is a short recap of everything learnt above. To run a 6LoWPAN border router/gateway, your application needs to:
 
 - Implement a callback for registering a backhaul network driver.
 - Call the start function to get your border router up and running.
@@ -225,7 +226,7 @@ To create a border router application using the Nanostack Border Router module:
 **Step 2.** Set up the Nanostack tracing library. [OPTIONAL]
 
 ```C
-   /* Initialize the tracing library */
+   /* Initialise the tracing library */
    trace_init(); 
 
    /* Define your printing function */
