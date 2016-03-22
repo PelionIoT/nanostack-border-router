@@ -95,7 +95,6 @@ The former is needed by Nanostack Border Router (this repository) and the later 
 ```C
 int8_t arm_net_phy_register(phy_device_driver_s *phy_driver);
 ```
-
 An example of a routine performing the registration of an Ethernet interface:
 
 ```C
