@@ -26,9 +26,9 @@ You can find all this information and more in the [ARM mbed OS User Guide](https
 
 ### Selecting the target platform
 
-Target platform is the hardware on which the border router will run. There are hundreds of target platforms already available for you out of the box (such as (FRDM-K64F)[https://www.mbed.com/en/development/hardware/boards/nxp/frdm_k64f/]). If you wish to write your own target please follow the instructions in [Writing yotta targets](http://yottadocs.mbed.com/tutorial/targets.html).
+Target platform is the hardware on which the border router will run. There are hundreds of target platforms already available for you out of the box, for example [FRDM-K64F](https://www.mbed.com/en/development/hardware/boards/nxp/frdm_k64f/). If you wish to write your own target, follow the instructions in [Writing yotta targets](http://yottadocs.mbed.com/tutorial/targets.html).
 
-Useful yotta commands:
+**Useful yotta commands:**
 
 ```shell
 # Display the current target
@@ -44,6 +44,7 @@ $ yotta target <target name>
 ### Installing dependencies
 
 To install dependencies for your application with yotta:
+
 ```shell
 # To include this module as a dependency
 $ yotta install nanostack-border-router
@@ -51,10 +52,10 @@ $ yotta install nanostack-border-router
 
 Alternatively, you can manually add a dependency in your `module.json` file.
 
-For your 6LoWPAN border router you may need the following yotta modules (dependencies):
+For your 6LoWPAN border router, you may need the following yotta modules (dependencies):
 
 - Nanostack Border Router (this repository).
-- Backhaul drivers (e.g. [Ethernet](https://github.com/ARMmbed/sal-nanostack-driver-k64f-eth), [SLIP](https://github.com/ARMmbed/sal-stack-nanostack-slip)).
+- Backhaul drivers, for example [Ethernet](https://github.com/ARMmbed/sal-nanostack-driver-k64f-eth) or [SLIP](https://github.com/ARMmbed/sal-stack-nanostack-slip).
 - [Atmel IEEE 802.15.4 RF driver](https://github.com/ARMmbed/atmel-rf-driver).
 - [6LowPAN networking stack (Nanostack)](https://github.com/ARMmbed/sal-stack-nanostack).
 
