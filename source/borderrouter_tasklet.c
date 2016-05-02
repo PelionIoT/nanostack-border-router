@@ -31,6 +31,9 @@
 #include "net_interface.h"
 #include "ip6string.h"
 #include "net_rpl.h"
+#include "mac_api.h"
+#include "ethernet_mac_api.h"
+#include "sw_mac.h"
 
 #ifdef YOTTA_CFG_BORDER_ROUTER
 #include "nanostack-border-router/yotta_config.h"
@@ -325,8 +328,13 @@ static int8_t rf_interface_init(void)
     tr_debug("RF device ID: %d", rf_phy_device_register_id);
 
     if (rf_phy_device_register_id >= 0) {
-        rfid = arm_nwk_interface_init(NET_INTERFACE_RF_6LOWPAN,
-                                      rf_phy_device_register_id, "mesh0");
+        mac_description_storage_size_t storage_sizes;
+        storage_sizes.device_decription_table_size = 32;
+        storage_sizes.key_description_table_size = 3;
+        storage_sizes.key_lookup_size = 1;
+        storage_sizes.key_usage_size = 3;
+        mac_api_t *api = ns_sw_mac_create(rf_phy_device_register_id, &storage_sizes);
+        rfid = arm_nwk_interface_lowpan_init(api, "mesh0");
         tr_debug("RF interface ID: %d", rfid);
     }
 
@@ -360,7 +368,9 @@ static int backhaul_interface_up(int8_t driver_id)
     if (backhaul_if_id != -1) {
         tr_debug("Border RouterInterface already at active state\n");
     } else {
-        backhaul_if_id = arm_nwk_interface_init(NET_INTERFACE_ETHERNET, driver_id, "bh0");
+        eth_mac_api_t *api = ethernet_mac_create(driver_id);
+        backhaul_if_id = arm_nwk_interface_ethernet_init(api, "bh0");
+
         if (backhaul_if_id >= 0) {
             tr_debug("Backhaul interface ID: %d", backhaul_if_id);
             if (memcmp(backhaul_prefix, (const uint8_t[8]) {0}, 8) == 0) {

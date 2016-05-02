@@ -20,6 +20,7 @@
 #include <ctype.h>
 #include "ip6string.h"
 #include "ns_types.h"
+#include "common_functions.h"
 
 static char tmp_print_buffer[128] = {0};
 
