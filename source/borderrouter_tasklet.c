@@ -35,6 +35,7 @@
 #include "ethernet_mac_api.h"
 #include "sw_mac.h"
 
+
 #ifdef YOTTA_CFG_BORDER_ROUTER
 #include "nanostack-border-router/yotta_config.h"
 #else
@@ -58,6 +59,7 @@ conf_t *global_config = static_config;
 
 #define NR_BACKHAUL_INTERFACE_PHY_DRIVER_READY 2
 #define NR_BACKHAUL_INTERFACE_PHY_DOWN  3
+#define START_6LOWPAN  4
 
 /* The border router tasklet runs in grounded/non-storing mode */
 #define RPL_FLAGS RPL_GROUNDED | BR_DODAG_MOP_NON_STORING | RPL_DODAG_PREF(0)
@@ -113,6 +115,7 @@ static net_ipv6_mode_e backhaul_bootstrap_mode = NET_IPV6_BOOTSTRAP_STATIC;
 
 static const uint8_t gp16_address_suffix[6] = {0x00, 0x00, 0x00, 0xff, 0xfe, 0x00};
 
+static int8_t nwk_tasklet_id = -1;
 static int8_t br_tasklet_id = -1;
 static int8_t net_6lowpan_id = -1;
 static int8_t backhaul_if_id = -1;
@@ -144,7 +147,7 @@ void border_router_start(void)
 
     protocol_stats_start(&nwk_stats);
 
-    eventOS_event_handler_create(
+   nwk_tasklet_id = eventOS_event_handler_create(
         &borderrouter_tasklet,
         ARM_LIB_TASKLET_INIT_EVENT);
 }
@@ -236,6 +239,14 @@ static void load_config(void)
     br.ra_life_time = cfg_int(global_config, "RA_ROUTER_LIFETIME", 1024);
     br.beacon_protocol_id = cfg_int(global_config, "BEACON_PROTOCOL_ID", 4);
 
+    rf_prefix_from_backhaul = cfg_int(global_config, "PREFIX_FROM_BACKHAUL", 0);
+
+    /*If rf_prefix_from_backhaul is set to true, then 6lp interface should use
+     * the same prefix as backhaul*/
+    if (rf_prefix_from_backhaul) {
+        memcpy(nd_prefix, backhaul_prefix, 16);
+    }
+
     memcpy(br.lowpan_nd_prefix, nd_prefix, 8);
     br.abro_version_num = 0;
 
@@ -263,8 +274,6 @@ static void load_config(void)
     /* Bootstrap mode for the backhaul interface */
     backhaul_bootstrap_mode = (net_ipv6_mode_e)cfg_int(global_config,
                               "BACKHAUL_BOOTSTRAP_MODE", NET_IPV6_BOOTSTRAP_STATIC);
-
-    rf_prefix_from_backhaul = cfg_int(global_config, "PREFIX_FROM_BACKHAUL", 0);
 
     /* Backhaul default route */
     memset(&backhaul_route, 0, sizeof(backhaul_route));
@@ -395,6 +404,19 @@ static int backhaul_interface_down(void)
     return retval;
 }
 
+void send_start_6lowpan_event(void)
+{
+    arm_event_s event;
+    event.sender = nwk_tasklet_id;
+    event.priority = ARM_LIB_MED_PRIORITY_EVENT;
+    event.receiver = br_tasklet_id;
+    event.event_id = START_6LOWPAN;
+    event.event_type = APPLICATION_EVENT;
+    event.event_data = 0;
+    event.data_ptr = NULL;
+    eventOS_event_send(&event);
+}
+
 /**
   * \brief Border Router Main Tasklet
   *
@@ -435,6 +457,15 @@ static void borderrouter_tasklet(arm_event_s *event)
                     backhaul_if_id = -1;
                     net_backhaul_state = INTERFACE_IDLE_STATE;
                 }
+            } else if (event->event_id == START_6LOWPAN) {
+                if (net_6lowpan_state == INTERFACE_IDLE_PHY_NOT_READY) {
+                    net_6lowpan_state = INTERFACE_IDLE_STATE;
+                }
+
+                if (net_6lowpan_state == INTERFACE_IDLE_STATE && net_backhaul_state == INTERFACE_IDLE_PHY_NOT_READY) {
+                    tr_info("Starting 6lp without BACKHAUL.");
+                    start_6lowpan(0);
+                }
             }
             break;
 
@@ -448,6 +479,7 @@ static void borderrouter_tasklet(arm_event_s *event)
                 tr_error("RF interface initialization failed");
                 return;
             }
+            send_start_6lowpan_event();
             net_6lowpan_state = INTERFACE_IDLE_STATE;
             eventOS_event_timer_request(9, ARM_LIB_SYSTEM_TIMER_EVENT, br_tasklet_id, 20000);
             break;
@@ -469,13 +501,17 @@ static void borderrouter_tasklet(arm_event_s *event)
 
 static void start_6lowpan(const uint8_t *backhaul_address)
 {
-    uint8_t p[16] = {0};
+    uint32_t lifetime = 0xffffffff; // infinite
+    uint8_t prefix_len = 0;
+    uint8_t t_flags = 0;
+    int8_t retval = -1;
 
-    if (arm_net_address_get(backhaul_if_id, ADDR_IPV6_GP, p) == 0) {
-        uint32_t lifetime = 0xffffffff; // infinite
-        uint8_t prefix_len = 0;
-        uint8_t t_flags = 0;
-        int8_t retval = -1;
+
+        /* Should we use the backhaul prefix on the PAN as well? */
+        if (backhaul_address && rf_prefix_from_backhaul) {
+            memcpy(br.lowpan_nd_prefix, backhaul_address, 8);
+            memcpy(rpl_setup_info.DODAG_ID, br.lowpan_nd_prefix, 8);
+        }
 
         /* Channel list: listen to a channel (default: all channels) */
         uint32_t channel = cfg_int(global_config, "RF_CHANNEL", 0);
@@ -495,12 +531,6 @@ static void start_6lowpan(const uint8_t *backhaul_address)
         if (retval < 0) {
             tr_error("Failed to set link layer security mode, retval = %d", retval);
             return;
-        }
-
-        /* Should we use the backhaul prefix on the PAN as well? */
-        if (backhaul_address && rf_prefix_from_backhaul) {
-            memcpy(br.lowpan_nd_prefix, p, 8);
-            memcpy(rpl_setup_info.DODAG_ID, br.lowpan_nd_prefix, 8);
         }
 
         retval = arm_nwk_6lowpan_border_router_init(net_6lowpan_id, &br);
@@ -576,7 +606,7 @@ static void start_6lowpan(const uint8_t *backhaul_address)
 
         multicast_set_parameters(10, 0, 20, 3, 75);
         multicast_add_address(multicast_addr, 1);
-    }
+ //   }
 }
 
 /**
