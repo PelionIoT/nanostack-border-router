@@ -35,21 +35,17 @@
 #include "ethernet_mac_api.h"
 #include "sw_mac.h"
 
-#ifdef YOTTA_CFG_BORDER_ROUTER
-#include "nanostack-border-router/yotta_config.h"
+#if defined(YOTTA_CFG_BORDER_ROUTER) || defined(MBED_CONF_APP_DEFINED_BR_CONFIG)
+#include "nanostack-border-router/mbed_config.h"
 #else
-#warning No yotta configuration: using empty config
+#warning No configuration provided: using empty config
 static conf_t static_config[] = {
     {NULL, NULL, 0}
 };
 conf_t *global_config = static_config;
 #endif
 
-#ifdef YOTTA_CFG_BORDER_ROUTER_DEBUG_TRACES
-#if YOTTA_CFG_BORDER_ROUTER_DEBUG_TRACES == 1
-#define HAVE_DEBUG 1
-#endif
-#else
+#if YOTTA_CFG_BORDER_ROUTER_DEBUG_TRACES==1
 #define HAVE_DEBUG 1
 #endif
 
@@ -58,6 +54,9 @@ conf_t *global_config = static_config;
 
 #define NR_BACKHAUL_INTERFACE_PHY_DRIVER_READY 2
 #define NR_BACKHAUL_INTERFACE_PHY_DOWN  3
+
+static mac_api_t *api;
+static eth_mac_api_t *eth_mac_api;
 
 /* The border router tasklet runs in grounded/non-storing mode */
 #define RPL_FLAGS RPL_GROUNDED | BR_DODAG_MOP_NON_STORING | RPL_DODAG_PREF(0)
@@ -159,7 +158,7 @@ static void print_interface_addr(int id)
         uint8_t *t_buf = address_buf;
         for (int i = 0; i < address_count; ++i) {
             ip6tos(t_buf, buf);
-            tr_debug("   [%d] %s", i, buf);
+            tr_info("   [%d] %s", i, buf);
             t_buf += 16;
         }
     }
@@ -333,7 +332,9 @@ static int8_t rf_interface_init(void)
         storage_sizes.key_description_table_size = 3;
         storage_sizes.key_lookup_size = 1;
         storage_sizes.key_usage_size = 3;
-        mac_api_t *api = ns_sw_mac_create(rf_phy_device_register_id, &storage_sizes);
+        if (!api) {
+            api = ns_sw_mac_create(rf_phy_device_register_id, &storage_sizes);
+        }
         rfid = arm_nwk_interface_lowpan_init(api, "mesh0");
         tr_debug("RF interface ID: %d", rfid);
     }
@@ -368,15 +369,19 @@ static int backhaul_interface_up(int8_t driver_id)
     if (backhaul_if_id != -1) {
         tr_debug("Border RouterInterface already at active state\n");
     } else {
-        eth_mac_api_t *api = ethernet_mac_create(driver_id);
-        backhaul_if_id = arm_nwk_interface_ethernet_init(api, "bh0");
+        if (!eth_mac_api) {
+            eth_mac_api = ethernet_mac_create(driver_id);
+        }
+
+        backhaul_if_id = arm_nwk_interface_ethernet_init(eth_mac_api, "bh0");
 
         if (backhaul_if_id >= 0) {
             tr_debug("Backhaul interface ID: %d", backhaul_if_id);
-            if (memcmp(backhaul_prefix, (const uint8_t[8]) {0}, 8) == 0) {
+            if (memcmp(backhaul_prefix, (const uint8_t[8] ) { 0 }, 8) == 0) {
                 memcpy(backhaul_prefix, rpl_setup_info.DODAG_ID, 8);
             }
-            arm_nwk_interface_configure_ipv6_bootstrap_set(backhaul_if_id, backhaul_bootstrap_mode, backhaul_prefix);
+            arm_nwk_interface_configure_ipv6_bootstrap_set(
+                    backhaul_if_id, backhaul_bootstrap_mode, backhaul_prefix);
             arm_nwk_interface_up(backhaul_if_id);
             retval = 0;
         }
@@ -440,10 +445,12 @@ static void borderrouter_tasklet(arm_event_s *event)
 
         case ARM_LIB_TASKLET_INIT_EVENT:
             br_tasklet_id = event->receiver;
+
             /* initialize the backhaul interface */
             backhaul_driver_init(borderrouter_backhaul_phy_status_cb);
-
+            /* initialize Radio module*/
             net_6lowpan_id = rf_interface_init();
+
             if (net_6lowpan_id < 0) {
                 tr_error("RF interface initialization failed");
                 return;
@@ -456,8 +463,12 @@ static void borderrouter_tasklet(arm_event_s *event)
             eventOS_event_timer_cancel(event->event_id, event->receiver);
 
             if (event->event_id == 9) {
+#ifdef MBED_CONF_APP_DEBUG_TRACE
+#if MBED_CONF_APP_DEBUG_TRACE == 1
                 arm_print_routing_table();
                 arm_print_neigh_cache();
+#endif
+#endif
                 eventOS_event_timer_request(9, ARM_LIB_SYSTEM_TIMER_EVENT, br_tasklet_id, 20000);
             }
             break;
@@ -601,9 +612,9 @@ static void app_parse_network_event(arm_event_s *event)
             if (backhaul_if_id == event->event_id) {
 
                 if (gp_address_available) {
-                    tr_debug("Backhaul bootstrap ready, IPv6 = %s", buf);
+                    tr_info("Backhaul bootstrap ready, IPv6 = %s", buf);
                 } else {
-                    tr_debug("Backhaul interface in ULA Mode");
+                    tr_info("Backhaul interface in ULA Mode");
                 }
 
                 if (backhaul_bootstrap_mode == NET_IPV6_BOOTSTRAP_STATIC) {
@@ -617,9 +628,9 @@ static void app_parse_network_event(arm_event_s *event)
                         next_hop_ptr = backhaul_route.next_hop;
                     }
 
-                    tr_debug("Backhaul default route:");
-                    tr_debug("   prefix:   %s", print_ipv6_prefix(backhaul_route.prefix, backhaul_route.prefix_len));
-                    tr_debug("   next hop: %s", next_hop_ptr ? print_ipv6(backhaul_route.next_hop) : "on-link");
+                    tr_info("Backhaul default route:");
+                    tr_info("   prefix:   %s", print_ipv6_prefix(backhaul_route.prefix, backhaul_route.prefix_len));
+                    tr_info("   next hop: %s", next_hop_ptr ? print_ipv6(backhaul_route.next_hop) : "on-link");
 
                     retval = arm_net_route_add(backhaul_route.prefix, backhaul_route.prefix_len,
                                                next_hop_ptr, 0xffffffff, 128, backhaul_if_id);
@@ -629,7 +640,7 @@ static void app_parse_network_event(arm_event_s *event)
                     }
                 }
 
-                tr_debug("Backhaul interface addresses:");
+                tr_info("Backhaul interface addresses:");
                 print_interface_addr(backhaul_if_id);
 
                 net_backhaul_state = INTERFACE_CONNECTED;
@@ -638,11 +649,12 @@ static void app_parse_network_event(arm_event_s *event)
                     start_6lowpan(p);
                 }
             } else {
-                tr_debug("RF bootstrap ready, IPv6 = %s", buf);
+                tr_info("RF bootstrap ready, IPv6 = %s", buf);
                 arm_nwk_6lowpan_rpl_dodag_start(net_6lowpan_id);
                 net_6lowpan_state = INTERFACE_CONNECTED;
-                tr_debug("RF interface addresses:");
+                tr_info("RF interface addresses:");
                 print_interface_addr(net_6lowpan_id);
+                tr_info("6LoWPAN Border Router Bootstrap Complete.");
             }
         }
             /* Network connection Ready */
