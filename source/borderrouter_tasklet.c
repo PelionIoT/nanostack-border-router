@@ -26,7 +26,7 @@
 #include "nanostack-border-router/borderrouter_tasklet.h"
 #include "nanostack-border-router/borderrouter_helpers.h"
 #include "nanostack-border-router/cfg_parser.h"
-#include "atmel-rf-driver/driverRFPhy.h"
+#include "rf_wrapper.h"
 #include "nwk_stats_api.h"
 #include "net_interface.h"
 #include "ip6string.h"
@@ -169,21 +169,6 @@ static void initialize_channel_list(uint32_t channel)
     const int_fast8_t word_index = channel / 32;
     const int_fast8_t bit_index = channel % 32;
 
-    rf_trx_part_e type = rf_radio_type_read();
-
-    switch (type) {
-        case ATMEL_AT86RF212:
-            tr_debug("Using SUBGHZ radio, type = %d, channel = %lu", type, channel);
-            break;
-        case ATMEL_AT86RF231:
-        case ATMEL_AT86RF233:
-            tr_debug("Using 24GHZ radio, type = %d, channel = %lu", type, channel);
-            break;
-        default:
-            tr_debug("Using UNKNOWN radio, type = %d, channel = %lu", type, channel);
-            break;
-    }
-
     if (channel > 0) {
         /* Zero channel value means listen all channels */
         memset(&channel_list.channel_mask, 0, sizeof(channel_list.channel_mask));
@@ -322,6 +307,7 @@ static void load_config(void)
 
 static int8_t rf_interface_init(void)
 {
+    static char phy_name[] = "mesh0";
     int8_t rfid = -1;
     int8_t rf_phy_device_register_id = rf_device_register();
     tr_debug("RF device ID: %d", rf_phy_device_register_id);
@@ -335,7 +321,7 @@ static int8_t rf_interface_init(void)
         if (!api) {
             api = ns_sw_mac_create(rf_phy_device_register_id, &storage_sizes);
         }
-        rfid = arm_nwk_interface_lowpan_init(api, "mesh0");
+        rfid = arm_nwk_interface_lowpan_init(api, phy_name);
         tr_debug("RF interface ID: %d", rfid);
     }
 
