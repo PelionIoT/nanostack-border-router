@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef MBED_CONF_APP_THREAD_BR
 
 #include <string.h>
 #include <stdlib.h>
@@ -35,19 +36,8 @@
 #include "ethernet_mac_api.h"
 #include "sw_mac.h"
 
-#if defined(YOTTA_CFG_BORDER_ROUTER) || defined(MBED_CONF_APP_DEFINED_BR_CONFIG)
-#include "nanostack-border-router/mbed_config.h"
-#else
-#warning No configuration provided: using empty config
-static conf_t static_config[] = {
-    {NULL, NULL, 0}
-};
-conf_t *global_config = static_config;
-#endif
 
-#if YOTTA_CFG_BORDER_ROUTER_DEBUG_TRACES==1
-#define HAVE_DEBUG 1
-#endif
+#include "nanostack-border-router/mbed_config.h"
 
 #include "ns_trace.h"
 #define TRACE_GROUP "brro"
@@ -181,7 +171,7 @@ static void load_config(void)
     const char *prefix, *psk;
     uint8_t nd_prefix[16];
 
-    prefix = cfg_string(global_config, "PREFIX", NULL);
+    prefix = cfg_string(mbed_config, "PREFIX", NULL);
 
     if (!prefix) {
         tr_error("No RF prefix in configuration!");
@@ -190,7 +180,7 @@ static void load_config(void)
 
     stoip6(prefix, strlen(prefix), nd_prefix);
 
-    prefix = cfg_string(global_config, "BACKHAUL_PREFIX", NULL);
+    prefix = cfg_string(mbed_config, "BACKHAUL_PREFIX", NULL);
     if (!prefix) {
         tr_error("No backhaul prefix in configuration!");
         return;
@@ -669,3 +659,4 @@ static void app_parse_network_event(arm_event_s *event)
             break;
     }
 }
+#endif
