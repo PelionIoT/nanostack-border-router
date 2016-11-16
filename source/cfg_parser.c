@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#ifndef MBED_CONF_APP_THREAD_BR
+ 
 #include <string.h>
 #include "nanostack-border-router/cfg_parser.h"
 
@@ -36,3 +38,4 @@ int cfg_int(conf_t *conf, const char *key, int default_value)
     }
     return default_value;
 }
+#endif

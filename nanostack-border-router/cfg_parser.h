@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef MBED_CONF_APP_THREAD_BR
 
 #ifndef CFG_PARSER_H
 #define CFG_PARSER_H
@@ -31,3 +32,4 @@ int cfg_int(conf_t *conf, const char *key, int default_value);
 }
 #endif
 #endif /* CFG_PARSER_H */
+#endif /* MBED_CONF_APP_THREAD_BR */

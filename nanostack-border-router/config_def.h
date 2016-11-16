@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef MBED_CONF_APP_THREAD_BR
 
 #ifndef CONFIG_DEF_H
 #define CONFIG_DEF_H
@@ -24,5 +25,5 @@ typedef struct conf_t {
 } conf_t;
 
 extern conf_t *global_config;
-
 #endif /* CONFIG_DEF_H */
+#endif /* MBED_CONF_APP_THREAD_BR */
