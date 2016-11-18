@@ -69,6 +69,7 @@ static const uint32_t channel_mask_0_2_4ghz = 0x07fff800;
 
 /* Backhaul prefix */
 static uint8_t backhaul_prefix[16] = {0};
+static uint8_t rf_mac[8] = {0};
 
 /* Backhaul default route information */
 static route_info_t backhaul_route;
@@ -95,10 +96,6 @@ static net_ipv6_mode_e backhaul_bootstrap_mode = NET_IPV6_BOOTSTRAP_STATIC;
 static void initialize_channel_list(uint32_t channel);
 static void borderrouter_tasklet(arm_event_s *event);
 static void initialize_channel_list(uint32_t channel);
-
-// verbatim copy of the config data from new channel API example:
-#define APP_CHANNEL_PAGE    CHANNEL_PAGE_0
-
 
 /* Timers */
 #define RETRY_BOOT_TIMER    70
@@ -150,8 +147,7 @@ typedef struct {
     uint8_t         protocol_version;
     int8_t          net_rf_id;
     uint8_t         mesh_ml_prefix[8];
-    bool            nap_brouter;
-    net_6lowpan_gp_address_mode_e address_mode;
+    bool            nap_brouter;    
     bool            ifup_ongoing;
     bool            retry_boot;
     bool            reconnect;
@@ -245,7 +241,7 @@ static void mesh_network_data_init(int8_t rf_driver_id, mac_api_t *mac_api)
     tr_info("backhaul prefix: %s", print_ipv6(backhaul_route.prefix));
 
     //initialize network related variables
-    param = STR(MBED_CONF_APP_RF_CHANNEL);
+    param = STR(MBED_CONF_APP_NETWORD_ID);
     (void)memcpy((void *)network.mesh.networkid, param, 16);
     network.mesh.rf_driver_id = rf_driver_id;
     network.mesh.net_rf_id = -1;
@@ -277,8 +273,8 @@ static void mesh_network_data_init(int8_t rf_driver_id, mac_api_t *mac_api)
     // initialize PSKd, used in ifconfig
     set_network_PSKd((uint8_t *)"threadjpaketest", strlen("threadjpaketest"));
     network.mesh.thread_cfg.maxChildCount = 32;    
-    network.mesh.rfChannel = 22;
-    network.mesh.pan_id = 0xFACE; //Default: 0x0691
+    network.mesh.rfChannel = MBED_CONF_APP_RF_CHANNEL;
+    network.mesh.pan_id = MBED_CONF_APP_PAN_ID; //Default: 0x0691
     network.mesh.protocol_id = 0x03;
     network.mesh.protocol_version = 2;    
     memcpy(network.mesh.mesh_ml_prefix, "\xFD\0\x0d\xb8\0\0\0\0", 8);
@@ -287,8 +283,7 @@ static void mesh_network_data_init(int8_t rf_driver_id, mac_api_t *mac_api)
 
     network.ethernet.ifup_ongoing = false;
     network.ethernet.metric = 0; // high priority    
-
-    static uint8_t rf_mac[8] = {0};
+    
     rf_read_mac_address(rf_mac);
     memcpy(network.ethernet.mac48, rf_mac, 6);	
 
@@ -305,11 +300,6 @@ static void mesh_network_data_init(int8_t rf_driver_id, mac_api_t *mac_api)
     network.mesh.num_nwk_reconnections = 0;
     network.mesh.nap_brouter = false;
     memset(network.ethernet.global_address, 0, 16);
-}
-
-int8_t network_tasklet_id(void)
-{
-    return network.tasklet_id;
 }
 
 void retry_boot(void)
@@ -355,7 +345,7 @@ int retry_boot_delay_check(void)
         }
     }
 
-    eventOS_event_timer_request(RETRY_BOOT_TIMER, ARM_LIB_SYSTEM_TIMER_EVENT, network_tasklet_id(), network.mesh.retry_boot_timeout);
+    eventOS_event_timer_request(RETRY_BOOT_TIMER, ARM_LIB_SYSTEM_TIMER_EVENT, network.tasklet_id, network.mesh.retry_boot_timeout);
 
     return 1;
 }
@@ -376,24 +366,19 @@ static int thread_interface_up()
     memset(&link_setup, 0, sizeof(link_setup));
     tr_info("thread_interface_up");
     thread_link_configuration_get(&link_setup);
-    //ret = thread_management_link_configuration_store(network.mesh.net_rf_id, link_setup_ptr);
-
-    //}
-    // registers all services
+    
     val = thread_management_node_init(network.mesh.net_rf_id, &channel_list, &device_config, &link_setup);
 
     if (val) {
         tr_error("Thread init error with code: %is\r\n", (int)val);
+		return val;
     }
 
     // Additional thread configurations
     if (network.mesh.linkTimeout != 100) {
         thread_management_set_link_timeout(network.mesh.net_rf_id, network.mesh.linkTimeout);
     }
-    /*if (network.mesh.thread_cfg.partition_id) {
-        thread_test_partition_info_set(network.mesh.net_rf_id, network.mesh.thread_cfg.partition_id);
-    }
-    */
+    
     if (network.mesh.thread_cfg.maxChildCount != 32) {
         thread_management_max_child_count(network.mesh.net_rf_id, network.mesh.thread_cfg.maxChildCount);
     }    
@@ -452,7 +437,7 @@ static void network_interface_event_handler(arm_event_s *event)
 
             connectStatus = true;
 
-            tr_info("id_get %d.", thread_interface_status_border_router_interface_id_get());
+            tr_info("BR interface_id %d.", thread_interface_status_border_router_interface_id_get());
             if (thread_interface_status_border_router_interface_id_get() != -1) {
                 if (0 == arm_net_address_get(thread_interface_status_border_router_interface_id_get(), ADDR_IPV6_GP, network.ethernet.global_address)) {
                     network.ethernet.state = STATE_CONNECTED;
@@ -604,12 +589,10 @@ void thread_interface_event_handler(arm_event_s *event)
             if (retry_boot_delay == 0) {
                 retry_boot();
             } else if (retry_boot_delay < 0) {
-                network.mesh.ifup_ongoing = false;
-                //cmd_ready(connectStatus ? CMDLINE_RETCODE_SUCCESS : CMDLINE_RETCODE_FAIL);
+                network.mesh.ifup_ongoing = false;                
             }
         } else {
-            network.mesh.ifup_ongoing = false;
-            //cmd_ready(connectStatus ? CMDLINE_RETCODE_SUCCESS : CMDLINE_RETCODE_FAIL);
+            network.mesh.ifup_ongoing = false;            
         }
     }
     thread_interface_status_thread_connection(connectStatus);
@@ -620,7 +603,6 @@ static void meshnetwork_up() {
 
         if (network.mesh.state == STATE_CONNECTED || network.mesh.state == STATE_BOOTSTRAP) {
             tr_info("mesh0 already up\r\n");
-
         }        
 
         if (network.mesh.rf_driver_id != -1) {

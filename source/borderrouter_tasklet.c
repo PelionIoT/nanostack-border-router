@@ -171,7 +171,7 @@ static void load_config(void)
     const char *prefix, *psk;
     uint8_t nd_prefix[16];
 
-    prefix = cfg_string(mbed_config, "PREFIX", NULL);
+    prefix = cfg_string(global_config, "PREFIX", NULL);
 
     if (!prefix) {
         tr_error("No RF prefix in configuration!");
@@ -180,7 +180,7 @@ static void load_config(void)
 
     stoip6(prefix, strlen(prefix), nd_prefix);
 
-    prefix = cfg_string(mbed_config, "BACKHAUL_PREFIX", NULL);
+    prefix = cfg_string(global_config, "BACKHAUL_PREFIX", NULL);
     if (!prefix) {
         tr_error("No backhaul prefix in configuration!");
         return;

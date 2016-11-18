@@ -66,6 +66,6 @@ static conf_t mbed_config[] = {
     {NULL, NULL, 0}
 };
 conf_t *global_config = mbed_config;
-#endif
+#endif //MBED_CONF_APP_THREAD_BR
 
 #endif //MBED_CONFIG_H
