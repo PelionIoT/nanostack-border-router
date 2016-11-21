@@ -44,6 +44,9 @@
 
 #define NR_BACKHAUL_INTERFACE_PHY_DRIVER_READY 2
 #define NR_BACKHAUL_INTERFACE_PHY_DOWN  3
+#define MESH_LINK_TIMEOUT 100
+#define MESH_METRIC 1000
+#define THREAD_MAX_CHILD_COUNT 32
 
 static mac_api_t *api;
 static eth_mac_api_t *eth_mac_api;
@@ -64,18 +67,14 @@ typedef struct {
 /* Border router channel list */
 static channel_list_s channel_list;
 
-/* Channel masks for different RF types */
-static const uint32_t channel_mask_0_2_4ghz = 0x07fff800;
-
 /* Backhaul prefix */
 static uint8_t backhaul_prefix[16] = {0};
-static uint8_t rf_mac[8] = {0};
 
 /* Backhaul default route information */
 static route_info_t backhaul_route;
 
-static net_6lowpan_mode_e operating_mode = NET_6LOWPAN_BORDER_ROUTER;
-static net_6lowpan_mode_extension_e operating_mode_extension = NET_6LOWPAN_ND_WITH_MLE;
+static net_6lowpan_mode_e operating_mode = NET_6LOWPAN_ROUTER;
+static net_6lowpan_mode_extension_e operating_mode_extension = NET_6LOWPAN_THREAD;
 static int8_t br_tasklet_id = -1;
 static int8_t backhaul_if_id = -1;
 
@@ -88,7 +87,7 @@ static void thread_link_configuration_get(link_configuration_s *link_configurati
 static void network_interface_event_handler(arm_event_s *event);
 
 static void meshnetwork_up();
-static void mesh_network_data_init(int8_t rf_driver_id, mac_api_t *api);
+static void mesh_network_data_init(int8_t rf_driver_id);
 static void set_network_PSKd(uint8_t *pskd, uint8_t len);
 static interface_bootstrap_state_e net_6lowpan_state = INTERFACE_IDLE_PHY_NOT_READY;
 static interface_bootstrap_state_e net_backhaul_state = INTERFACE_IDLE_PHY_NOT_READY;
@@ -186,25 +185,19 @@ static void set_network_PSKd(uint8_t *PSKd, uint8_t len)
     memcpy(network.mesh.thread_cfg.PSKd, PSKd, len);
 }
 
-static void mesh_network_data_init(int8_t rf_driver_id, mac_api_t *mac_api)
+static void mesh_network_data_init(int8_t rf_driver_id)
 {
-    const char *param;
-
-    /* Set up channel page and channgel mask */
+    const char *param;	
+    /* Set up channel page and channel mask */
     memset(&channel_list, 0, sizeof(channel_list));
     channel_list.channel_page = MBED_CONF_APP_RF_CHANNEL_PAGE;
     channel_list.channel_mask[0] = MBED_CONF_APP_RF_CHANNEL_MASK;
-
-    /* Channel list: listen to a channel (default: all channels) */
-    uint32_t channel = MBED_CONF_APP_RF_CHANNEL;
-    initialize_channel_list(channel);
-
-    memset(&backhaul_prefix[8], 0, 8);
-    #ifdef MBED_CONF_APP_BACKHAUL_PREFIX
-    param = STR(MBED_CONF_APP_BACKHAUL_PREFIX);
-    stoip6(param, strlen(param), backhaul_prefix);
-    tr_info("backhaul_prefix: %s", print_ipv6(backhaul_prefix));
-    #endif
+    
+	network.mesh.rfChannel = MBED_CONF_APP_RF_CHANNEL;    
+	MBED_ASSERT(network.mesh.rfChannel<28);
+    initialize_channel_list(network.mesh.rfChannel);
+	
+    memset(&backhaul_prefix[8], 0, 8);  
 
     /* Bootstrap mode for the backhaul interface */
     if (MBED_CONF_APP_BACKHAUL_DYNAMIC_BOOTSTRAP) {
@@ -212,46 +205,39 @@ static void mesh_network_data_init(int8_t rf_driver_id, mac_api_t *mac_api)
         tr_info("NET_IPV6_BOOTSTRAP_AUTONOMOUS");
     }
     else {
-        backhaul_bootstrap_mode = NET_IPV6_BOOTSTRAP_STATIC;
+        backhaul_bootstrap_mode = NET_IPV6_BOOTSTRAP_STATIC;								
+		// done like this so that prefix can be left out in the dynamic case.
+		param = STR(MBED_CONF_APP_BACKHAUL_PREFIX); 
+		MBED_ASSERT(sizeof(param)>0);
+		stoip6(param, strlen(param), backhaul_prefix);
+		tr_info("backhaul_prefix: %s", print_ipv6(backhaul_prefix));		
     }
 
-    /* Backhaul default route */
+    /* Backhaul route configuration*/
     memset(&backhaul_route, 0, sizeof(backhaul_route));
-
-    param = STR(MBED_CONF_APP_BACKHAUL_NEXT_HOP);
-
-    if (param) {
-        stoip6(param, strlen(param), backhaul_route.next_hop);
-    }
+    param = STR(MBED_CONF_APP_BACKHAUL_NEXT_HOP);    
+    stoip6(param, strlen(param), backhaul_route.next_hop);    
 
     tr_info("next hop: %s", print_ipv6(backhaul_route.next_hop));
 
-    param = STR(MBED_CONF_APP_BACKHAUL_DEFAULT_ROUTE);
+    param = MBED_CONF_APP_BACKHAUL_DEFAULT_ROUTE;
+    
+	char *prefix, route_buf[255] = {0};
+	/* copy the config value to a non-const buffer */
+	strncpy(route_buf, param, sizeof(route_buf) - 1);
+	prefix = strtok(route_buf, "/");
+	backhaul_route.prefix_len = atoi(strtok(NULL, "/"));
+	stoip6(prefix, strlen(prefix), backhaul_route.prefix);
+	tr_info("backhaul route prefix: %s", print_ipv6(backhaul_route.prefix));	
 
-    if (param) {
-        char *prefix, route_buf[255] = {0};
-
-        /* copy the config value to a non-const buffer */
-        strncpy(route_buf, param, sizeof(route_buf) - 1);
-        prefix = strtok(route_buf, "/");
-        backhaul_route.prefix_len = atoi(strtok(NULL, "/"));
-        stoip6(prefix, strlen(prefix), backhaul_route.prefix);
-    }
-
-    tr_info("backhaul prefix: %s", print_ipv6(backhaul_route.prefix));
-
-    //initialize network related variables
-    param = STR(MBED_CONF_APP_NETWORD_ID);
-    (void)memcpy((void *)network.mesh.networkid, param, 16);
+    //initialize network related variables	
+	MBED_ASSERT(strlen(MBED_CONF_APP_NETWORK_ID)==16);
+    param = MBED_CONF_APP_NETWORK_ID;	
+    (void)memcpy((void *)network.mesh.networkid, param, sizeof(param));
     network.mesh.rf_driver_id = rf_driver_id;
-    network.mesh.net_rf_id = -1;
-    //network.mesh.security.enabled = true;
-    network.mesh.linkTimeout = 100;
-    network.mesh.metric = 1000; // low priority
-
-    if( api ){
-        api = mac_api;
-    }
+    network.mesh.net_rf_id = -1;    
+    network.mesh.linkTimeout = MESH_LINK_TIMEOUT;
+    network.mesh.metric = MESH_METRIC; // low priority    
 
     // Thread specific initialization
     network.mesh.thread_cfg.security_policy = 0xff;
@@ -259,66 +245,67 @@ static void mesh_network_data_init(int8_t rf_driver_id, mac_api_t *mac_api)
     network.mesh.thread_cfg.key_sequence_counter = 0;
     network.mesh.thread_cfg.provisioning_url = NULL;
     network.mesh.thread_cfg.timestamp = 0;
-    (void)memcpy((void *)network.mesh.thread_cfg.PSKc, "threadjpaketest", 16);// 16 here is different than in PSKd this actually is 16
-
+	const uint8_t pskc[] = MBED_CONF_APP_PSKC;
+	MBED_ASSERT(sizeof(pskc)==16);
+    (void)memcpy((void *)network.mesh.thread_cfg.PSKc, pskc, sizeof(network.mesh.thread_cfg.PSKc));// 16 here is different than in PSKd this actually is 16		
+	
+	param = MBED_CONF_APP_PSKD;
+	uint16_t len = strlen(param);
+	MBED_ASSERT(len>5 && len <33);
+    set_network_PSKd((uint8_t *)param, len);
+	
     const uint8_t master_key[] = MBED_CONF_APP_THREAD_MASTER_KEY;
     MBED_ASSERT(sizeof(master_key) == 16);
-    memcpy(network.mesh.thread_cfg.master_key, master_key, 16);
-    tr_info("Master key: %s", trace_array(network.mesh.thread_cfg.master_key, 16));
-
-    network.mesh.thread_cfg.PSKc[15] = '\0';
-    (void)memcpy((void *)network.mesh.thread_cfg.extented_panid, "\0\0\0\0\0\0\0\0", 8);
-    (void)memset((void *)network.mesh.thread_cfg.private_mac, 0, 8);
-    (void)memset((void *)network.mesh.thread_cfg.ml_eid, 0, 8);
-    // initialize PSKd, used in ifconfig
-    set_network_PSKd((uint8_t *)"threadjpaketest", strlen("threadjpaketest"));
-    network.mesh.thread_cfg.maxChildCount = 32;    
-    network.mesh.rfChannel = MBED_CONF_APP_RF_CHANNEL;
-    network.mesh.pan_id = MBED_CONF_APP_PAN_ID; //Default: 0x0691
+    memcpy(network.mesh.thread_cfg.master_key, master_key, sizeof(master_key));    
+   
+    (void)memcpy((void *)network.mesh.thread_cfg.extented_panid, "\0\0\0\0\0\0\0\0", sizeof(network.mesh.thread_cfg.extented_panid));
+    (void)memset((void *)network.mesh.thread_cfg.private_mac, 0, sizeof(network.mesh.thread_cfg.private_mac));
+    (void)memset((void *)network.mesh.thread_cfg.ml_eid, 0, sizeof(network.mesh.thread_cfg.ml_eid));
+		
+    network.mesh.thread_cfg.maxChildCount = THREAD_MAX_CHILD_COUNT;        
+    network.mesh.pan_id = MBED_CONF_APP_PAN_ID;
     network.mesh.protocol_id = 0x03;
     network.mesh.protocol_version = 2;    
-    memcpy(network.mesh.mesh_ml_prefix, "\xFD\0\x0d\xb8\0\0\0\0", 8);
+    memcpy(network.mesh.mesh_ml_prefix, "\xFD\0\x0d\xb8\0\0\0\0", sizeof(network.mesh.mesh_ml_prefix));
     network.ethernet.driver_id = -1;
     network.ethernet.state = STATE_DISCONNECTED;    
 
     network.ethernet.ifup_ongoing = false;
     network.ethernet.metric = 0; // high priority    
     
+	uint8_t rf_mac[6] = {0};
     rf_read_mac_address(rf_mac);
-    memcpy(network.ethernet.mac48, rf_mac, 6);	
+    memcpy(network.ethernet.mac48, rf_mac, sizeof(rf_mac));	
 
-    network.mesh.ifup_ongoing = false;
-    //network.mesh.use_rpl = true;
+    network.mesh.ifup_ongoing = false;    
     network.mesh.retry_boot = false;
     network.mesh.reconnect = false;
     network.mesh.retry_boot_timeout = 0;
     network.mesh.retry_boot_init = 3000;
     network.mesh.retry_boot_max_count = 0;
     network.mesh.retry_boot_max_time = 9000;
-//    network.mesh.fhss_already_enabled = false;
     network.mesh.num_boot_retries = 0;
     network.mesh.num_nwk_reconnections = 0;
     network.mesh.nap_brouter = false;
-    memset(network.ethernet.global_address, 0, 16);
+    memset(network.ethernet.global_address, 0, sizeof(network.ethernet.global_address));
 }
 
 void retry_boot(void)
-{
-    /* Some command line parameters hackery... */
-   // char *params[3] = {"ifconfig", "mesh0", "up"};
+{    
     network.mesh.num_boot_retries++;
     tr_debug("Boot scan retry attempt #%d", (int)network.mesh.num_boot_retries);
     if (network.mesh.num_nwk_reconnections > 0) {
         tr_debug("Reconnection attempt #%d", (int)network.mesh.num_nwk_reconnections);
     }
-    meshnetwork_up();
-    /* cmd_ready(CMDLINE_RETCODE_EXCUTING_CONTINUE); */
+    meshnetwork_up(); 
 }
 
 int retry_boot_delay_check(void)
 {
+	tr_info("retry_boot_delay_check");
     if (network.mesh.retry_boot_max_count > 0 ) {
         if (network.mesh.num_boot_retries >= network.mesh.retry_boot_max_count) {
+			tr_warning("max num_boot_retries reached");
             return -1;
         }
     }
@@ -346,7 +333,6 @@ int retry_boot_delay_check(void)
     }
 
     eventOS_event_timer_request(RETRY_BOOT_TIMER, ARM_LIB_SYSTEM_TIMER_EVENT, network.tasklet_id, network.mesh.retry_boot_timeout);
-
     return 1;
 }
 
@@ -357,31 +343,25 @@ static int thread_interface_up()
     device_configuration_s device_config;
     link_configuration_s link_setup;
 
-
+	tr_info("thread_interface_up");
     memset(&device_config, 0, sizeof(device_config));
     device_config.PSKd_ptr = (uint8_t *)network.mesh.thread_cfg.PSKd;
     device_config.PSKd_len = network.mesh.thread_cfg.PSKd_len;
     device_config.provisioning_uri_ptr = network.mesh.thread_cfg.provisioning_url;
 
-    memset(&link_setup, 0, sizeof(link_setup));
-    tr_info("thread_interface_up");
+    memset(&link_setup, 0, sizeof(link_setup));    
     thread_link_configuration_get(&link_setup);
     
     val = thread_management_node_init(network.mesh.net_rf_id, &channel_list, &device_config, &link_setup);
-
+	
     if (val) {
         tr_error("Thread init error with code: %is\r\n", (int)val);
 		return val;
     }
 
-    // Additional thread configurations
-    if (network.mesh.linkTimeout != 100) {
-        thread_management_set_link_timeout(network.mesh.net_rf_id, network.mesh.linkTimeout);
-    }
-    
-    if (network.mesh.thread_cfg.maxChildCount != 32) {
-        thread_management_max_child_count(network.mesh.net_rf_id, network.mesh.thread_cfg.maxChildCount);
-    }    
+    // Additional thread configurations    
+    thread_management_set_link_timeout(network.mesh.net_rf_id, network.mesh.linkTimeout);   
+    thread_management_max_child_count(network.mesh.net_rf_id, network.mesh.thread_cfg.maxChildCount);        
 
     val = arm_nwk_interface_up(network.mesh.net_rf_id);
     if (val != 0) {
@@ -400,24 +380,15 @@ static int thread_interface_up()
 
 static void thread_link_configuration_get(link_configuration_s *link_configuration)
 {
-    memset(link_configuration, 0, sizeof(link_configuration_s));
-    //NWK ID
-    memcpy(link_configuration->name, network.mesh.networkid, 16);
-    //X PANID
-    memcpy(link_configuration->extented_pan_id , network.mesh.thread_cfg.extented_panid, 8);
-    //Private MAC
-    memcpy(link_configuration->extended_random_mac, network.mesh.thread_cfg.private_mac, 8);
-    // PSKc
-    memcpy(link_configuration->PSKc, network.mesh.thread_cfg.PSKc, 16);
-    // PSKc
-    memcpy(link_configuration->mesh_local_eid, network.mesh.thread_cfg.ml_eid, 8);
-    // Timestamp
-    link_configuration->timestamp = network.mesh.thread_cfg.timestamp;
-    //PAN-ID
-    link_configuration->panId = network.mesh.pan_id;
-    //RF Channel
+    memset(link_configuration, 0, sizeof(link_configuration_s));    
+    memcpy(link_configuration->name, network.mesh.networkid, 16);    
+    memcpy(link_configuration->extented_pan_id , network.mesh.thread_cfg.extented_panid, 8);    
+    memcpy(link_configuration->extended_random_mac, network.mesh.thread_cfg.private_mac, 8);    
+    memcpy(link_configuration->PSKc, network.mesh.thread_cfg.PSKc, 16);    
+    memcpy(link_configuration->mesh_local_eid, network.mesh.thread_cfg.ml_eid, 8);    
+    link_configuration->timestamp = network.mesh.thread_cfg.timestamp;    
+    link_configuration->panId = network.mesh.pan_id;    
     link_configuration->rfChannel = network.mesh.rfChannel;
-
     link_configuration->securityPolicy = network.mesh.thread_cfg.security_policy;
     //Beacon data setting
     link_configuration->Protocol_id = network.mesh.protocol_id;
@@ -436,21 +407,20 @@ static void network_interface_event_handler(arm_event_s *event)
         case (ARM_NWK_BOOTSTRAP_READY): { // Interface configured Bootstrap is ready
 
             connectStatus = true;
-
             tr_info("BR interface_id %d.", thread_interface_status_border_router_interface_id_get());
-            if (thread_interface_status_border_router_interface_id_get() != -1) {
+            if (-1 != thread_interface_status_border_router_interface_id_get()) {
                 if (0 == arm_net_address_get(thread_interface_status_border_router_interface_id_get(), ADDR_IPV6_GP, network.ethernet.global_address)) {
-                    network.ethernet.state = STATE_CONNECTED;
-                    tr_info("\reth0 ready\r\n");
-                    tr_info("Ethernet (eth0) bootstrap ready. IP: %s\r\n", print_ipv6(network.ethernet.global_address));
+                    network.ethernet.state = STATE_CONNECTED;                    
+                    tr_info("Ethernet (eth0) bootstrap ready. IP: %s", print_ipv6(network.ethernet.global_address));
 
-                    if (arm_net_interface_set_metric(thread_interface_status_border_router_interface_id_get(), network.ethernet.metric) != 0) {
+                    if (0 != arm_net_interface_set_metric(thread_interface_status_border_router_interface_id_get(), network.ethernet.metric)) {
                         tr_warn("Failed to set metric for eth0.");
                     }
 
                     if (backhaul_bootstrap_mode==NET_IPV6_BOOTSTRAP_STATIC) {
-                        uint8_t *next_hop_ptr;
-                        if (memcmp(backhaul_route.next_hop, (const uint8_t[16]) {0}, 16) == 0) {
+r                        uint8_t *next_hop_ptr;       						
+						if (strcmp(backhaul_route.next_hop, "")) {
+							 tr_info("next hop not defined");
                              next_hop_ptr = NULL;
                         } else {
                              next_hop_ptr = backhaul_route.next_hop;
@@ -484,8 +454,7 @@ static void network_interface_event_handler(arm_event_s *event)
             tr_error("\rNO GP address detected");
             break;
         case (ARM_NWK_DUPLICATE_ADDRESS_DETECTED): // User specific GP16 was not valid
-            tr_error("\rEthernet IPv6 Duplicate addr detected!\r\n");
-            tr_error("\rTry Generate new MAC for driver!\r\n");
+            tr_error("\rEthernet IPv6 Duplicate addr detected!\r\n");            
             break;
         case (ARM_NWK_AUHTENTICATION_START_FAIL): // No valid Authentication server detected behind access point ;
             tr_error("\rNo valid ath server detected behind AP\r\n");
@@ -507,24 +476,14 @@ static void network_interface_event_handler(arm_event_s *event)
             break;
     }
     //Update Interface status
-    if (connectStatus) {
-        /// @TODO Add configurable options for multicast values
-       /* multicast_set_parameters(multicast_params.i_min,
-                                 multicast_params.i_max,
-                                 multicast_params.k,
-                                 multicast_params.timer_expirations,
-                                 multicast_params.window_expiration);
-                                 */
-    } else {
-        //network.tunnel.state = STATE_LINK_READY;
+    if (connectStatus) {        
+    } else {        
         network.ethernet.state = STATE_LINK_READY;
     }
     if (network.ethernet.ifup_ongoing) {
-        network.ethernet.ifup_ongoing = false;
-       // cmd_ready(connectStatus ? CMDLINE_RETCODE_SUCCESS : CMDLINE_RETCODE_FAIL);
+        network.ethernet.ifup_ongoing = false;       
     }
     thread_interface_status_ethernet_connection(connectStatus);
-
 }
 
 void thread_interface_event_handler(arm_event_s *event)
@@ -544,7 +503,8 @@ void thread_interface_event_handler(arm_event_s *event)
         case (ARM_NWK_RPL_INSTANCE_FLOODING_READY): // RPL instance have been flooded
             tr_info("\rRPL instance have been flooded\r\n");
             break;
-        case (ARM_NWK_SET_DOWN_COMPLETE): // Interface DOWN command successfully
+        case (ARM_NWK_SET_DOWN_COMPLETE):
+			tr_info("\rThread interface down\r\n");
             break;
         case (ARM_NWK_NWK_SCAN_FAIL):   // Interface have not detect any valid network
             tr_warning("\rmesh0 haven't detect any valid nw\r\n");
@@ -558,8 +518,7 @@ void thread_interface_event_handler(arm_event_s *event)
             }
             break;
         case (ARM_NWK_DUPLICATE_ADDRESS_DETECTED): // User specific GP16 was not valid
-            tr_error("\rEthernet IPv6 Duplicate addr detected!\r\n");
-            tr_error("\rTry Generate new MAC for driver!\r\n");
+            tr_error("\rEthernet IPv6 Duplicate addr detected!\r\n");            
             break;
         case (ARM_NWK_AUHTENTICATION_START_FAIL): // No valid Authentication server detected behind access point
             tr_error("\rNo valid ath server detected behind AP\r\n");
@@ -612,9 +571,7 @@ static void meshnetwork_up() {
             if (network.mesh.net_rf_id == -1) {
                 if (network.mesh.nap_brouter != true){
                     network.mesh.net_rf_id = arm_nwk_interface_lowpan_init(api, "ThreadInterface");
-                    tr_info("network.mesh.net_rf_id: %d", network.mesh.net_rf_id);
-                    //looks that second call mess up system.. whaat?
-                    // --> cannot change operating mode/extension after first call !
+                    tr_info("network.mesh.net_rf_id: %d", network.mesh.net_rf_id);                    
                     thread_interface_status_threadinterface_id_set(network.mesh.net_rf_id);
                 }
                 if (operating_mode != NET_6LOWPAN_NETWORK_DRIVER){
@@ -636,8 +593,7 @@ static void meshnetwork_up() {
                     /// @TODO
                     tr_error("NET_6LOWPAN_ND_WITHOUT_MLE not supported");
                 }
-                else if (operating_mode_extension == NET_6LOWPAN_ZIGBEE_IP) {
-                    /// @TODO
+                else if (operating_mode_extension == NET_6LOWPAN_ZIGBEE_IP) {                    
                     tr_error("NET_6LOWPAN_ZIGBEE_IP not supported");
                 }
                 else {
@@ -660,7 +616,7 @@ void thread_rf_init() {
     storage_sizes.key_description_table_size = 6;
 
     randLIB_seed_random();
-    mesh_network_data_init(rf_phy_device_register_id, api);
+    mesh_network_data_init(rf_phy_device_register_id);
 
     if (!api) {
         api = ns_sw_mac_create(rf_phy_device_register_id, &storage_sizes);
@@ -721,8 +677,7 @@ static int backhaul_interface_up(int8_t driver_id)
         tr_debug("Border RouterInterface already at active state\n");
     } else {
 
-        thread_interface_status_borderrouter_driver_id_set(driver_id);
-        tr_debug("driver_id %d\n", driver_id);
+        thread_interface_status_borderrouter_driver_id_set(driver_id);        
 
         if (!eth_mac_api) {
             eth_mac_api = ethernet_mac_create(driver_id);
@@ -753,7 +708,6 @@ static int backhaul_interface_down(void)
         backhaul_if_id = -1;
         retval = 0;
     }
-
     return retval;
 }
 
@@ -808,16 +762,11 @@ static void borderrouter_tasklet(arm_event_s *event)
             break;
 
         case ARM_LIB_TASKLET_INIT_EVENT:
-            br_tasklet_id = event->receiver;
-
-            /* initialize the backhaul interface */
+            br_tasklet_id = event->receiver;            
             backhaul_driver_init(borderrouter_backhaul_phy_status_cb);
-            /* initialize Radio module*/
-
             thread_interface_status_init();
             thread_rf_init();
-            meshnetwork_up();            
-
+            meshnetwork_up();
             net_6lowpan_state = INTERFACE_IDLE_STATE;
             eventOS_event_timer_request(9, ARM_LIB_SYSTEM_TIMER_EVENT, br_tasklet_id, 20000);
             break;
