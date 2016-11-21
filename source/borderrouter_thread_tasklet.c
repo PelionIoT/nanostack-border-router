@@ -1,18 +1,7 @@
 /*
  * Copyright (c) 2016 ARM Limited. All rights reserved.
- * SPDX-License-Identifier: Apache-2.0
- * Licensed under the Apache License, Version 2.0 (the License); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an AS IS BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
  */
+
 
 #ifdef MBED_CONF_APP_THREAD_BR
 
@@ -72,9 +61,6 @@ static uint8_t backhaul_prefix[16] = {0};
 
 /* Backhaul default route information */
 static route_info_t backhaul_route;
-
-static net_6lowpan_mode_e operating_mode = NET_6LOWPAN_ROUTER;
-static net_6lowpan_mode_extension_e operating_mode_extension = NET_6LOWPAN_THREAD;
 static int8_t br_tasklet_id = -1;
 static int8_t backhaul_if_id = -1;
 
@@ -141,12 +127,11 @@ typedef struct {
 typedef struct {
     connection_state_e state;
     int8_t          rf_driver_id;
-    uint8_t         networkid[16];
+    uint8_t         network_name[16];
     uint8_t         protocol_id;
     uint8_t         protocol_version;
     int8_t          net_rf_id;
-    uint8_t         mesh_ml_prefix[8];
-    bool            nap_brouter;    
+    uint8_t         mesh_ml_prefix[8];    
     bool            ifup_ongoing;
     bool            retry_boot;
     bool            reconnect;
@@ -193,47 +178,46 @@ static void mesh_network_data_init(int8_t rf_driver_id)
     channel_list.channel_page = MBED_CONF_APP_RF_CHANNEL_PAGE;
     channel_list.channel_mask[0] = MBED_CONF_APP_RF_CHANNEL_MASK;
     
-	network.mesh.rfChannel = MBED_CONF_APP_RF_CHANNEL;    
+	network.mesh.rfChannel = MBED_CONF_APP_RF_CHANNEL;
 	MBED_ASSERT(network.mesh.rfChannel<28);
     initialize_channel_list(network.mesh.rfChannel);
 	
     memset(&backhaul_prefix[8], 0, 8);  
 
     /* Bootstrap mode for the backhaul interface */
-    if (MBED_CONF_APP_BACKHAUL_DYNAMIC_BOOTSTRAP) {
+    #if MBED_CONF_APP_BACKHAUL_DYNAMIC_BOOTSTRAP == 1
         backhaul_bootstrap_mode = NET_IPV6_BOOTSTRAP_AUTONOMOUS;
         tr_info("NET_IPV6_BOOTSTRAP_AUTONOMOUS");
-    }
-    else {
+    
+    #else
+		tr_info("NET_IPV6_BOOTSTRAP_STATIC");
         backhaul_bootstrap_mode = NET_IPV6_BOOTSTRAP_STATIC;								
 		// done like this so that prefix can be left out in the dynamic case.
-		param = STR(MBED_CONF_APP_BACKHAUL_PREFIX); 
-		MBED_ASSERT(sizeof(param)>0);
+		param = MBED_CONF_APP_BACKHAUL_PREFIX; 		
 		stoip6(param, strlen(param), backhaul_prefix);
 		tr_info("backhaul_prefix: %s", print_ipv6(backhaul_prefix));		
-    }
-
-    /* Backhaul route configuration*/
-    memset(&backhaul_route, 0, sizeof(backhaul_route));
-    param = STR(MBED_CONF_APP_BACKHAUL_NEXT_HOP);    
-    stoip6(param, strlen(param), backhaul_route.next_hop);    
-
-    tr_info("next hop: %s", print_ipv6(backhaul_route.next_hop));
-
-    param = MBED_CONF_APP_BACKHAUL_DEFAULT_ROUTE;
-    
-	char *prefix, route_buf[255] = {0};
-	/* copy the config value to a non-const buffer */
-	strncpy(route_buf, param, sizeof(route_buf) - 1);
-	prefix = strtok(route_buf, "/");
-	backhaul_route.prefix_len = atoi(strtok(NULL, "/"));
-	stoip6(prefix, strlen(prefix), backhaul_route.prefix);
-	tr_info("backhaul route prefix: %s", print_ipv6(backhaul_route.prefix));	
+		
+		/* Backhaul route configuration*/
+		memset(&backhaul_route, 0, sizeof(backhaul_route));
+		#ifdef MBED_CONF_APP_BACKHAUL_NEXT_HOP
+		param = MBED_CONF_APP_BACKHAUL_NEXT_HOP; 		
+		stoip6(param, strlen(param), backhaul_route.next_hop);    
+		tr_info("next hop: %s", print_ipv6(backhaul_route.next_hop));
+		#endif
+		param = MBED_CONF_APP_BACKHAUL_DEFAULT_ROUTE;		
+		char *prefix, route_buf[255] = {0};
+		/* copy the config value to a non-const buffer */
+		strncpy(route_buf, param, sizeof(route_buf) - 1);
+		prefix = strtok(route_buf, "/");
+		backhaul_route.prefix_len = atoi(strtok(NULL, "/"));
+		stoip6(prefix, strlen(prefix), backhaul_route.prefix);
+		tr_info("backhaul route prefix: %s", print_ipv6(backhaul_route.prefix));	
+	#endif
 
     //initialize network related variables	
-	MBED_ASSERT(strlen(MBED_CONF_APP_NETWORK_ID)==16);
-    param = MBED_CONF_APP_NETWORK_ID;	
-    (void)memcpy((void *)network.mesh.networkid, param, sizeof(param));
+	MBED_ASSERT(strlen(MBED_CONF_APP_NETWORK_NAME)>0 && strlen(MBED_CONF_APP_NETWORK_NAME) < 17);
+    param = MBED_CONF_APP_NETWORK_NAME;	
+    (void)memcpy((void *)network.mesh.network_name, param, sizeof(param));
     network.mesh.rf_driver_id = rf_driver_id;
     network.mesh.net_rf_id = -1;    
     network.mesh.linkTimeout = MESH_LINK_TIMEOUT;
@@ -247,7 +231,7 @@ static void mesh_network_data_init(int8_t rf_driver_id)
     network.mesh.thread_cfg.timestamp = 0;
 	const uint8_t pskc[] = MBED_CONF_APP_PSKC;
 	MBED_ASSERT(sizeof(pskc)==16);
-    (void)memcpy((void *)network.mesh.thread_cfg.PSKc, pskc, sizeof(network.mesh.thread_cfg.PSKc));// 16 here is different than in PSKd this actually is 16		
+    (void)memcpy((void *)network.mesh.thread_cfg.PSKc, pskc, sizeof(pskc));
 	
 	param = MBED_CONF_APP_PSKD;
 	uint16_t len = strlen(param);
@@ -285,8 +269,7 @@ static void mesh_network_data_init(int8_t rf_driver_id)
     network.mesh.retry_boot_max_count = 0;
     network.mesh.retry_boot_max_time = 9000;
     network.mesh.num_boot_retries = 0;
-    network.mesh.num_nwk_reconnections = 0;
-    network.mesh.nap_brouter = false;
+    network.mesh.num_nwk_reconnections = 0;    
     memset(network.ethernet.global_address, 0, sizeof(network.ethernet.global_address));
 }
 
@@ -381,7 +364,7 @@ static int thread_interface_up()
 static void thread_link_configuration_get(link_configuration_s *link_configuration)
 {
     memset(link_configuration, 0, sizeof(link_configuration_s));    
-    memcpy(link_configuration->name, network.mesh.networkid, 16);    
+    memcpy(link_configuration->name, network.mesh.network_name, 16);    
     memcpy(link_configuration->extented_pan_id , network.mesh.thread_cfg.extented_panid, 8);    
     memcpy(link_configuration->extended_random_mac, network.mesh.thread_cfg.private_mac, 8);    
     memcpy(link_configuration->PSKc, network.mesh.thread_cfg.PSKc, 16);    
@@ -418,13 +401,14 @@ static void network_interface_event_handler(arm_event_s *event)
                     }
 
                     if (backhaul_bootstrap_mode==NET_IPV6_BOOTSTRAP_STATIC) {
-r                        uint8_t *next_hop_ptr;       						
-						if (strcmp(backhaul_route.next_hop, "")) {
-							 tr_info("next hop not defined");
-                             next_hop_ptr = NULL;
-                        } else {
-                             next_hop_ptr = backhaul_route.next_hop;
-                        }
+                        uint8_t *next_hop_ptr;       						
+						
+						if (memcmp(backhaul_route.next_hop, (const uint8_t[16]) {0}, 16) == 0) {
+							next_hop_ptr = NULL;
+						}
+						else {
+							next_hop_ptr = backhaul_route.next_hop;
+						}
                         tr_debug("Default route prefix: %s/%d", print_ipv6(backhaul_route.prefix),
                                  backhaul_route.prefix_len);
                         tr_debug("Default route next hop: %s", print_ipv6(backhaul_route.next_hop));
@@ -569,44 +553,28 @@ static void meshnetwork_up() {
             // Create 6Lowpan Interface
             tr_debug("Create Mesh Interface");
             if (network.mesh.net_rf_id == -1) {
-                if (network.mesh.nap_brouter != true){
-                    network.mesh.net_rf_id = arm_nwk_interface_lowpan_init(api, "ThreadInterface");
-                    tr_info("network.mesh.net_rf_id: %d", network.mesh.net_rf_id);                    
-                    thread_interface_status_threadinterface_id_set(network.mesh.net_rf_id);
-                }
-                if (operating_mode != NET_6LOWPAN_NETWORK_DRIVER){
-                    arm_nwk_interface_configure_6lowpan_bootstrap_set(
-                        network.mesh.net_rf_id,
-                        operating_mode,
-                        operating_mode_extension);
-                }
+                
+				network.mesh.net_rf_id = arm_nwk_interface_lowpan_init(api, "ThreadInterface");
+				tr_info("network.mesh.net_rf_id: %d", network.mesh.net_rf_id);                    
+				thread_interface_status_threadinterface_id_set(network.mesh.net_rf_id);                
+                
+				arm_nwk_interface_configure_6lowpan_bootstrap_set(
+					network.mesh.net_rf_id,
+					NET_6LOWPAN_ROUTER,
+					NET_6LOWPAN_THREAD);                
             }
 
-            if (network.mesh.net_rf_id != -1) {
-                if (operating_mode_extension == NET_6LOWPAN_THREAD) {
-                    int err = thread_interface_up();
-                    if(err) {
-                         tr_error("thread_interface_up() failed: %d", err);
-                    }
-                }
-                else if (operating_mode_extension == NET_6LOWPAN_ND_WITHOUT_MLE) {
-                    /// @TODO
-                    tr_error("NET_6LOWPAN_ND_WITHOUT_MLE not supported");
-                }
-                else if (operating_mode_extension == NET_6LOWPAN_ZIGBEE_IP) {                    
-                    tr_error("NET_6LOWPAN_ZIGBEE_IP not supported");
-                }
-                else {
-                    tr_error("no valid extension!!!!!!!!!!!!!");
-                }
+            if (network.mesh.net_rf_id != -1) {                
+				int err = thread_interface_up();
+				if(err) {
+					 tr_error("thread_interface_up() failed: %d", err);
+				}
             }
         }
     }
 
-void thread_rf_init() {
-
-    operating_mode = NET_6LOWPAN_ROUTER;
-    operating_mode_extension = NET_6LOWPAN_THREAD;
+void thread_rf_init() {    
+    
     int8_t rf_phy_device_register_id = -1;
     rf_phy_device_register_id = rf_device_register();
     mac_description_storage_size_t storage_sizes;
@@ -775,12 +743,12 @@ static void borderrouter_tasklet(arm_event_s *event)
             eventOS_event_timer_cancel(event->event_id, event->receiver);
 
             if (event->event_id == 9) {
-#ifdef MBED_CONF_APP_DEBUG_TRACE
-#if MBED_CONF_APP_DEBUG_TRACE == 1
+			#ifdef MBED_CONF_APP_DEBUG_TRACE
+			#if MBED_CONF_APP_DEBUG_TRACE == 1
                 arm_print_routing_table();
                 arm_print_neigh_cache();
-#endif
-#endif
+			#endif
+			#endif
                 eventOS_event_timer_request(9, ARM_LIB_SYSTEM_TIMER_EVENT, br_tasklet_id, 20000);
             }
             break;
