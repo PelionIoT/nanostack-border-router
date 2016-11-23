@@ -207,22 +207,23 @@ static void thread_link_configuration_get(link_configuration_s *link_configurati
     MBED_ASSERT(sizeof(extented_panid) == 8);
     const uint8_t mesh_local_ula_prefix[] = MBED_CONF_APP_MESH_LOCAL_ULA_PREFIX;
     MBED_ASSERT(sizeof(mesh_local_ula_prefix) == 8);
-
-    memcpy(link_configuration->name, MBED_CONF_APP_NETWORK_NAME, 16);
-
+    
     memcpy(link_configuration->extented_pan_id, extented_panid, sizeof(extented_panid));
-    memcpy(link_configuration->PSKc, pskc, sizeof(pskc));
-    memcpy(link_configuration->master_key, master_key, 16);
-    link_configuration->panId = MBED_CONF_APP_PAN_ID;
-    link_configuration->rfChannel = MBED_CONF_APP_RF_CHANNEL;
-    link_configuration->channel_page = MBED_CONF_APP_RF_CHANNEL_PAGE;
-
-    //uint8_t channel_mask[8];
-    uint32_t channel_mask = MBED_CONF_APP_RF_CHANNEL_MASK;
-    common_write_32_bit(link_configuration->channel_mask, &channel_mask);
-    link_configuration->securityPolicy = SECURITY_POLICY_ALL_SECURITY;
-
     memcpy(link_configuration->mesh_local_ula_prefix, mesh_local_ula_prefix, sizeof(mesh_local_ula_prefix));
+    
+    link_configuration->panId = MBED_CONF_APP_PAN_ID;    
+    memcpy(link_configuration->name, MBED_CONF_APP_NETWORK_NAME, 16);       
+    link_configuration->timestamp = MBED_CONF_APP_COMMISSIONING_DATASET_TIMESTAMP;
+    
+    memcpy(link_configuration->PSKc, pskc, sizeof(pskc));
+    memcpy(link_configuration->master_key, master_key, 16);        
+    link_configuration->securityPolicy = SECURITY_POLICY_ALL_SECURITY;
+    
+    link_configuration->rfChannel = MBED_CONF_APP_RF_CHANNEL;
+    link_configuration->channel_page = MBED_CONF_APP_RF_CHANNEL_PAGE;    
+    uint32_t channel_mask = MBED_CONF_APP_RF_CHANNEL_MASK;
+    common_write_32_bit(link_configuration->channel_mask, &channel_mask);   
+    
     link_configuration->key_rotation = 3600;
     link_configuration->key_sequence = 0;
 }
