@@ -223,10 +223,18 @@ static void load_config(void)
     dodag_config.DAG_SEC_PCS = cfg_int(global_config, "RPL_PCS", 1);
     dodag_config.DAG_OCP = cfg_int(global_config, "RPL_OCP", 1);
 
+	bool dynamic_bootstrap = (net_ipv6_mode_e)cfg_int(global_config, "BACKHAUL_DYNAMIC_BOOTSTRAP", 0);
+	
+	if (dynamic_bootstrap == 1) {
+        backhaul_bootstrap_mode = NET_IPV6_BOOTSTRAP_AUTONOMOUS;
+        tr_info("NET_IPV6_BOOTSTRAP_AUTONOMOUS");
+	}
+	else {
+		tr_info("NET_IPV6_BOOTSTRAP_STATIC");
+        backhaul_bootstrap_mode = NET_IPV6_BOOTSTRAP_STATIC;	
+	}	
+	
     /* Bootstrap mode for the backhaul interface */
-    backhaul_bootstrap_mode = (net_ipv6_mode_e)cfg_int(global_config,
-                              "BACKHAUL_BOOTSTRAP_MODE", NET_IPV6_BOOTSTRAP_STATIC);
-
     rf_prefix_from_backhaul = cfg_int(global_config, "PREFIX_FROM_BACKHAUL", 0);
 
     /* Backhaul default route */
