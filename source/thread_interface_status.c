@@ -14,7 +14,7 @@
 
 
 #define TRACE_GROUP "ThBrApp"
-#define DHCP_SERVER_SHUTDOWN_TIMEOUT (2*60*1000)
+#define DHCP_SERVER_SHUTDOWN_TIMEOUT (100)
 
 typedef struct thread_interface_status_s {
     int8_t  borderRouterInterfaceId;
@@ -31,7 +31,6 @@ typedef struct thread_interface_status_s {
 
 static thread_interface_status_s thread_interface_borderrouter_status;
 static void thread_interface_status_border_router_startup_attempt(void);
-static bool thread_interface_status_default_route_disable(void);
 static bool thread_interface_status_default_route_enable(void);
 static void thread_interface_status_dhcp_server_stop_cb(void *arg);
 static void thread_interface_status_border_router_shutdown_request(void);
@@ -53,20 +52,19 @@ void thread_interface_status_init(void)
 
 static void thread_interface_status_border_router_startup_attempt(void)
 {
-    if (thread_interface_borderrouter_status.threadDhcpShutdownTimer != NULL) {        
-		tr_debug("DHCP server already running, enable default_route");
+    if (thread_interface_borderrouter_status.threadDhcpShutdownTimer != NULL) {
+        tr_debug("DHCP server already running, enable default_route");
         eventOS_timeout_cancel(thread_interface_borderrouter_status.threadDhcpShutdownTimer);
         thread_interface_borderrouter_status.threadDhcpShutdownTimer = NULL;
     }
 
-    if (!thread_interface_borderrouter_status.borderRouterConnectionReady) {        
-		tr_debug("eth0 is down");
+    if (!thread_interface_borderrouter_status.borderRouterConnectionReady) {
+        tr_debug("eth0 is down");
+        return;
+    } else if (!thread_interface_borderrouter_status.threadNetworkConnectionReady) {
+        tr_debug("mesh0 is down");
         return;
     }
-	else if (!thread_interface_borderrouter_status.threadNetworkConnectionReady) {
-		tr_debug("mesh0 is down");
-        return;
-	}
 
     if (thread_interface_borderrouter_status.dhcpPrefixLen == 0) {
         //No prefix/prefix_len to start DHCP server
@@ -138,29 +136,6 @@ void thread_interface_status_prefix_add(uint8_t *prefix, uint8_t prefix_len)
     memcpy(thread_interface_borderrouter_status.dhcpPrefix, prefix, prefix_len / 8);
 }
 
-static bool thread_interface_status_default_route_disable(void)
-{
-    thread_border_router_info_t thread_border_router_info;
-    thread_border_router_info.Prf = 1;
-    thread_border_router_info.P_preferred = false;
-    thread_border_router_info.P_slaac = false;
-    thread_border_router_info.P_dhcp = true;
-    thread_border_router_info.P_configure = false;
-    thread_border_router_info.P_default_route = false;
-    thread_border_router_info.P_on_mesh = false;
-    thread_border_router_info.P_nd_dns = false;
-    thread_border_router_info.stableData = true;
-
-    if(thread_border_router_prefix_add(thread_interface_borderrouter_status.threadInterfaceId, thread_interface_borderrouter_status.dhcpPrefix, thread_interface_borderrouter_status.dhcpPrefixLen, &thread_border_router_info) == 0) {
-        thread_border_router_publish(thread_interface_borderrouter_status.threadInterfaceId);
-        tr_debug("Updated %s prefix", print_ipv6_prefix(thread_interface_borderrouter_status.dhcpPrefix, thread_interface_borderrouter_status.dhcpPrefixLen));
-        return true;
-    } else {
-        tr_error("Failed to disable default_route flag from prefix");
-        return false;
-    }
-}
-
 static bool thread_interface_status_default_route_enable(void)
 {
     thread_border_router_info_t thread_border_router_info;
@@ -174,7 +149,7 @@ static bool thread_interface_status_default_route_enable(void)
     thread_border_router_info.P_nd_dns = false;
     thread_border_router_info.stableData = true;
 
-    if(thread_border_router_prefix_add(thread_interface_borderrouter_status.threadInterfaceId, thread_interface_borderrouter_status.dhcpPrefix, thread_interface_borderrouter_status.dhcpPrefixLen, &thread_border_router_info) == 0) {
+    if (thread_border_router_prefix_add(thread_interface_borderrouter_status.threadInterfaceId, thread_interface_borderrouter_status.dhcpPrefix, thread_interface_borderrouter_status.dhcpPrefixLen, &thread_border_router_info) == 0) {
         thread_border_router_publish(thread_interface_borderrouter_status.threadInterfaceId);
         tr_debug("Updated %s prefix", print_ipv6_prefix(thread_interface_borderrouter_status.dhcpPrefix, thread_interface_borderrouter_status.dhcpPrefixLen));
         return true;
@@ -188,15 +163,9 @@ static void thread_interface_status_dhcp_server_stop_cb(void *arg)
 {
     (void)arg;
     thread_interface_borderrouter_status.threadDhcpShutdownTimer = NULL;
-    /**
-    * NOTE! 
-    * Currently DHCP server can't be deleted because clients are failing to remove allocated addresses once DHCP server is deleted
-    * Once stack is fixed do not delete DHCP server.
-    * thread_interface_borderrouter_status.dhcpServerRunning = false;
-    * thread_dhcpv6_server_delete(thread_interface_borderrouter_status.threadInterfaceId, thread_interface_borderrouter_status.dhcpPrefix);
-    * thread_border_router_publish(thread_interface_borderrouter_status.threadInterfaceId);
-    */
-    thread_interface_status_default_route_disable();
+    thread_interface_borderrouter_status.dhcpServerRunning = false;
+    thread_dhcpv6_server_delete(thread_interface_borderrouter_status.threadInterfaceId, thread_interface_borderrouter_status.dhcpPrefix);
+    thread_border_router_publish(thread_interface_borderrouter_status.threadInterfaceId);
 
     tr_debug("DHCP server stop cb");
     thread_interface_borderrouter_status.dhcpPrefixLen = 0;
