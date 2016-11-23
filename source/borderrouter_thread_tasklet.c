@@ -20,6 +20,7 @@
 #include "ip6string.h"
 #include "ethernet_mac_api.h"
 #include "mac_api.h"
+#include "sw_mac.h"
 #include "mbed_interface.h"
 #include "common_functions.h"
 #include "thread_management_if.h"
@@ -91,16 +92,14 @@ typedef struct {
 	connection_state_e  state;    
     int8_t              driver_id;
     uint8_t             mac48[6];
-    uint8_t             global_address[16];    
-    uint16_t            metric;
+    uint8_t             global_address[16];        
 } if_ethernet_t;
 
 
 typedef struct {
     connection_state_e state;
     int8_t          rf_driver_id;
-    int8_t          net_rf_id;    
-    uint16_t        metric;
+    int8_t          net_rf_id;        
 } if_mesh_t;
 
 
@@ -126,7 +125,7 @@ static void eth_network_data_init()
 		tr_info("NET_IPV6_BOOTSTRAP_STATIC");
         backhaul_bootstrap_mode = NET_IPV6_BOOTSTRAP_STATIC;								
 		// done like this so that prefix can be left out in the dynamic case.
-		param = MBED_CONF_APP_BACKHAUL_PREFIX; 		
+		const char* param = MBED_CONF_APP_BACKHAUL_PREFIX; 		
 		stoip6(param, strlen(param), backhaul_prefix);
 		tr_info("backhaul_prefix: %s", print_ipv6(backhaul_prefix));		
 		
@@ -148,8 +147,7 @@ static void eth_network_data_init()
 #endif
 	
 	network.ethernet.driver_id = -1;
-    network.ethernet.state = STATE_DISCONNECTED;        
-    network.ethernet.metric = 0; // high priority    
+    network.ethernet.state = STATE_DISCONNECTED;            
 	
 	char rf_mac[6] = {0};
     mbed_mac_address(rf_mac);
@@ -249,7 +247,8 @@ static void network_interface_event_handler(arm_event_s *event)
                     network.ethernet.state = STATE_CONNECTED;                    
                     tr_info("Ethernet (eth0) bootstrap ready. IP: %s", print_ipv6(network.ethernet.global_address));
 
-                    if (0 != arm_net_interface_set_metric(thread_interface_status_border_router_interface_id_get(), network.ethernet.metric)) {
+					// metric set to high priority
+                    if (0 != arm_net_interface_set_metric(thread_interface_status_border_router_interface_id_get(), 0)) {
                         tr_warn("Failed to set metric for eth0.");
                     }
 
@@ -329,7 +328,7 @@ void thread_interface_event_handler(arm_event_s *event)
             connectStatus = true;
             tr_info("\rBootstrap ready\r\n");
 
-            if (arm_net_interface_set_metric(network.mesh.net_rf_id, network.mesh.metric) != 0) {
+            if (arm_net_interface_set_metric(network.mesh.net_rf_id, MESH_METRIC) != 0) {
                 tr_warn("Failed to set metric for mesh0.");
             }
             break;
@@ -395,8 +394,7 @@ void thread_rf_init() {
     randLIB_seed_random();
 	eth_network_data_init();
 
-    network.mesh.net_rf_id = -1; 
-    network.mesh.metric = MESH_METRIC; 
+    network.mesh.net_rf_id = -1;     
 
     if (!api) {
         api = ns_sw_mac_create(network.mesh.rf_driver_id, &storage_sizes);
