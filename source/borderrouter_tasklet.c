@@ -223,17 +223,16 @@ static void load_config(void)
     dodag_config.DAG_SEC_PCS = cfg_int(global_config, "RPL_PCS", 1);
     dodag_config.DAG_OCP = cfg_int(global_config, "RPL_OCP", 1);
 
-	bool dynamic_bootstrap = (net_ipv6_mode_e)cfg_int(global_config, "BACKHAUL_DYNAMIC_BOOTSTRAP", 0);
-	
-	if (dynamic_bootstrap == 1) {
+    bool dynamic_bootstrap = (net_ipv6_mode_e)cfg_int(global_config, "BACKHAUL_DYNAMIC_BOOTSTRAP", 0);
+
+    if (dynamic_bootstrap == 1) {
         backhaul_bootstrap_mode = NET_IPV6_BOOTSTRAP_AUTONOMOUS;
         tr_info("NET_IPV6_BOOTSTRAP_AUTONOMOUS");
-	}
-	else {
-		tr_info("NET_IPV6_BOOTSTRAP_STATIC");
-        backhaul_bootstrap_mode = NET_IPV6_BOOTSTRAP_STATIC;	
-	}	
-	
+    } else {
+        tr_info("NET_IPV6_BOOTSTRAP_STATIC");
+        backhaul_bootstrap_mode = NET_IPV6_BOOTSTRAP_STATIC;
+    }
+
     /* Bootstrap mode for the backhaul interface */
     rf_prefix_from_backhaul = cfg_int(global_config, "PREFIX_FROM_BACKHAUL", 0);
 
@@ -350,11 +349,11 @@ static int backhaul_interface_up(int8_t driver_id)
 
         if (backhaul_if_id >= 0) {
             tr_debug("Backhaul interface ID: %d", backhaul_if_id);
-            if (memcmp(backhaul_prefix, (const uint8_t[8] ) { 0 }, 8) == 0) {
+            if (memcmp(backhaul_prefix, (const uint8_t[8]) { 0 }, 8) == 0) {
                 memcpy(backhaul_prefix, rpl_setup_info.DODAG_ID, 8);
             }
             arm_nwk_interface_configure_ipv6_bootstrap_set(
-                    backhaul_if_id, backhaul_bootstrap_mode, backhaul_prefix);
+                backhaul_if_id, backhaul_bootstrap_mode, backhaul_prefix);
             arm_nwk_interface_up(backhaul_if_id);
             retval = 0;
         }
@@ -595,7 +594,7 @@ static void app_parse_network_event(arm_event_s *event)
                     uint8_t *next_hop_ptr;
 
                     if (memcmp(backhaul_route.next_hop, (const uint8_t[16]) {0}, 16) == 0) {
-						tr_info("Next hop not defined");
+                        tr_info("Next hop not defined");
                         next_hop_ptr = NULL;
                     }
                     else {

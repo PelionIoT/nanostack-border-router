@@ -8,9 +8,9 @@
 #define CONFIG_DEF_H
 
 typedef struct conf_t {
-  const char *name;
-  const char *svalue;
-  const int ivalue;
+    const char *name;
+    const char *svalue;
+    const int ivalue;
 } conf_t;
 
 extern conf_t *global_config;
