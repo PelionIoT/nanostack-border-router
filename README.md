@@ -160,8 +160,10 @@ The minimum set of configuration options required are explained here:
 | rf-channel                          | The wireless (6LoWPAN mesh network) radio channel the border router application listens to. |
 
 
-The following parameters are only used in the 6lowpan border router.
+The following parameters are only used in the 6LoWPAN border router.
 
+| Field                               | Description                                                   |
+|-------------------------------------|---------------------------------------------------------------|
 | prefix-from-backhaul                | Whether or not the same prefix on the backhaul interface should also be used on the mesh network side. This option can be used when backhaul-dynamic-bootstrap is set to true. Note, that in the Thread network it is enough when the backhaul-dynamic-bootstrap parameter is set.
 | Field                               | Description                                                   |
 | security-mode                       | The 6LoWPAN mesh network traffic (link layer) can be protected with the Private Shared Key (PSK) security mode, allowed values: `NONE` and `PSK`. |
