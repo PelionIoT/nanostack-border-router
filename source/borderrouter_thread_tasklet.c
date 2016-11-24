@@ -205,11 +205,11 @@ static void thread_link_configuration_get(link_configuration_s *link_configurati
 
     const uint8_t extented_panid[] = MBED_CONF_APP_EXTENDED_PAN_ID;
     MBED_ASSERT(sizeof(extented_panid) == 8);
-    const uint8_t mesh_local_ula_prefix[] = MBED_CONF_APP_MESH_LOCAL_ULA_PREFIX;
-    MBED_ASSERT(sizeof(mesh_local_ula_prefix) == 8);
+    const uint8_t mesh_local_prefix[] = MBED_CONF_APP_MESH_LOCAL_PREFIX;
+    MBED_ASSERT(sizeof(mesh_local_prefix) == 8);
     
     memcpy(link_configuration->extented_pan_id, extented_panid, sizeof(extented_panid));
-    memcpy(link_configuration->mesh_local_ula_prefix, mesh_local_ula_prefix, sizeof(mesh_local_ula_prefix));
+    memcpy(link_configuration->mesh_local_ula_prefix, mesh_local_prefix, sizeof(mesh_local_prefix));
     
     link_configuration->panId = MBED_CONF_APP_PAN_ID;    
     memcpy(link_configuration->name, MBED_CONF_APP_NETWORK_NAME, 16);       
