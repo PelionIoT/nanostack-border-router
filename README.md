@@ -165,7 +165,6 @@ The following parameters are only used in the 6LoWPAN border router.
 | Field                               | Description                                                   |
 |-------------------------------------|---------------------------------------------------------------|
 | prefix-from-backhaul                | Whether or not the same prefix on the backhaul interface should also be used on the mesh network side. This option can be used when backhaul-dynamic-bootstrap is set to true. Note, that in the Thread network it is enough when the backhaul-dynamic-bootstrap parameter is set.
-| Field                               | Description                                                   |
 | security-mode                       | The 6LoWPAN mesh network traffic (link layer) can be protected with the Private Shared Key (PSK) security mode, allowed values: `NONE` and `PSK`. |
 | psk-key                             | 16 bytes long private shared key to be used when the security mode is PSK. Example format (hexadecimal byte values separated by commas inside brackets): `{0x00, ..., 0x0f}` |
 | multicast-addr                      | Multicast forwarding is supported by default. This defines the multicast address to which the border router application forwards multicast packets (on the backhaul and RF interface). Example format: `ff05::5` |
