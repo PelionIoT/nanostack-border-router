@@ -211,8 +211,8 @@ static void thread_link_configuration_get(link_configuration_s *link_configurati
     memcpy(link_configuration->extented_pan_id, extented_panid, sizeof(extented_panid));
     memcpy(link_configuration->mesh_local_ula_prefix, mesh_local_prefix, sizeof(mesh_local_prefix));
     
-    link_configuration->panId = MBED_CONF_APP_PAN_ID;    
-    memcpy(link_configuration->name, MBED_CONF_APP_NETWORK_NAME, 16);       
+    link_configuration->panId = MBED_CONF_APP_PAN_ID;
+    memcpy(link_configuration->name, MBED_CONF_APP_NETWORK_NAME, strlen(MBED_CONF_APP_NETWORK_NAME));
     link_configuration->timestamp = MBED_CONF_APP_COMMISSIONING_DATASET_TIMESTAMP;
     
     memcpy(link_configuration->PSKc, pskc, sizeof(pskc));
