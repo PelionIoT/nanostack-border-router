@@ -216,7 +216,7 @@ static void thread_link_configuration_get(link_configuration_s *link_configurati
     link_configuration->timestamp = MBED_CONF_APP_COMMISSIONING_DATASET_TIMESTAMP;
     
     memcpy(link_configuration->PSKc, pskc, sizeof(pskc));
-    memcpy(link_configuration->master_key, master_key, 16);        
+    memcpy(link_configuration->master_key, master_key, sizeof(master_key));        
     link_configuration->securityPolicy = SECURITY_POLICY_ALL_SECURITY;
     
     link_configuration->rfChannel = MBED_CONF_APP_RF_CHANNEL;
