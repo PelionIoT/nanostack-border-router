@@ -37,7 +37,7 @@ For your 6LoWPAN border router, you may need the following modules (dependencies
 - [Atmel IEEE 802.15.4 RF driver](https://github.com/ARMmbed/atmel-rf-driver).
 - [6LowPAN networking stack (Nanostack)](https://github.com/ARMmbed/sal-stack-nanostack).
 
-An example of the `module.json` file:
+An example of the `mbed_app.json` file:
 
 ```json
 {
@@ -147,7 +147,7 @@ ns_dyn_mem_init(app_stack_heap, APP_DEFINED_HEAP_SIZE, app_heap_error_handler, 0
 
 ### Configuring Nanostack Border Router
 
-Applications using Nanostack Border Router need to use a `config.json` file for the configuration. The file needs to contain a *border-router* section under which the Nanostack Border Router specific configuration options are defined. The complete list of all configuration options is in the [config.json.example](config.json.example) file (for 6LoWPAN router). The `config.json` file contains all compile-time configurations for your border router application.
+Applications using Nanostack Border Router need to use a `mbed_app.json` file for the configuration. The file needs to contain a *border-router* section under which the Nanostack Border Router specific configuration options are defined. The example configurations can be found in [K64f-border-router] https://github.com/ARMmbed/k64f-border-router/configs.
 
 The minimum set of configuration options required are explained here:
 
