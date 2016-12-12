@@ -37,25 +37,6 @@ For your 6LoWPAN border router, you may need the following modules (dependencies
 - [Atmel IEEE 802.15.4 RF driver](https://github.com/ARMmbed/atmel-rf-driver).
 - [6LowPAN networking stack (Nanostack)](https://github.com/ARMmbed/sal-stack-nanostack).
 
-An example of the `mbed_app.json` file:
-
-```json
-{
-  "name": "my-6lowpan-border-router",
-  "version": "1.0.0",
-  "description": "My 6LoWPAN border router",
-  "keywords": [
-    "border router",
-  ],
-  "author": "John Doe <john.doe@arm.com>",
-  "homepage": "https://www.mbed.com/",
-  "license": "Apache-2.0",
-  "bin": "./source",
-  "dependencies": {
-      "nanostack-border-router": "^1.0.0",
-  }
-}
-```
 The diagram below shows a conceptual model for the [FRDM-K64F border router](https://github.com/ARMmbed/k64f-border-router) application, which is similar to your application.
 
 ![](/images/BorderRouter.png) 
