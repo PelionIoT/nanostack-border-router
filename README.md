@@ -25,10 +25,10 @@ To install dependencies for your application:
 
 ```shell
 # To include this module as a dependency
-$ mbed add nanostack-border-router
+$ mbed add nanostack-border-routermb
 ```
 
-Alternatively, you can manually add a dependency in your `module.json` file.
+Alternatively, you can manually add a dependency in your `mbed_app.json` file.
 
 For your 6LoWPAN border router, you may need the following modules (dependencies):
 
