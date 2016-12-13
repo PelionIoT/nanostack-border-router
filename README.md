@@ -1,6 +1,6 @@
 # Nanostack Border Router
 
-Nanostack Border Router is a generic mbed border router implementation that provides the main IPv6/6LoWPAN or Thread border router logic usable to any 3rd party application. An example of such a application is [FRDM-K64F border router](https://github.com/ARMmbed/k64f-border-router), which can be used to start 6LoWPAN or Thread border router. The example also includes various configurations (.json)
+Nanostack Border Router is a generic mbed border router implementation that provides the main IPv6/6LoWPAN or Thread border router logic usable to any 3rd party application. An example of such a application is [FRDM-K64F border router](https://github.com/ARMmbed/k64f-border-router-private), which can be used to start 6LoWPAN or Thread border router.
 
 The steps involved in porting a target platform are:
 
@@ -24,7 +24,7 @@ Target platform is the hardware on which the border router will run. There are h
 To install dependencies for your application:
 
 ```shell
-# To include this module as a dependency
+# To include a module as a dependency
 $ mbed add "library URL"
 ```
 
@@ -126,7 +126,7 @@ ns_dyn_mem_init(app_stack_heap, APP_DEFINED_HEAP_SIZE, app_heap_error_handler, 0
 
 ### Configuring Nanostack Border Router
 
-Applications using Nanostack Border Router need to use a `mbed_app.json` file for the configuration. The file needs to contain a *border-router* section under which the Nanostack Border Router specific configuration options are defined. The example configurations can be found in [K64f-border-router] https://github.com/ARMmbed/k64f-border-router/configs.
+Applications using Nanostack Border Router need to use a `mbed_app.json` file for the configuration. The example configurations can be found in [K64f-border-router] https://github.com/ARMmbed/k64f-border-router/configs.
 
 The minimum set of configuration options required are explained here:
 
@@ -185,9 +185,9 @@ To create a border router application using the Nanostack Border Router module:
 
 **Step 4.** Start the backhaul driver and invoke the `backhaul_driver_status_cb()` callback (performed by your code or the backhaul driver code).
 
-For a complete application using Nanostack Border Router, read the [FRDM-K64F border router](https://github.com/ARMmbed/k64f-border-router) documentation.
+For a complete application using Nanostack Border Router, read the [FRDM-K64F border router](https://github.com/ARMmbed/k64f-border-router-private) documentation.
 
-#### The routing protocol RPL
+#### The routing protocol RPL (6LoWPAN)
 
 Nanostack Border Router uses [RPL](https://tools.ietf.org/html/rfc6550) as the routing protocol on the mesh network side (RF interface). Currently, only the `grounded/non-storing` operation mode is supported.
 
