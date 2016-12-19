@@ -24,7 +24,7 @@
 #include "mbed_interface.h"
 #include "common_functions.h"
 #include "thread_management_if.h"
-#include "thread_interface_status.h"
+#include "thread_br_conn_handler.h"
 #include "nanostack-border-router/mbed_config.h"
 #include "randLIB.h"
 
@@ -72,10 +72,41 @@ static nwk_stats_t nwk_stats;
 static void thread_link_configuration_get(link_configuration_s *link_configuration);
 static void network_interface_event_handler(arm_event_s *event);
 
+void eth_link_driver_id_set(int8_t driverId);
+int8_t eth_link_driver_id_get(void);
+
+void   rf_link_driver_id_set(int8_t driverId);
+int8_t rf_link_driver_id_get(void);
+
 static void meshnetwork_up();
 static void eth_network_data_init(void);
 static net_ipv6_mode_e backhaul_bootstrap_mode = NET_IPV6_BOOTSTRAP_STATIC;
 static void borderrouter_tasklet(arm_event_s *event);
+
+int8_t  borderRouterInterfaceId;
+int8_t  borderRouterLinkDriverId;
+int8_t  threadLinkDriverId;
+
+int8_t eth_link_driver_id_get(void)
+{
+    return borderRouterLinkDriverId;
+}
+
+void eth_link_driver_id_set(int8_t driverId)
+{
+    borderRouterLinkDriverId = driverId;
+}
+    
+void rf_link_driver_id_set(int8_t driverId)
+{
+    threadLinkDriverId = driverId;
+}
+
+int8_t rf_link_driver_id_get(void)
+{
+    return threadLinkDriverId;
+}
+
 
 typedef enum {
     STATE_UNKNOWN,
@@ -88,8 +119,7 @@ typedef enum {
 
 typedef struct {
     connection_state_e  state;
-    int8_t              driver_id;
-    uint8_t             global_address[16];
+    int8_t              driver_id;    
 } if_ethernet_t;
 
 
@@ -235,14 +265,12 @@ static void network_interface_event_handler(arm_event_s *event)
         case (ARM_NWK_BOOTSTRAP_READY): { // Interface configured Bootstrap is ready
 
             connectStatus = true;
-            tr_info("BR interface_id %d.", thread_interface_status_border_router_interface_id_get());
-            if (-1 != thread_interface_status_border_router_interface_id_get()) {
-                if (0 == arm_net_address_get(thread_interface_status_border_router_interface_id_get(), ADDR_IPV6_GP, network.ethernet.global_address)) {
-                    network.ethernet.state = STATE_CONNECTED;
-                    tr_info("Ethernet (eth0) bootstrap ready. IP: %s", print_ipv6(network.ethernet.global_address));
+            tr_info("BR interface_id %d.", thread_br_conn_handler_eth_interface_id_get());
+            if (-1 != thread_br_conn_handler_eth_interface_id_get()) {                
+                    network.ethernet.state = STATE_CONNECTED;                 
 
                     // metric set to high priority
-                    if (0 != arm_net_interface_set_metric(thread_interface_status_border_router_interface_id_get(), 0)) {
+                    if (0 != arm_net_interface_set_metric(thread_br_conn_handler_eth_interface_id_get(), 0)) {
                         tr_warn("Failed to set metric for eth0.");
                     }
 
@@ -261,14 +289,10 @@ static void network_interface_event_handler(arm_event_s *event)
                         arm_net_route_add(backhaul_route.prefix,
                                           backhaul_route.prefix_len,
                                           next_hop_ptr, 0xffffffff, 128,
-                                          thread_interface_status_border_router_interface_id_get());
+                                          thread_br_conn_handler_eth_interface_id_get());
                     }
 
-                    thread_interface_status_prefix_add(network.ethernet.global_address, 64);
-
-                } else {
-                    tr_warn("arm_net_address_get fail");
-                }
+                    thread_br_conn_handler_eth_ready();               
             }
             break;
         }
@@ -310,7 +334,7 @@ static void network_interface_event_handler(arm_event_s *event)
     } else {
         network.ethernet.state = STATE_LINK_READY;
     }
-    thread_interface_status_ethernet_connection(connectStatus);
+    thread_br_conn_handler_update_ethernet_connection(connectStatus);
 }
 
 void thread_interface_event_handler(arm_event_s *event)
@@ -340,20 +364,20 @@ void thread_interface_event_handler(arm_event_s *event)
         network.mesh.state = STATE_LINK_READY;
     }
 
-    thread_interface_status_thread_connection(connectStatus);
+    thread_br_conn_handler_update_thread_connection(connectStatus);
 }
 
 static void meshnetwork_up()
 {
     tr_info("mesh0 up");   
     if (network.mesh.rf_driver_id != -1) {
-        thread_interface_status_thread_driver_id_set(network.mesh.rf_driver_id);
+        rf_link_driver_id_set(network.mesh.rf_driver_id);
         // Create 6Lowpan Interface
         tr_debug("Create Mesh Interface");
 
         network.mesh.net_rf_id = arm_nwk_interface_lowpan_init(api, "ThreadInterface");
         tr_info("network.mesh.net_rf_id: %d", network.mesh.net_rf_id);
-        thread_interface_status_threadinterface_id_set(network.mesh.net_rf_id);
+        thread_br_conn_handler_threadinterface_id_set(network.mesh.net_rf_id);
 
         arm_nwk_interface_configure_6lowpan_bootstrap_set(
             network.mesh.net_rf_id,
@@ -432,7 +456,7 @@ static int backhaul_interface_up(int8_t driver_id)
         tr_debug("Border RouterInterface already at active state\n");
     } else {
 
-        thread_interface_status_borderrouter_driver_id_set(driver_id);
+        eth_link_driver_id_set(driver_id);
 
         if (!eth_mac_api) {
             eth_mac_api = ethernet_mac_create(driver_id);
@@ -442,7 +466,7 @@ static int backhaul_interface_up(int8_t driver_id)
 
         if (backhaul_if_id >= 0) {
             tr_debug("Backhaul interface ID: %d", backhaul_if_id);
-            thread_interface_status_borderrouter_interface_id_set(backhaul_if_id);
+            thread_br_conn_handler_eth_interface_id_set(backhaul_if_id);
             arm_nwk_interface_configure_ipv6_bootstrap_set(
                 backhaul_if_id, backhaul_bootstrap_mode, backhaul_prefix);
             arm_nwk_interface_up(backhaul_if_id);
@@ -457,8 +481,8 @@ static int backhaul_interface_down(void)
     int retval = -1;
     if (backhaul_if_id != -1) {
         arm_nwk_interface_down(backhaul_if_id);
-        thread_interface_status_borderrouter_interface_id_set(-1);
-        thread_interface_status_ethernet_connection(false);
+        thread_br_conn_handler_eth_interface_id_set(-1);
+        thread_br_conn_handler_update_ethernet_connection(false);
         backhaul_if_id = -1;
         retval = 0;
     }
@@ -482,7 +506,7 @@ static void borderrouter_tasklet(arm_event_s *event)
     switch (event_type) {
         case ARM_LIB_NWK_INTERFACE_EVENT:
 
-            if (event->event_id == thread_interface_status_border_router_interface_id_get()) {
+            if (event->event_id == thread_br_conn_handler_eth_interface_id_get()) {
                 network_interface_event_handler(event);
             } else {
                 thread_interface_event_handler(event);
@@ -514,7 +538,7 @@ static void borderrouter_tasklet(arm_event_s *event)
             br_tasklet_id = event->receiver;
 			eth_network_data_init();
             backhaul_driver_init(borderrouter_backhaul_phy_status_cb);
-            thread_interface_status_init();
+            thread_br_conn_handler_init();
             thread_rf_init();
             meshnetwork_up();            
             eventOS_event_timer_request(9, ARM_LIB_SYSTEM_TIMER_EVENT, br_tasklet_id, 20000);
