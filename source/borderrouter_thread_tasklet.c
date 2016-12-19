@@ -74,8 +74,6 @@ static void network_interface_event_handler(arm_event_s *event);
 
 static void meshnetwork_up();
 static void eth_network_data_init(void);
-static interface_bootstrap_state_e net_6lowpan_state = INTERFACE_IDLE_PHY_NOT_READY;
-static interface_bootstrap_state_e net_backhaul_state = INTERFACE_IDLE_PHY_NOT_READY;
 static net_ipv6_mode_e backhaul_bootstrap_mode = NET_IPV6_BOOTSTRAP_STATIC;
 static void borderrouter_tasklet(arm_event_s *event);
 
@@ -228,6 +226,7 @@ static void thread_link_configuration_get(link_configuration_s *link_configurati
     link_configuration->key_sequence = 0;
 }
 
+// ethernet interface
 static void network_interface_event_handler(arm_event_s *event)
 {
     bool connectStatus = false;
@@ -346,12 +345,7 @@ void thread_interface_event_handler(arm_event_s *event)
 
 static void meshnetwork_up()
 {
-    tr_info("mesh0 up");
-
-    if (network.mesh.state == STATE_CONNECTED || network.mesh.state == STATE_BOOTSTRAP) {
-        tr_info("mesh0 already up\r\n");
-    }
-
+    tr_info("mesh0 up");   
     if (network.mesh.rf_driver_id != -1) {
         thread_interface_status_thread_driver_id_set(network.mesh.rf_driver_id);
         // Create 6Lowpan Interface
@@ -387,8 +381,7 @@ void thread_rf_init()
     storage_sizes.key_description_table_size = 6;
 
     network.mesh.rf_driver_id = rf_device_register();
-    randLIB_seed_random();
-    eth_network_data_init();
+    randLIB_seed_random();   
 
     network.mesh.net_rf_id = -1;
 
@@ -500,15 +493,11 @@ static void borderrouter_tasklet(arm_event_s *event)
         case APPLICATION_EVENT:
             if (event->event_id == NR_BACKHAUL_INTERFACE_PHY_DRIVER_READY) {
                 int8_t net_backhaul_id = (int8_t) event->event_data;
-                if (net_backhaul_state == INTERFACE_IDLE_PHY_NOT_READY) {
-                    net_backhaul_state = INTERFACE_IDLE_STATE;
-                }
-
+                
                 if (backhaul_interface_up(net_backhaul_id) != 0) {
                     tr_debug("Backhaul bootstrap start failed");
                 } else {
-                    tr_debug("Backhaul bootstrap started");
-                    net_backhaul_state = INTERFACE_BOOTSTRAP_ACTIVE;
+                    tr_debug("Backhaul bootstrap started");                    
                 }
             } else if (event->event_id == NR_BACKHAUL_INTERFACE_PHY_DOWN) {
                 if (backhaul_interface_down() != 0) {
@@ -517,18 +506,17 @@ static void borderrouter_tasklet(arm_event_s *event)
                 } else {
                     tr_debug("Backhaul interface is down");
                     backhaul_if_id = -1;
-                    net_backhaul_state = INTERFACE_IDLE_STATE;
                 }
             }
             break;
 
         case ARM_LIB_TASKLET_INIT_EVENT:
             br_tasklet_id = event->receiver;
+			eth_network_data_init();
             backhaul_driver_init(borderrouter_backhaul_phy_status_cb);
             thread_interface_status_init();
             thread_rf_init();
-            meshnetwork_up();
-            net_6lowpan_state = INTERFACE_IDLE_STATE;
+            meshnetwork_up();            
             eventOS_event_timer_request(9, ARM_LIB_SYSTEM_TIMER_EVENT, br_tasklet_id, 20000);
             break;
 
