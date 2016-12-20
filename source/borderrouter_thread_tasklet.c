@@ -218,7 +218,7 @@ static void thread_link_configuration_get(link_configuration_s *link_configurati
     
     link_configuration->rfChannel = MBED_CONF_APP_RF_CHANNEL;
     link_configuration->channel_page = MBED_CONF_APP_RF_CHANNEL_PAGE;    
-    uint32_t channel_mask = MBED_CONF_APP_RF_CHANNEL_MASK;
+    uint8_t channel_mask[4] = MBED_CONF_APP_RF_CHANNEL_MASK;
     common_write_32_bit(link_configuration->channel_mask, &channel_mask);   
     
     link_configuration->key_rotation = 3600;
@@ -241,7 +241,7 @@ static void network_interface_event_handler(arm_event_s *event)
                     // metric set to high priority
                     if (0 != arm_net_interface_set_metric(thread_br_conn_handler_eth_interface_id_get(), 0)) {
                         tr_warn("Failed to set metric for eth0.");
-                    }   
+                    }
 
                     if (backhaul_bootstrap_mode == NET_IPV6_BOOTSTRAP_STATIC) {
                         uint8_t *next_hop_ptr;
