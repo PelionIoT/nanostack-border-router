@@ -12,10 +12,10 @@ extern "C" {
 #include "ns_types.h"
 
 void thread_br_conn_handler_init(void);
-void thread_br_conn_handler_update_thread_connection(bool status);
-void thread_br_conn_handler_update_ethernet_connection(bool status);
+void thread_br_conn_handler_thread_connection_update(bool status);
+void thread_br_conn_handler_ethernet_connection_update(bool status);
 
-// Tells that ethernet connection is ready and prefix can be set.
+// Tells that ethernet connection is ready and the prefix can be read and set.
 void thread_br_conn_handler_eth_ready();
 // Setters
 void   thread_br_conn_handler_thread_interface_id_set(int8_t interfaceId);

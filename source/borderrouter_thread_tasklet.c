@@ -68,11 +68,11 @@ static int8_t br_tasklet_id = -1;
 /* Network statistics */
 static nwk_stats_t nwk_stats;
 
-int8_t  borderRouterLinkDriverId;
-int8_t  threadLinkDriverId;
+static int8_t  eth_link_driver_id;
+static int8_t  thread_link_driver_id;
 
-connection_state_e mesh_state;
-connection_state_e ethernet_state;
+static connection_state_e mesh_state;
+static connection_state_e ethernet_state;
 
 /* Function forward declarations */
 
@@ -90,24 +90,24 @@ static void eth_network_data_init(void);
 static net_ipv6_mode_e backhaul_bootstrap_mode = NET_IPV6_BOOTSTRAP_STATIC;
 static void borderrouter_tasklet(arm_event_s *event);
 
-int8_t eth_link_driver_id_get(void)
+static int8_t eth_link_driver_id_get(void)
 {
-    return borderRouterLinkDriverId;
+    return eth_link_driver_id;
 }
 
-void eth_link_driver_id_set(int8_t driverId)
+static void eth_link_driver_id_set(int8_t driverId)
 {
-    borderRouterLinkDriverId = driverId;
+    eth_link_driver_id = driverId;
 }
     
-void rf_link_driver_id_set(int8_t driverId)
+static void rf_link_driver_id_set(int8_t driverId)
 {
-    threadLinkDriverId = driverId;
+    thread_link_driver_id = driverId;
 }
 
-int8_t rf_link_driver_id_get(void)
+static int8_t rf_link_driver_id_get(void)
 {
-    return threadLinkDriverId;
+    return thread_link_driver_id;
 }
 
 static void eth_network_data_init()
@@ -233,8 +233,7 @@ static void network_interface_event_handler(arm_event_s *event)
     switch (status) {
         case (ARM_NWK_BOOTSTRAP_READY): { // Interface configured Bootstrap is ready
 
-            connectStatus = true;
-            thread_br_conn_handler_update_ethernet_connection(connectStatus);
+            connectStatus = true;            
             tr_info("BR interface_id %d.", thread_br_conn_handler_eth_interface_id_get());
             if (-1 != thread_br_conn_handler_eth_interface_id_get()) {                
                     ethernet_state = STATE_CONNECTED;                 
@@ -242,7 +241,7 @@ static void network_interface_event_handler(arm_event_s *event)
                     // metric set to high priority
                     if (0 != arm_net_interface_set_metric(thread_br_conn_handler_eth_interface_id_get(), 0)) {
                         tr_warn("Failed to set metric for eth0.");
-                    }
+                    }   
 
                     if (backhaul_bootstrap_mode == NET_IPV6_BOOTSTRAP_STATIC) {
                         uint8_t *next_hop_ptr;
@@ -261,7 +260,8 @@ static void network_interface_event_handler(arm_event_s *event)
                                           next_hop_ptr, 0xffffffff, 128,
                                           thread_br_conn_handler_eth_interface_id_get());
                     }
-                    thread_br_conn_handler_eth_ready();               
+                    thread_br_conn_handler_eth_ready();
+                    thread_br_conn_handler_ethernet_connection_update(connectStatus);
             }
             break;
         }
@@ -332,7 +332,7 @@ void thread_interface_event_handler(arm_event_s *event)
         mesh_state = STATE_LINK_READY;
     }
 
-    thread_br_conn_handler_update_thread_connection(connectStatus);
+    thread_br_conn_handler_thread_connection_update(connectStatus);
 }
 
 static void meshnetwork_up()
@@ -452,7 +452,7 @@ static int backhaul_interface_down(void)
     if (thread_br_conn_handler_eth_interface_id_get() != -1) {
         arm_nwk_interface_down(thread_br_conn_handler_eth_interface_id_get());
         thread_br_conn_handler_eth_interface_id_set(-1);
-        thread_br_conn_handler_update_ethernet_connection(false);        
+        thread_br_conn_handler_ethernet_connection_update(false);        
         retval = 0;
     }
     else {
