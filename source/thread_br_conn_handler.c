@@ -13,7 +13,7 @@
 #include "eventOS_event_timer.h"
 
 
-#define TRACE_GROUP "ThBrApp"
+#define TRACE_GROUP "ThBrConnHandl"
 #define DHCP_SERVER_SHUTDOWN_TIMEOUT (100)
 
 typedef struct thread_interface_status_s {
@@ -127,9 +127,8 @@ void thread_br_conn_handler_update_ethernet_connection(bool status)
 }
 
 void thread_br_conn_handler_eth_ready()
-{
-    uint8_t *prefix;
-    uint8_t prefix_len;
+{    
+    uint8_t prefix_len = 64;
     uint8_t global_address[16];
     
     if (0 == arm_net_address_get(thread_br_conn_handler_eth_interface_id_get(), ADDR_IPV6_GP, global_address)) {
@@ -139,7 +138,7 @@ void thread_br_conn_handler_eth_ready()
     }
     thread_interface_borderrouter_status.dhcpPrefixLen = prefix_len;
     memset(thread_interface_borderrouter_status.dhcpPrefix, 0, 16);
-    memcpy(thread_interface_borderrouter_status.dhcpPrefix, prefix, prefix_len / 8);
+    memcpy(thread_interface_borderrouter_status.dhcpPrefix, global_address, prefix_len / 8);
 }
 
 static bool thread_br_conn_handler_default_route_enable(void)
@@ -186,7 +185,7 @@ static void thread_br_conn_handler_border_router_shutdown_request(void)
     }
 }
 
-void thread_br_conn_handler_threadinterface_id_set(int8_t interfaceId)
+void thread_br_conn_handler_thread_interface_id_set(int8_t interfaceId)
 {
     thread_interface_borderrouter_status.threadInterfaceId = interfaceId;
 }
