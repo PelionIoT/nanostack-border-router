@@ -218,8 +218,8 @@ static void thread_link_configuration_get(link_configuration_s *link_configurati
     
     link_configuration->rfChannel = MBED_CONF_APP_RF_CHANNEL;
     link_configuration->channel_page = MBED_CONF_APP_RF_CHANNEL_PAGE;    
-    uint8_t channel_mask[4] = MBED_CONF_APP_RF_CHANNEL_MASK;
-    common_write_32_bit(link_configuration->channel_mask, &channel_mask);   
+    uint32_t channel_mask = MBED_CONF_APP_RF_CHANNEL_MASK;
+    common_write_32_bit(channel_mask, &link_configuration->channel_mask);
     
     link_configuration->key_rotation = 3600;
     link_configuration->key_sequence = 0;
@@ -350,9 +350,9 @@ static void meshnetwork_up()
         NET_6LOWPAN_THREAD);
     
         int err = thread_interface_up();
+        MBED_ASSERT(!err);
         if (err) {
-            tr_error("thread_interface_up() failed: %d", err);
-            MBED_ASSERT(0);
+            tr_error("thread_interface_up() failed: %d", err);            
         }
     } else {
         tr_error("arm_nwk_interface_lowpan_init() failed");
@@ -430,6 +430,7 @@ static int backhaul_interface_up(int8_t driver_id)
 
         backhaul_if_id = arm_nwk_interface_ethernet_init(eth_mac_api, "bh0");
         
+        MBED_ASSERT(backhaul_if_id >= 0);
         if (backhaul_if_id >= 0) {
             tr_debug("Backhaul interface ID: %d", backhaul_if_id);
             thread_br_conn_handler_eth_interface_id_set(backhaul_if_id);
@@ -439,8 +440,7 @@ static int backhaul_interface_up(int8_t driver_id)
             retval = 0;
         }
         else {
-            tr_debug("Could not init ethernet");
-            MBED_ASSERT(0);
+            tr_debug("Could not init ethernet");            
         }
     }
     return retval;
