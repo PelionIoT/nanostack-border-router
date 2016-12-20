@@ -218,8 +218,8 @@ static void thread_link_configuration_get(link_configuration_s *link_configurati
     
     link_configuration->rfChannel = MBED_CONF_APP_RF_CHANNEL;
     link_configuration->channel_page = MBED_CONF_APP_RF_CHANNEL_PAGE;    
-    uint32_t channel_mask = MBED_CONF_APP_RF_CHANNEL_MASK;
-    common_write_32_bit(channel_mask, &link_configuration->channel_mask);
+    uint32_t channel_mask = MBED_CONF_APP_RF_CHANNEL_MASK;    
+    common_write_32_bit(channel_mask, link_configuration->channel_mask);
     
     link_configuration->key_rotation = 3600;
     link_configuration->key_sequence = 0;
