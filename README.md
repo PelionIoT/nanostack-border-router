@@ -126,7 +126,7 @@ ns_dyn_mem_init(app_stack_heap, APP_DEFINED_HEAP_SIZE, app_heap_error_handler, 0
 
 ### Configuring Nanostack Border Router
 
-Applications using Nanostack Border Router need to use a `.json` file for the configuration. The example configurations can be found in [K64f-border-router] https://github.com/ARMmbed/k64f-border-router-private/tree/master/configs. Where you can also find all the descriptions for the parameters.
+Applications using Nanostack Border Router need to use a `.json` file for the configuration. The example configurations can be found in [K64f-border-router configs] (https://github.com/ARMmbed/k64f-border-router-private/tree/master/configs). Where you can also find all the descriptions for the parameters.
 
 The backhaul related configuration options are explained here:
 
