@@ -12,11 +12,11 @@ The steps involved in porting a target platform are:
 
 ### Creating a border router application
 
-Working with ARM mbed OS is fairly straightforward as most of the bits you need to develop an application are already in place for you. You can find all the related information from the [ARM mbed OS User Guide](https://docs.mbed.com/docs/mbed-os-handbook/en/latest/).
+Working with ARM mbed OS is fairly straightforward as most of the bits you need to develop an application are already in place for you. You can find all the related information from the [ARM mbed OS User Guide](https://docs.mbed.com/docs/mbed-os-handbook/en/).
 
 ### Selecting the target platform
 
-Target platform is the hardware on which the border router will run. There are hundreds of target platforms already available for you out of the box, for example [FRDM-K64F](https://www.mbed.com/en/development/hardware/boards/nxp/frdm_k64f/). If you wish to write your own target, follow the instructions in [Adding target support to mbed OS 5](https://docs.mbed.com/docs/mbed-os-handbook/en/5.2/advanced/porting_guide/).
+Target platform is the hardware on which the border router will run. There are hundreds of target platforms already available for you out of the box, for example [FRDM-K64F](https://www.mbed.com/en/development/hardware/boards/nxp/frdm_k64f/). If you wish to write your own target, follow the instructions in [Adding target support to mbed OS 5](https://docs.mbed.com/docs/mbed-os-handbook/en/5.3/advanced/porting_guide/).
 
 
 ### Installing dependencies
@@ -35,7 +35,7 @@ For your mesh border router, you may need the following modules (dependencies):
 - Radio driver, for example [Atmel IEEE 802.15.4 RF driver](https://github.com/ARMmbed/atmel-rf-driver).
 - [6LowPAN networking stack (Nanostack)](https://github.com/ARMmbed/sal-stack-nanostack).
 
-The diagram below shows a conceptual model for the [FRDM-K64F border router](https://github.com/ARMmbed/k64f-border-router) application, which is similar to your application.
+The diagram below shows a conceptual model for the [FRDM-K64F border router](https://github.com/ARMmbed/k64f-border-router-private) application, which is similar to your application.
 
 ![](/images/BorderRouter.png) 
 
