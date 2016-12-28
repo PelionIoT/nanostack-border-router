@@ -28,7 +28,7 @@ To install dependencies for your application:
 $ mbed add "library URL"
 ```
 
-For your mesh border router, you may need the following modules (dependencies):
+For your border router, you may need the following modules (dependencies):
 
 - Nanostack Border Router (this repository).
 - Backhaul drivers, for example [Ethernet](https://github.com/ARMmbed/sal-nanostack-driver-k64f-eth) or [SLIP](https://github.com/ARMmbed/sal-stack-nanostack-slip).
@@ -126,8 +126,7 @@ ns_dyn_mem_init(app_stack_heap, APP_DEFINED_HEAP_SIZE, app_heap_error_handler, 0
 
 ### Configuring Nanostack Border Router
 
-Applications using Nanostack Border Router need to use a `.json` file for the configuration. The example configurations can be found in [K64f-border-router configs] (https://github.com/ARMmbed/k64f-border-router-private/tree/master/configs). Where you can also find all the descriptions for the parameters.
-
+Applications using Nanostack Border Router need to use a `.json` file for the configuration. The example configurations can be found in [K64f-border-router configs] (https://github.com/ARMmbed/k64f-border-router-private/tree/master/configs).
 The backhaul related configuration options are explained here:
 
 | Field                               | Description                                                   |
@@ -136,7 +135,6 @@ The backhaul related configuration options are explained here:
 | backhaul-prefix                     | The IPv6 prefix (64 bits) assigned to and advertised on the backhaul interface. Example format: `fd00:1:2::` |
 | backhaul-default-route              | The default route (prefix and prefix length) where packets should be forwarded on the backhaul device, default: `::/0`. Example format: `fd00:a1::/10` |
 | backhaul-next-hop                   | The next-hop value for the backhaul default route; should be a link-local address of a neighboring router, default: empty (on-link prefix). Example format: `fe80::1` |
-
 
 The following parameters are only used in the 6LoWPAN ND border router.
 
