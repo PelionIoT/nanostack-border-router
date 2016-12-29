@@ -209,6 +209,7 @@ static void thread_link_configuration_get(link_configuration_s *link_configurati
     memcpy(link_configuration->mesh_local_ula_prefix, mesh_local_prefix, sizeof(mesh_local_prefix));
     
     link_configuration->panId = MBED_CONF_APP_PAN_ID;
+    tr_info("PAN ID %x", link_configuration->panId);
     memcpy(link_configuration->name, MBED_CONF_APP_NETWORK_NAME, strlen(MBED_CONF_APP_NETWORK_NAME));
     link_configuration->timestamp = MBED_CONF_APP_COMMISSIONING_DATASET_TIMESTAMP;
     
@@ -217,6 +218,7 @@ static void thread_link_configuration_get(link_configuration_s *link_configurati
     link_configuration->securityPolicy = SECURITY_POLICY_ALL_SECURITY;
     
     link_configuration->rfChannel = MBED_CONF_APP_RF_CHANNEL;
+    tr_info("RF channel %d", link_configuration->rfChannel);
     link_configuration->channel_page = MBED_CONF_APP_RF_CHANNEL_PAGE;    
     uint32_t channel_mask = MBED_CONF_APP_RF_CHANNEL_MASK;    
     common_write_32_bit(channel_mask, link_configuration->channel_mask);

@@ -1,6 +1,6 @@
 # Nanostack Border Router
 
-Nanostack Border Router is a generic mbed border router implementation that provides the main IPv6/6LoWPAN or Thread border router logic usable to any 3rd party application. An example of such a application is [FRDM-K64F border router](https://github.com/ARMmbed/k64f-border-router-private), which can be used to start 6LoWPAN or Thread border router.
+Nanostack Border Router is a generic mbed border router implementation that provides the main 6LoWPAN ND or Thread border router logic usable to any 3rd party application. An example of such a application is [FRDM-K64F border router](https://github.com/ARMmbed/k64f-border-router-private), which can be used to build a 6LoWPAN ND or Thread border router.
 
 The steps involved in porting a target platform are:
 
@@ -12,11 +12,11 @@ The steps involved in porting a target platform are:
 
 ### Creating a border router application
 
-Working with ARM mbed OS is fairly straightforward as most of the bits you need to develop an application are already in place for you. You can find all the related information from the [ARM mbed OS User Guide](https://docs.mbed.com/docs/mbed-os-handbook/en/latest/).
+Working with ARM mbed OS is fairly straightforward as most of the bits you need to develop an application are already in place for you. You can find all the related information from the [ARM mbed OS User Guide](https://docs.mbed.com/docs/mbed-os-handbook/en/).
 
 ### Selecting the target platform
 
-Target platform is the hardware on which the border router will run. There are hundreds of target platforms already available for you out of the box, for example [FRDM-K64F](https://www.mbed.com/en/development/hardware/boards/nxp/frdm_k64f/). If you wish to write your own target, follow the instructions in [Adding target support to mbed OS 5](https://docs.mbed.com/docs/mbed-os-handbook/en/5.2/advanced/porting_guide/).
+Target platform is the hardware on which the border router will run. There are hundreds of target platforms already available for you out of the box, for example [FRDM-K64F](https://www.mbed.com/en/development/hardware/boards/nxp/frdm_k64f/). If you wish to write your own target, follow the instructions in [Adding target support to mbed OS 5](https://docs.mbed.com/docs/mbed-os-handbook/en/5.3/advanced/porting_guide/).
 
 
 ### Installing dependencies
@@ -28,14 +28,14 @@ To install dependencies for your application:
 $ mbed add "library URL"
 ```
 
-For your 6LoWPAN border router, you may need the following modules (dependencies):
+For your border router, you may need the following modules (dependencies):
 
 - Nanostack Border Router (this repository).
 - Backhaul drivers, for example [Ethernet](https://github.com/ARMmbed/sal-nanostack-driver-k64f-eth) or [SLIP](https://github.com/ARMmbed/sal-stack-nanostack-slip).
-- [Atmel IEEE 802.15.4 RF driver](https://github.com/ARMmbed/atmel-rf-driver).
+- Radio driver, for example [Atmel IEEE 802.15.4 RF driver](https://github.com/ARMmbed/atmel-rf-driver).
 - [6LowPAN networking stack (Nanostack)](https://github.com/ARMmbed/sal-stack-nanostack).
 
-The diagram below shows a conceptual model for the [FRDM-K64F border router](https://github.com/ARMmbed/k64f-border-router) application, which is similar to your application.
+The diagram below shows a conceptual model for the [FRDM-K64F border router](https://github.com/ARMmbed/k64f-border-router-private) application, which is similar to your application.
 
 ![](/images/BorderRouter.png) 
 
@@ -48,7 +48,7 @@ Your border router application must implement at least the following two routine
 - `backhaul_driver_init()`
 - `app_start()`
 
-The former is needed by Nanostack Border Router (this repository) and the later is needed by mbed OS. All mbed OS applications start with the function `app_start()` (equivalent to `main()`). The purpose of `backhaul_driver_init()` is to register a backhaul interface to the networking stack. The driver for the backhaul interface must implement a routine that performs the registration of the driver. The *Device Driver API* of the ARM IPv6/6LoWPAN stack (*Nanostack*) provides `arm_net_phy_register()` routine to register the interface:
+The former is needed by Nanostack Border Router (this repository) and the later is needed by mbed OS. All mbed OS applications start with the function `app_start()` (equivalent to `main()`). The purpose of `backhaul_driver_init()` is to register a backhaul interface to the networking stack. The driver for the backhaul interface must implement a routine that performs the registration of the driver. The *Device Driver API* of the ARM 6LoWPAN ND stack (*Nanostack*) provides `arm_net_phy_register()` routine to register the interface:
 
 ```C
 int8_t arm_net_phy_register(phy_device_driver_s *phy_driver);
@@ -126,9 +126,8 @@ ns_dyn_mem_init(app_stack_heap, APP_DEFINED_HEAP_SIZE, app_heap_error_handler, 0
 
 ### Configuring Nanostack Border Router
 
-Applications using Nanostack Border Router need to use a `mbed_app.json` file for the configuration. The example configurations can be found in [K64f-border-router] https://github.com/ARMmbed/k64f-border-router/configs.
-
-The minimum set of configuration options required are explained here:
+Applications using Nanostack Border Router need to use a `.json` file for the configuration. The example configurations can be found in [K64f-border-router configs] (https://github.com/ARMmbed/k64f-border-router-private/tree/master/configs).
+The backhaul related configuration options are explained here:
 
 | Field                               | Description                                                   |
 |-------------------------------------|---------------------------------------------------------------|
@@ -136,10 +135,8 @@ The minimum set of configuration options required are explained here:
 | backhaul-prefix                     | The IPv6 prefix (64 bits) assigned to and advertised on the backhaul interface. Example format: `fd00:1:2::` |
 | backhaul-default-route              | The default route (prefix and prefix length) where packets should be forwarded on the backhaul device, default: `::/0`. Example format: `fd00:a1::/10` |
 | backhaul-next-hop                   | The next-hop value for the backhaul default route; should be a link-local address of a neighboring router, default: empty (on-link prefix). Example format: `fe80::1` |
-| rf-channel                          | The wireless (6LoWPAN mesh network) radio channel the border router application listens to. |
 
-
-The following parameters are only used in the 6LoWPAN border router.
+The following parameters are only used in the 6LoWPAN ND border router.
 
 | Field                               | Description                                                   |
 |-------------------------------------|---------------------------------------------------------------|
@@ -150,7 +147,7 @@ The following parameters are only used in the 6LoWPAN border router.
 
 ### Using Nanostack Border Router in your application
 
-Here is a short recap of everything learnt above. To run a 6LoWPAN border router/gateway, your application needs to:
+Here is a short recap of everything learnt above. To run a 6LoWPAN ND or Thread border router/gateway, your application needs to:
 
 - Implement a callback for registering a backhaul network driver.
 - Call the start function to get your border router up and running.
@@ -187,7 +184,7 @@ To create a border router application using the Nanostack Border Router module:
 
 For a complete application using Nanostack Border Router, read the [FRDM-K64F border router](https://github.com/ARMmbed/k64f-border-router-private) documentation.
 
-#### The routing protocol RPL (6LoWPAN)
+#### The routing protocol RPL (6LoWPAN ND)
 
 Nanostack Border Router uses [RPL](https://tools.ietf.org/html/rfc6550) as the routing protocol on the mesh network side (RF interface). Currently, only the `grounded/non-storing` operation mode is supported.
 
