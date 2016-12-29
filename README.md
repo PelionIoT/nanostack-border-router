@@ -16,7 +16,7 @@ Working with ARM mbed OS is fairly straightforward as most of the bits you need 
 
 ### Selecting the target platform
 
-Target platform is the hardware on which the border router will run. There are hundreds of target platforms already available for you out of the box, for example [FRDM-K64F](https://www.mbed.com/en/development/hardware/boards/nxp/frdm_k64f/). If you wish to write your own target, follow the instructions in [Adding target support to mbed OS 5](https://docs.mbed.com/docs/mbed-os-handbook/en/5.3/advanced/porting_guide/).
+Target platform is the hardware on which the border router runs. There are hundreds of target platforms already available for you out of the box, for example [FRDM-K64F](https://www.mbed.com/en/development/hardware/boards/nxp/frdm_k64f/). If you wish to write your own target, follow the instructions in [Adding target support to mbed OS 5](https://docs.mbed.com/docs/mbed-os-handbook/en/5.3/advanced/porting_guide/).
 
 
 ### Installing dependencies
@@ -48,7 +48,7 @@ Your border router application must implement at least the following two routine
 - `backhaul_driver_init()`
 - `app_start()`
 
-The former is needed by Nanostack Border Router (this repository) and the later is needed by mbed OS. All mbed OS applications start with the function `app_start()` (equivalent to `main()`). The purpose of `backhaul_driver_init()` is to register a backhaul interface to the networking stack. The driver for the backhaul interface must implement a routine that performs the registration of the driver. The *Device Driver API* of the ARM 6LoWPAN ND stack (*Nanostack*) provides `arm_net_phy_register()` routine to register the interface:
+The former is needed by Nanostack Border Router (this repository) and the later is needed by mbed OS. All mbed OS applications start with the function `app_start()` (equivalent to `main()`). The purpose of `backhaul_driver_init()` is to register a backhaul interface to the networking stack. The driver for the backhaul interface must implement a routine that performs the registration of the driver. The [Device Driver API](https://docs.mbed.com/docs/arm-ipv66lowpan-stack/en/latest/driver_api/) of the ARM 6LoWPAN ND stack (*Nanostack*) provides `arm_net_phy_register()` routine to register the interface:
 
 ```C
 int8_t arm_net_phy_register(phy_device_driver_s *phy_driver);
@@ -103,7 +103,7 @@ tr_info("Starting border router...");
 border_router_start();
 ```
 
-You also need to initialise the memory heap depending on the memory available on your hardware. For example:
+You also need to initialize the memory heap depending on the memory available on your hardware. For example:
 
 ```C
 /* Se the heap size to ~32 KB */
@@ -131,7 +131,7 @@ The backhaul related configuration options are explained here:
 
 | Field                               | Description                                                   |
 |-------------------------------------|---------------------------------------------------------------|
-| backhaul-dynamic-bootstrap          | Defines whether the manually configured backhaul prefix and default route are used, or whether they are learnt automatically via the IPv6 neighbor discovery. false means static and true means automatic configuration. |
+| backhaul-dynamic-bootstrap          | Defines whether the manually configured backhaul prefix and default route are used, or whether they are learnt automatically via the IPv6 neighbor discovery. False means static and true means automatic configuration. |
 | backhaul-prefix                     | The IPv6 prefix (64 bits) assigned to and advertised on the backhaul interface. Example format: `fd00:1:2::` |
 | backhaul-default-route              | The default route (prefix and prefix length) where packets should be forwarded on the backhaul device, default: `::/0`. Example format: `fd00:a1::/10` |
 | backhaul-next-hop                   | The next-hop value for the backhaul default route; should be a link-local address of a neighboring router, default: empty (on-link prefix). Example format: `fe80::1` |
@@ -162,25 +162,26 @@ void backhaul_driver_init(void (*backhaul_driver_status_cb)(uint8_t, int8_t));
 
 To create a border router application using the Nanostack Border Router module:
 
-**Step 1.** Call `ns_dyn_mem_init()` to set the heap size and a handler for memory errors of your application.
+1. Call `ns_dyn_mem_init()` to set the heap size and a handler for memory errors of your application.
 
-**Step 2.** Set up the Nanostack tracing library. [OPTIONAL]
+2. Set up the Nanostack tracing library. [OPTIONAL]
 
-```C
-   /* Initialise the tracing library */
-   trace_init(); 
+    ```C
+       /* Initialise the tracing library */
+       trace_init(); 
 
-   /* Define your printing function */
-   set_trace_print_function(my_print_function);
+       /* Define your printing function */
+       set_trace_print_function(my_print_function);
 
-   /* Configure trace output for your taste */
-   set_trace_config(TRACE_CARRIAGE_RETURN | ...);
-```
-**Note:** You must call these functions before you call any Nanostack Border Router functions. For the detailed description of the above Nanostack functions, read [the Nanostack documentation](https://docs.mbed.com/docs/arm-ipv66lowpan-stack/en/latest/).
+       /* Configure trace output for your taste */
+       set_trace_config(TRACE_CARRIAGE_RETURN | ...);
+    ```
+    
+    **Note:** You must call these functions before you call any Nanostack Border Router functions. For the detailed description of the above Nanostack functions, read [the Nanostack documentation](https://docs.mbed.com/docs/arm-ipv66lowpan-stack/en/latest/).
 
-**Step 3.** Call the `start_border_router()` function. Nanostack will call your `backhaul_driver_init()` function to register your backhaul driver.
+3. Call the `start_border_router()` function. Nanostack will call your `backhaul_driver_init()` function to register your backhaul driver.
 
-**Step 4.** Start the backhaul driver and invoke the `backhaul_driver_status_cb()` callback (performed by your code or the backhaul driver code).
+4. Start the backhaul driver and invoke the `backhaul_driver_status_cb()` callback (performed by your code or the backhaul driver code).
 
 For a complete application using Nanostack Border Router, read the [FRDM-K64F border router](https://github.com/ARMmbed/k64f-border-router-private) documentation.
 
