@@ -6,8 +6,7 @@
 
 
 #include "mbed.h"
-#include "nsdynmemLIB.h"
-#include "nanostack-border-router/borderrouter_tasklet.h"
+#include "borderrouter_tasklet.h"
 #include "sal-nanostack-driver-k64f-eth/k64f_eth_nanostack_port.h"
 #include "sal-stack-nanostack-slip/Slip.h"
 
@@ -25,19 +24,13 @@
 
 
 #include "ns_trace.h"
-
 #define TRACE_GROUP "app"
-#define STR_HELPER(x) #x
-#define STR(x) STR_HELPER(x)
 
 #define APP_DEFINED_HEAP_SIZE MBED_CONF_APP_HEAP_SIZE
-
-
 static uint8_t app_stack_heap[APP_DEFINED_HEAP_SIZE];
 static uint8_t mac[6] = {0};
 
-static SlipMACDriver *pslipmacdriver;
-static DigitalOut led1(LED1);
+static DigitalOut led1(MBED_CONF_APP_LED);
 
 static Ticker led_ticker;
 
@@ -62,44 +55,45 @@ static void trace_printer(const char *str)
  */
 void backhaul_driver_init(void (*backhaul_driver_status_cb)(uint8_t, int8_t))
 {
-    const char *driver;
-
-    driver = STR(MBED_CONF_APP_BACKHAUL_DRIVER);
-
-    if (strcmp(driver, "SLIP") == 0) {
-        int8_t slipdrv_id = -1;
+// Values allowed in "backhaul-driver" option
+#define ETH 0
+#define SLIP 1
+#if MBED_CONF_APP_BACKHAUL_DRIVER == SLIP
+    SlipMACDriver *pslipmacdriver;
+    int8_t slipdrv_id = -1;
 #if defined(MBED_CONF_APP_SLIP_HW_FLOW_CONTROL)
-        pslipmacdriver = new SlipMACDriver(SERIAL_TX, SERIAL_RX, SERIAL_RTS, SERIAL_CTS);
+    pslipmacdriver = new SlipMACDriver(SERIAL_TX, SERIAL_RX, SERIAL_RTS, SERIAL_CTS);
 #else
-        pslipmacdriver = new SlipMACDriver(SERIAL_TX, SERIAL_RX);
+    pslipmacdriver = new SlipMACDriver(SERIAL_TX, SERIAL_RX);
 #endif
 
-        if (pslipmacdriver == NULL) {
-            tr_error("Unable to create SLIP driver");
-            return;
-        }
-
-        tr_info("Using SLIP backhaul driver...");
-
-#ifdef MBED_CONF_APP_SLIP_SERIAL_BAUD_RATE
-        slipdrv_id = pslipmacdriver->Slip_Init(mac, MBED_CONF_APP_SLIP_SERIAL_BAUD_RATE);
-#else
-        tr_warning("baud rate for slip not defined");
-#endif
-
-        if (slipdrv_id >= 0) {
-            backhaul_driver_status_cb(1, slipdrv_id);
-            return;
-        }
-
-        tr_error("Backhaul driver init failed, retval = %d", slipdrv_id);
-    } else if (strcmp(driver, "ETH") == 0) {
-        tr_info("Using ETH backhaul driver...");
-        arm_eth_phy_device_register(mac, backhaul_driver_status_cb);
+    if (pslipmacdriver == NULL) {
+        tr_error("Unable to create SLIP driver");
         return;
     }
 
-    tr_error("Unsupported backhaul driver: %s", driver);
+    tr_info("Using SLIP backhaul driver...");
+
+#ifdef MBED_CONF_APP_SLIP_SERIAL_BAUD_RATE
+    slipdrv_id = pslipmacdriver->Slip_Init(mac, MBED_CONF_APP_SLIP_SERIAL_BAUD_RATE);
+#else
+    tr_warning("baud rate for slip not defined");
+#endif
+
+    if (slipdrv_id >= 0) {
+        backhaul_driver_status_cb(1, slipdrv_id);
+        return;
+    }
+
+    tr_error("Backhaul driver init failed, retval = %d", slipdrv_id);
+#elif MBED_CONF_APP_BACKHAUL_DRIVER == ETH
+    tr_info("Using ETH backhaul driver...");
+    arm_eth_phy_device_register(mac, backhaul_driver_status_cb);
+    return;
+#else
+#error "Unsupported backhaul driver"
+#endif
+
 }
 
 /**
@@ -107,7 +101,7 @@ void backhaul_driver_init(void (*backhaul_driver_status_cb)(uint8_t, int8_t))
  * Sets up the application and starts the border router module.
  */
 
-void app_start(int, char **)
+int main(int argc, char **argv)
 {
     ns_hal_init(app_stack_heap, APP_DEFINED_HEAP_SIZE, app_heap_error_handler, 0);
 
@@ -115,31 +109,26 @@ void app_start(int, char **)
     set_trace_print_function(trace_printer);
     set_trace_config(TRACE_MODE_COLOR | APP_TRACE_LEVEL | TRACE_CARRIAGE_RETURN);
 
-    const char *mac_src;
 
-    mac_src = STR(MBED_CONF_APP_BACKHAUL_MAC_SRC);
-
-    if (strcmp(mac_src, "BOARD") == 0) {
-        /* Setting the MAC Address from UID.
-         * Takes UID Mid low and UID low and shuffles them around. */
-        mbed_mac_address((char *)mac);
-    } else if (strcmp(mac_src, "CONFIG") == 0) {
-        const uint8_t mac48[] = MBED_CONF_APP_BACKHAUL_MAC;
-        for (uint32_t i = 0; i < sizeof(mac); ++i) {
-            mac[i] = mac48[i];
-        }
+#define BOARD 0
+#define CONFIG 1
+#if MBED_CONF_APP_BACKHAUL_MAC_SRC == BOARD
+    /* Setting the MAC Address from UID.
+     * Takes UID Mid low and UID low and shuffles them around. */
+    mbed_mac_address((char *)mac);
+#elif MBED_CONF_APP_BACKHAUL_MAC_SRC == CONFIG
+    const uint8_t mac48[] = MBED_CONF_APP_BACKHAUL_MAC;
+    for (uint32_t i = 0; i < sizeof(mac); ++i) {
+        mac[i] = mac48[i];
     }
+#else
+    #error "MAC address not defined"
+#endif
 
     led_ticker.attach_us(toggle_led1, 500000);
     tr_info("Starting K64F border router...");
     border_router_start();
 }
-
-int main(int argc, char **argv)
-{
-    app_start(argc, argv);
-}
-
 
 /**
  * \brief Error handler for errors in dynamic memory handling.

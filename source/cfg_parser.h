@@ -10,6 +10,9 @@ typedef struct conf_t {
     const int ivalue;
 } conf_t;
 
+#define STR_HELPER(x) #x
+#define STR(x) STR_HELPER(x)
+
 extern conf_t *global_config;
 
 #ifdef __cplusplus

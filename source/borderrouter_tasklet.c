@@ -2,7 +2,10 @@
  * Copyright (c) 2016 ARM Limited. All rights reserved.
  */
 
-#ifndef MBED_CONF_APP_THREAD_BR
+#include "net_interface.h"
+#define NET_6LOWPAN_ND_WITH_MLE 0
+#define NET_6LOWPAN_THREAD 1
+#if MBED_CONF_APP_MESH_MODE == NET_6LOWPAN_ND_WITH_MLE
 
 #include <string.h>
 #include <stdlib.h>
@@ -13,9 +16,9 @@
 #include "multicast_api.h"
 #include "whiteboard_api.h"
 #include "platform/arm_hal_timer.h"
-#include "nanostack-border-router/borderrouter_tasklet.h"
-#include "nanostack-border-router/borderrouter_helpers.h"
-#include "nanostack-border-router/cfg_parser.h"
+#include "borderrouter_tasklet.h"
+#include "borderrouter_helpers.h"
+#include "cfg_parser.h"
 #include "rf_wrapper.h"
 #include "nwk_stats_api.h"
 #include "net_interface.h"
@@ -25,8 +28,7 @@
 #include "ethernet_mac_api.h"
 #include "sw_mac.h"
 
-
-#include "nanostack-border-router/mbed_config.h"
+#include "static_6lowpan_config.h"
 
 #include "ns_trace.h"
 #define TRACE_GROUP "brro"
@@ -654,4 +656,5 @@ static void app_parse_network_event(arm_event_s *event)
             break;
     }
 }
-#endif
+
+#endif // MBED_CONF_APP_MESH_MODE
