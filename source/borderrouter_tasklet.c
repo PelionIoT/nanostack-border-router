@@ -110,12 +110,15 @@ static void app_parse_network_event(arm_event_s *event);
 static void borderrouter_tasklet(arm_event_s *event);
 static void initialize_channel_list(uint32_t channel);
 static void start_6lowpan(const uint8_t *backhaul_address);
+static int8_t rf_interface_init(void);
 static void load_config(void);
 
 void border_router_start(void)
 {
     load_config();
     net_init_core();
+    /* initialize Radio module*/
+    net_6lowpan_id = rf_interface_init();
 
     protocol_stats_start(&nwk_stats);
 
@@ -417,8 +420,6 @@ static void borderrouter_tasklet(arm_event_s *event)
 
             /* initialize the backhaul interface */
             backhaul_driver_init(borderrouter_backhaul_phy_status_cb);
-            /* initialize Radio module*/
-            net_6lowpan_id = rf_interface_init();
 
             if (net_6lowpan_id < 0) {
                 tr_error("RF interface initialization failed");

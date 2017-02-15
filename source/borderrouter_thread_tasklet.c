@@ -357,6 +357,7 @@ void thread_rf_init()
 void border_router_start(void)
 {
     net_init_core();
+    thread_rf_init();
     protocol_stats_start(&nwk_stats);
 
     eventOS_event_handler_create(
@@ -479,9 +480,8 @@ static void borderrouter_tasklet(arm_event_s *event)
         case ARM_LIB_TASKLET_INIT_EVENT:
             br_tasklet_id = event->receiver;
             thread_br_conn_handler_init();
-			eth_network_data_init();
+            eth_network_data_init();
             backhaul_driver_init(borderrouter_backhaul_phy_status_cb);            
-            thread_rf_init();
             mesh_network_up();            
             eventOS_event_timer_request(9, ARM_LIB_SYSTEM_TIMER_EVENT, br_tasklet_id, 20000);
             break;
