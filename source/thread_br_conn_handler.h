@@ -16,7 +16,7 @@ void thread_br_conn_handler_thread_connection_update(bool status);
 void thread_br_conn_handler_ethernet_connection_update(bool status);
 
 // Tells that ethernet connection is ready and the prefix can be read and set.
-void thread_br_conn_handler_eth_ready();
+void thread_br_conn_handler_eth_ready(void);
 // Setters
 void   thread_br_conn_handler_thread_interface_id_set(int8_t interfaceId);
 void   thread_br_conn_handler_eth_interface_id_set(int8_t interfaceId);

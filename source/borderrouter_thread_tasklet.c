@@ -67,14 +67,12 @@ static int8_t br_tasklet_id = -1;
 
 /* Network statistics */
 static nwk_stats_t nwk_stats;
-static connection_state_e mesh_state;
-static connection_state_e ethernet_state;
 
 /* Function forward declarations */
 
 static void thread_link_configuration_get(link_configuration_s *link_configuration);
 static void network_interface_event_handler(arm_event_s *event);
-static void mesh_network_up();
+static void mesh_network_up(void);
 static void eth_network_data_init(void);
 static net_ipv6_mode_e backhaul_bootstrap_mode = NET_IPV6_BOOTSTRAP_STATIC;
 static void borderrouter_tasklet(arm_event_s *event);
@@ -128,7 +126,6 @@ static void eth_network_data_init()
     stoip6(prefix, strlen(prefix), backhaul_route.prefix);
     tr_info("backhaul route prefix: %s", print_ipv6(backhaul_route.prefix));
 #endif    
-    ethernet_state = STATE_DISCONNECTED;
 }
 
 static int thread_interface_up()
@@ -166,11 +163,9 @@ static int thread_interface_up()
     val = arm_nwk_interface_up(thread_if_id);
     if (val != 0) {
         tr_error("mesh0 up Fail with code: %i\r\n", (int)val);
-        mesh_state = STATE_UNKNOWN;
         return -1;
     } else {
         tr_info("mesh0 bootstrap ongoing...");
-        mesh_state = STATE_BOOTSTRAP;
     }
     return 0;
 }
@@ -222,35 +217,33 @@ static void network_interface_event_handler(arm_event_s *event)
 
             connectStatus = true;            
             tr_info("BR interface_id: %d", thread_br_conn_handler_eth_interface_id_get());
-            if (-1 != thread_br_conn_handler_eth_interface_id_get()) {                
-                    ethernet_state = STATE_CONNECTED;                 
-                    
-                    // metric set to high priority
-                    if (0 != arm_net_interface_set_metric(thread_br_conn_handler_eth_interface_id_get(), 0)) {
-                        tr_warn("Failed to set metric for eth0.");
-                    }
+            if (-1 != thread_br_conn_handler_eth_interface_id_get()) {
+                // metric set to high priority
+                if (0 != arm_net_interface_set_metric(thread_br_conn_handler_eth_interface_id_get(), 0)) {
+                    tr_warn("Failed to set metric for eth0.");
+                }
 
-                    if (backhaul_bootstrap_mode == NET_IPV6_BOOTSTRAP_STATIC) {
-                        uint8_t *next_hop_ptr;
+                if (backhaul_bootstrap_mode == NET_IPV6_BOOTSTRAP_STATIC) {
+                    uint8_t *next_hop_ptr;
 
-                        if (memcmp(backhaul_route.next_hop, (const uint8_t[16]) {0}, 16) == 0) {
-                            next_hop_ptr = NULL;
-                        }
-                        else {
-                            next_hop_ptr = backhaul_route.next_hop;
-                        }
-                        tr_debug("Default route prefix: %s/%d", print_ipv6(backhaul_route.prefix),
-                                 backhaul_route.prefix_len);
-                        tr_debug("Default route next hop: %s", print_ipv6(backhaul_route.next_hop));
-                        arm_net_route_add(backhaul_route.prefix,
-                                          backhaul_route.prefix_len,
-                                          next_hop_ptr, 0xffffffff, 128,
-                                          thread_br_conn_handler_eth_interface_id_get());
+                    if (memcmp(backhaul_route.next_hop, (const uint8_t[16]) {0}, 16) == 0) {
+                        next_hop_ptr = NULL;
                     }
-                    thread_br_conn_handler_eth_ready();
-                    tr_info("Backhaul interface addresses:");
-                    print_interface_addr(thread_br_conn_handler_eth_interface_id_get());
-                    thread_br_conn_handler_ethernet_connection_update(connectStatus);
+                    else {
+                        next_hop_ptr = backhaul_route.next_hop;
+                    }
+                    tr_debug("Default route prefix: %s/%d", print_ipv6(backhaul_route.prefix),
+                             backhaul_route.prefix_len);
+                    tr_debug("Default route next hop: %s", print_ipv6(backhaul_route.next_hop));
+                    arm_net_route_add(backhaul_route.prefix,
+                                      backhaul_route.prefix_len,
+                                      next_hop_ptr, 0xffffffff, 128,
+                                      thread_br_conn_handler_eth_interface_id_get());
+                }
+                thread_br_conn_handler_eth_ready();
+                tr_info("Backhaul interface addresses:");
+                print_interface_addr(thread_br_conn_handler_eth_interface_id_get());
+                thread_br_conn_handler_ethernet_connection_update(connectStatus);
             }
             break;
         }
@@ -287,11 +280,6 @@ static void network_interface_event_handler(arm_event_s *event)
             tr_warning("\rUnkown nw if event (type: %02x, id: %02x, data: %02x)\r\n", event->event_type, event->event_id, (unsigned int)event->event_data);
             break;
     }
-    //Update Interface status
-    if (connectStatus) {
-    } else {
-        ethernet_state = STATE_LINK_READY;
-    }    
 }
 
 void thread_interface_event_handler(arm_event_s *event)
@@ -318,11 +306,6 @@ void thread_interface_event_handler(arm_event_s *event)
         default:
             tr_warning("Unkown nw if event (type: %02x, id: %02x, data: %02x)\r\n", event->event_type, event->event_id, (unsigned int)event->event_data);
             break;
-    }
-    if (connectStatus) {
-        mesh_state = STATE_CONNECTED;
-    } else {
-        mesh_state = STATE_LINK_READY;
     }
 
     thread_br_conn_handler_thread_connection_update(connectStatus);
@@ -373,8 +356,6 @@ void thread_rf_init()
 
 void border_router_start(void)
 {
-    platform_timer_enable();
-    eventOS_scheduler_init();
     net_init_core();
     protocol_stats_start(&nwk_stats);
 

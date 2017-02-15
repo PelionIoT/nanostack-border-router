@@ -114,9 +114,6 @@ static void load_config(void);
 
 void border_router_start(void)
 {
-    platform_timer_enable();
-    eventOS_scheduler_init();
-
     load_config();
     net_init_core();
 
