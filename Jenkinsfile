@@ -1,6 +1,7 @@
 // List of targets to compile
 def targets = [
-  "K64F"
+  "K64F",
+  "NUCLEO_F429ZI"
   ]
 
 // Map toolchains to compilers
@@ -12,9 +13,9 @@ def toolchains = [
 
 // Configurations
 def configurations = [
-  LOWPAN: "6lowpan_K64F_Atmel_RF_config.json",
-  THREAD: "Thread_K64F_Atmel_RF_config.json",
-  THREAD_SLIP: "Thread_SLIP_K64F_Atmel_RF_config.json"
+  LOWPAN: "6lowpan_Atmel_RF.json",
+  THREAD: "Thread_Atmel_RF.json",
+  THREAD_SLIP: "Thread_SLIP_Atmel_RF.json"
   ]
 
 def stepsForParallel = [:]
@@ -43,10 +44,10 @@ def buildStep(target, compilerLabel, configurationFile, configurationLabel, tool
     stage ("${target}_${compilerLabel}_${configurationLabel}") {
       node ("${compilerLabel}") {
         deleteDir()
-        dir("k64f-border-router-private") {
+        dir("nanostack-border-router") {
           checkout scm
           execute("mbed deploy --protocol ssh")
-          execute("mbed compile --build out/${target}_${configurationLabel}_${compilerLabel}/ -m ${target} -t ${toolchain} --app-config ./configs/${configurationFile} -c")
+          execute("mbed compile --build out/${configurationLabel}/${target}/${compilerLabel}/ -m ${target} -t ${toolchain} --app-config ./configs/${configurationFile}")
         }
         archive '**/nanostack-border-router.bin'
       }
