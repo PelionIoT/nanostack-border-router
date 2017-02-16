@@ -369,9 +369,13 @@ void border_router_start(void)
 
 static void borderrouter_backhaul_phy_status_cb(uint8_t link_up, int8_t driver_id)
 {
-    arm_event_s event;
-    event.sender = br_tasklet_id;
-    event.receiver = br_tasklet_id;
+    arm_event_s event = {
+        .sender = br_tasklet_id,
+        .receiver = br_tasklet_id,
+        .priority = ARM_LIB_MED_PRIORITY_EVENT,
+        .event_type = APPLICATION_EVENT,
+        .event_data = driver_id
+    };
 
     if (link_up) {
         event.event_id = NR_BACKHAUL_INTERFACE_PHY_DRIVER_READY;
@@ -381,10 +385,6 @@ static void borderrouter_backhaul_phy_status_cb(uint8_t link_up, int8_t driver_i
 
     tr_debug("Backhaul driver ID: %d", driver_id);
 
-    event.priority = ARM_LIB_MED_PRIORITY_EVENT;
-    event.event_type = APPLICATION_EVENT;
-    event.event_data = driver_id;
-    event.data_ptr = NULL;
     eventOS_event_send(&event);
 }
 

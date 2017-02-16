@@ -7,7 +7,7 @@
 
 #include "mbed.h"
 #include "borderrouter_tasklet.h"
-#include "sal-nanostack-driver-k64f-eth/k64f_eth_nanostack_port.h"
+#include "drivers/eth_driver.h"
 #include "sal-stack-nanostack-slip/Slip.h"
 
 #ifdef  MBED_CONF_APP_DEBUG_TRACE
