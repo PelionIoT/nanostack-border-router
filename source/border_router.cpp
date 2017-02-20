@@ -126,7 +126,7 @@ int main(int argc, char **argv)
 #endif
 
     led_ticker.attach_us(toggle_led1, 500000);
-    tr_info("Starting K64F border router...");
+    tr_info("Starting NanoStack Border Router...");
     border_router_start();
 }
 

@@ -31,7 +31,7 @@
         "pana-mode": "",
         "tls-psk-key": "{0xcf, 0xce, 0xcd, 0xcc, 0xcb, 0xca, 0xc9, 0xc8, 0xc7, 0xc6, 0xc5, 0xc4, 0xc3, 0xc2, 0xc1, 0xc0}",
         "tls-psk-key-id": 1,
-        "pan-id": "0x0700",
+        "pan-id": "0x0800",
         "network-id": "network000000000",
         "beacon-protocol-id": 4,
         "prefix": "fd00:db8::",
