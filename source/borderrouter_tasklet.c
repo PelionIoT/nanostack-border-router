@@ -197,6 +197,7 @@ static void load_config(void)
     memcpy(br.network_id, prefix, 16);
 
     br.mac_panid = cfg_int(global_config, "PAN_ID", 0x0691);
+    tr_info("PANID: %x", br.mac_panid);
     br.mac_short_adr = cfg_int(global_config, "SHORT_MAC_ADDRESS", 0xffff);
     br.ra_life_time = cfg_int(global_config, "RA_ROUTER_LIFETIME", 1024);
     br.beacon_protocol_id = cfg_int(global_config, "BEACON_PROTOCOL_ID", 4);
@@ -462,6 +463,7 @@ static void start_6lowpan(const uint8_t *backhaul_address)
 
         /* Channel list: listen to a channel (default: all channels) */
         uint32_t channel = cfg_int(global_config, "RF_CHANNEL", 0);
+        tr_info("RF channel: %d", channel);
         initialize_channel_list(channel);
 
         // configure as border router and set the operation mode
