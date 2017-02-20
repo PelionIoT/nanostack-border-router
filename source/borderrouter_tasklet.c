@@ -2,10 +2,9 @@
  * Copyright (c) 2016 ARM Limited. All rights reserved.
  */
 
-#include "net_interface.h"
-#define NET_6LOWPAN_ND_WITH_MLE 0
-#define NET_6LOWPAN_THREAD 1
-#if MBED_CONF_APP_MESH_MODE == NET_6LOWPAN_ND_WITH_MLE
+#define LOWPAN_ND 0
+#define THREAD 1
+#if MBED_CONF_APP_MESH_MODE == LOWPAN_ND
 
 #include <string.h>
 #include <stdlib.h>
@@ -18,6 +17,7 @@
 #include "platform/arm_hal_timer.h"
 #include "borderrouter_tasklet.h"
 #include "borderrouter_helpers.h"
+#include "net_interface.h"
 #include "cfg_parser.h"
 #include "rf_wrapper.h"
 #include "nwk_stats_api.h"

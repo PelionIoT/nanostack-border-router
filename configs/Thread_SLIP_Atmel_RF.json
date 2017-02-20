@@ -13,8 +13,8 @@
             "value": "SLIP"
         },
         "mesh-mode": {
-            "help": "Mesh networking mode. Options are NET_6LOWPAN_ND_WITH_MLE and NET_6LOWPAN_THREAD",
-            "value": "NET_6LOWPAN_THREAD"
+            "help": "Mesh networking mode. Options are LOWPAN_ND and THREAD",
+            "value": "THREAD"
         },
         "backhaul-mac-src": {
             "help": "Where to get EUI48 address. Options are BOARD, CONFIG",
