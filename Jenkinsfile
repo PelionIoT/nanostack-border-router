@@ -1,7 +1,6 @@
 // List of targets to compile
 def targets = [
-  "K64F",
-  "NUCLEO_F429ZI"
+  "K64F"
   ]
 
 // Map toolchains to compilers
