@@ -177,7 +177,7 @@ For the pin names of your desired UART line, refer to your development board's d
 
 An example configuration for the SLIP driver:
 
-```json
+```
 "target_overrides": {
     "K64F": {
         "SERIAL_TX": "PTE0",
