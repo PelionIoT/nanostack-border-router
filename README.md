@@ -17,7 +17,7 @@ The code layout is organized like this:
 ```
 configs/                  Contains example configuration files
 drivers/                  Contains PHY drivers
-mbed-os/                  Contains mbed OS intself
+mbed-os/                  Contains mbed OS itself
 source/                   Contains the application code
 mbed_app.json             Build time configuration file
 ```
@@ -115,24 +115,32 @@ Nanostack Border Router offers the following configuration options for RPL:
 
 ### Thread configuration
 
-The Thread-specific parameters are listed below.
+The Thread specific parameters are listed below.
 
 | Field                               | Description                                                   |
 |-------------------------------------|---------------------------------------------------------------|
-| `thread-br` | Must be set to true to build a Thread border router. |
-| `commissioning-dataset-timestamp` | Is used for updating the Thread network parameters. The device with the highest value propagates the parameters to the network (in the same Realm-Local scope). |
-| `nanostack.configuration` | Is needed when building the Thread border router from the Nanostack sources. |
+| `commissioning-dataset-timestamp`   | Used for updating the Thread network parameters. The device with the highest value propagates the parameters to the network (in the same Realm-Local scope) |
+| `pan-id`                            | 2-byte Personal Area Network ID |
+| `extended-pan-id`                   | 8-byte value used to identify Thread Networks in range |
+| `mesh-local-prefix`                 | ULA prefix used for communication within the Thread Network |
+| `network-name`                      | human-readable name for the network |
+| `pskd`                              | Pre-Shared Key for the Commissioner |
+| `pskd`                              | Pre-Shared Key for the Device |
+| `thread-master-key`                 | Key used to derive security material for MAC and MLE protection |
+| `nanostack.configuration`           | Is needed when building the Thread border router from the nanostack sources |
 
-All devices must share the same network configuration parameters, when out-of-band commissioning is used. Special care must be taken when defining security related parameters. 
-
-<span class="notes">**Note:** The PSKc is generated from the password, network name and extended PAN ID. The configuration below is an example for testing purposes only; do not use it for production or expose it.</span>
-
-The [mbedtls_thread_config.h](source/mbedtls_thread_config.h) file configures the mbed TLS for Thread use.
 
 The `THREAD_BORDER_ROUTER` feature is the Nanostack library, which implements the Thread border router networking stack.
 
-For the Thread BR, there are example configuration files for `SLIP` and `ETH` backhaul connectivity.
-See [configs/Thread_Atmel_RF.json](configs/Thread_Atmel_RF.json) and [configs/Thread_SLIP_Atmel_RF.json](configs/Thread_SLIP_Atmel_RF.json).
+For the Thread Border Router, there are example configuration files for `SLIP` and `ETH` backhaul connectivity:
+
+ * [configs/Thread_Atmel_RF.json](configs/Thread_Atmel_RF.json)
+ * [configs/Thread_SLIP_Atmel_RF.json](configs/Thread_SLIP_Atmel_RF.json)
+
+The [mbedtls_thread_config.h](source/mbedtls_thread_config.h) file configures the mbed TLS for Thread use.
+
+<span class="notes">**Note:** The configuration examples are for testing purposes only; do not use it for production or expose it.</span>
+
 
 #### Backhaul connectivity
 
