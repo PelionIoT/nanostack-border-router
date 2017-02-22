@@ -115,19 +115,19 @@ Nanostack Border Router offers the following configuration options for RPL:
 
 ### Thread configuration
 
-The Thread specific parameters are listed below.
+The Thread-specific parameters are listed below.
 
 | Field                               | Description                                                   |
 |-------------------------------------|---------------------------------------------------------------|
-| `commissioning-dataset-timestamp`   | Used for updating the Thread network parameters. The device with the highest value propagates the parameters to the network (in the same Realm-Local scope) |
-| `pan-id`                            | 2-byte Personal Area Network ID |
-| `extended-pan-id`                   | 8-byte value used to identify Thread Networks in range |
-| `mesh-local-prefix`                 | ULA prefix used for communication within the Thread Network |
-| `network-name`                      | human-readable name for the network |
-| `pskd`                              | Pre-Shared Key for the Commissioner |
-| `pskd`                              | Pre-Shared Key for the Device |
-| `thread-master-key`                 | Key used to derive security material for MAC and MLE protection |
-| `nanostack.configuration`           | Is needed when building the Thread border router from the nanostack sources |
+| `commissioning-dataset-timestamp`   | Used for updating the Thread network parameters. The device with the highest value propagates the parameters to the network (in the same Realm-Local scope). |
+| `pan-id`                            | 2-byte Personal Area Network ID. |
+| `extended-pan-id`                   | 8-byte value used to identify Thread networks in range. |
+| `mesh-local-prefix`                 | ULA prefix used for communication within the Thread network. |
+| `network-name`                      | A human-readable name for the network. |
+| `pskd`                              | Pre-Shared Key for the Commissioner. |
+| `pskd`                              | Pre-Shared Key for the device. |
+| `thread-master-key`                 | A key used to derive security material for MAC and MLE protection. |
+| `nanostack.configuration`           | Is needed when building the Thread border router from the Nanostack sources. |
 
 
 The `THREAD_BORDER_ROUTER` feature is the Nanostack library, which implements the Thread border router networking stack.
@@ -137,7 +137,7 @@ For the Thread Border Router, there are example configuration files for `SLIP` a
  * [configs/Thread_Atmel_RF.json](configs/Thread_Atmel_RF.json)
  * [configs/Thread_SLIP_Atmel_RF.json](configs/Thread_SLIP_Atmel_RF.json)
 
-The [mbedtls_thread_config.h](source/mbedtls_thread_config.h) file configures the mbed TLS for Thread use.
+The [mbedtls_thread_config.h](source/mbedtls_thread_config.h) file configures mbed TLS for Thread use.
 
 <span class="notes">**Note:** The configuration examples are for testing purposes only; do not use it for production or expose it.</span>
 
