@@ -12,7 +12,7 @@ This application runs on mbed OS and utilizes PHY drivers and Nanostack to form 
 
 ![](images/structure.png)
 
-Code layout is organized like this:
+The code layout is organized like this:
 
 ```
 configs/                  Contains example configuration files
@@ -47,13 +47,11 @@ $ mbed compile
 
 ## Selecting the target platform
 
-Target platform is the hardware on which the border router runs.
-There are number of target platforms already available for you at the mbed OS 5.
+The target platform is the hardware on which the border router runs. There are number of target platforms already available for you in the mbed OS 5.
 
 If you wish to write your own target, follow the instructions in [Adding target support to mbed OS 5](https://docs.mbed.com/docs/mbed-os-handbook/en/5.3/advanced/porting_guide/).
 
-Border router requires backhaul and RF drivers to be provided for Nanostack.
-Backhaul is either SLIP or Ethernet. Currently there exists ethernet drivers for following backhauls:
+The border router requires backhaul and RF drivers to be provided for Nanostack. The backhaul is either SLIP or Ethernet. Currently, there are Ethernet drivers for the following backhauls:
 
 * [K64F Ethernet](https://github.com/ARMmbed/sal-nanostack-driver-k64f-eth)
 * [SLIP driver](https://github.com/ARMmbed/sal-stack-nanostack-slip)
@@ -64,11 +62,11 @@ And following RF drivers:
 * [Atmel AT86RF212B](https://github.com/ARMmbed/atmel-rf-driver)
 * [NXP MCR20A](https://github.com/ARMmbed/mcr20a-rf-driver)
 
-Existing drivers are found in the `drivers/` directory. More drivers can be linked in.
+The existing drivers are found in the `drivers/` folder. More drivers can be linked in.
 
 ## Configuring Nanostack Border Router
 
-Applications using Nanostack Border Router need to use a `.json` file for the configuration. The example configurations can be found from `configs/` diretory.
+Applications using Nanostack Border Router need to use a `.json` file for the configuration. The example configurations can be found in the `configs/` folder.
 
 ### The backhaul configuration options
 
@@ -84,17 +82,17 @@ Applications using Nanostack Border Router need to use a `.json` file for the co
 | Field                               | Description                                                   |
 |-------------------------------------|---------------------------------------------------------------|
 | `security-mode`                       | The 6LoWPAN mesh network traffic (link layer) can be protected with the Private Shared Key (PSK) security mode, allowed values: `NONE` and `PSK`. |
-| `psk-key`                             | 16 bytes long private shared key to be used when the security mode is PSK. Example format (hexadecimal byte values separated by commas inside brackets): `{0x00, ..., 0x0f}` |
+| `psk-key`                             | A 16-bytes long private shared key to be used when the security mode is PSK. Example format (hexadecimal byte values separated by commas inside brackets): `{0x00, ..., 0x0f}` |
 | `multicast-addr`                      | Multicast forwarding is supported by default. This defines the multicast address to which the border router application forwards multicast packets (on the backhaul and RF interface). Example format: `ff05::5` |
 |`ra-router-lifetime`|Defines the router advertisement interval in seconds (default 1024 if left out).|
-|`beacon-protocol-id`|Is used to identify beacons, this should not be changed (default 4 if left out).|
-|`nanostack.configuration`|Is needed when building the 6LoWPAN ND border router from the nanostack sources.|
+|`beacon-protocol-id`|Is used to identify beacons. This should not be changed (default 4 if left out).|
+|`nanostack.configuration`|Is needed when building the 6LoWPAN ND border router from the Nanostack sources.|
 
-The feature `LOWPAN_BORDER_ROUTER` is the nanostack library, which implements the 6LoWPAN ND border router networking stack.
+The `LOWPAN_BORDER_ROUTER` feature is the Nanostack library, which implements the 6LoWPAN ND border router networking stack.
 
-More information on 6LoWPAN and the configuration parameters can be found from here [6LoWPAN overview] (https://docs.mbed.com/docs/arm-ipv66lowpan-stack/en/latest/quick_start_intro/index.html)
+To learn more about 6LoWPAN and the configuration parameters, read the [6LoWPAN overview] (https://docs.mbed.com/docs/arm-ipv66lowpan-stack/en/latest/quick_start_intro/index.html).
 
-See [configs/6lowpan_Atmel_RF.json](configs/6lowpan_Atmel_RF.json) for example configuration file.
+See [configs/6lowpan_Atmel_RF.json](configs/6lowpan_Atmel_RF.json) for an example configuration file.
 
 #### The routing protocol RPL (6LoWPAN ND)
 
@@ -117,23 +115,24 @@ Nanostack Border Router offers the following configuration options for RPL:
 
 ### Thread configuration
 
-The Thread specific parameters are listed below.
+The Thread-specific parameters are listed below.
 
 | Field                               | Description                                                   |
 |-------------------------------------|---------------------------------------------------------------|
-| `thread-br` | Must be set to true in order to build a Thread border router. |
+| `thread-br` | Must be set to true to build a Thread border router. |
 | `commissioning-dataset-timestamp` | Is used for updating the Thread network parameters. The device with the highest value propagates the parameters to the network (in the same Realm-Local scope). |
 | `nanostack.configuration` | Is needed when building the Thread border router from the Nanostack sources. |
 
-All devices must share the same network configuration parameters, when out of band commissioning is used. Special care must be taken when defining security related parameters. Note also that PSKc is generated from password, network name and extended PAN ID. The  configuration below is an example for testing purposes only; do not use them for production or expose them.
+All devices must share the same network configuration parameters, when out-of-band commissioning is used. Special care must be taken when defining security related parameters. 
+
+<span class="notes">**Note:** The PSKc is generated from the password, network name and extended PAN ID. The configuration below is an example for testing purposes only; do not use it for production or expose it.</span>
 
 The [mbedtls_thread_config.h](source/mbedtls_thread_config.h) file configures the mbed TLS for Thread use.
 
-The feature `THREAD_BORDER_ROUTER` is the nanostack library, which implements the Thread border router networking stack.
+The `THREAD_BORDER_ROUTER` feature is the Nanostack library, which implements the Thread border router networking stack.
 
-For the Thread BR, there are two example configuration files for `SLIP` and `ETH` backhaul connectivity.
-See [configs/Thread_Atmel_RF.json](configs/Thread_Atmel_RF.json) and [config/Thread_SLIP_Atmel_RF.json](config/Thread_SLIP_Atmel_RF.json)
-
+For the Thread BR, there are example configuration files for `SLIP` and `ETH` backhaul connectivity.
+See [configs/Thread_Atmel_RF.json](configs/Thread_Atmel_RF.json) and [configs/Thread_SLIP_Atmel_RF.json](configs/Thread_SLIP_Atmel_RF.json).
 
 #### Backhaul connectivity
 
@@ -158,26 +157,25 @@ The Nanostack border router application can be connected to a backhaul network. 
 }
 ```
 
-You can select your preferred option through the configuration file (field `backhaul-driver` in the `config` section). Value `SLIP` includes the SLIP driver, while the value `ETH` compiles the border router application with Ethernet backhaul support. You can define the MAC address on the backhaul interface manually (field `backhaul-mac-src` value `CONFIG`). Alternatively, you can use the MAC address provided by the development board (field `backhaul-mac-src` value `BOARD`). By default, the backhaul driver is set to be `ETH` and the MAC address source is `BOARD`.
+You can select your preferred option through the configuration file (field `backhaul-driver` in the `config` section). The value `SLIP` includes the SLIP driver, while the value `ETH` compiles the border router application with Ethernet backhaul support. You can define the MAC address on the backhaul interface manually (field `backhaul-mac-src` value `CONFIG`). Alternatively, you can use the MAC address provided by the development board (field `backhaul-mac-src` value `BOARD`). By default, the backhaul driver is set to `ETH` and the MAC address source is `BOARD`.
 
-You can also set the backhaul bootstrap mode (field `backhaul-dynamic-bootstrap`). By default, the bootstrap mode is set to true, which means autonomous mode. With the autonomous mode, the border router learns the prefix information automatically from an IPv6 gateway in the ethernet/SLIP segment. When parameter is set to false, it enables you to set up a manual configuration of `backhaul-prefix` and `backhaul-default-route`.
+You can also set the backhaul bootstrap mode (field `backhaul-dynamic-bootstrap`). By default, the bootstrap mode is set to true, which means the autonomous mode. With the autonomous mode, the border router learns the prefix information automatically from an IPv6 gateway in the Ethernet/SLIP segment. When the parameter is set to false, it enables you to set up a manual configuration of `backhaul-prefix` and `backhaul-default-route`.
 
-If you use static bootstrap mode, you need to configure a default route on the backhaul interface to properly forward packets between the backhaul and the 6LoWPAN mesh network. In addition to this, you need to set a backhaul prefix. Static mode creates a site-local IPv6 network from where packets cannot be routed outside.
+If you use the static bootstrap mode, you need to configure a default route on the backhaul interface to properly forward packets between the backhaul and the 6LoWPAN mesh network. In addition to this, you need to set a backhaul prefix. The static mode creates a site-local IPv6 network from which packets cannot be routed outside.
 
-When using the autonomous mode in the 6LoWPAN ND configuration, you can set the `prefix-from-backhaul` option to `true` to use the same backhaul prefix on the mesh network side as well. This allows for the mesh nodes to be directly connectable from the outside of the mesh network. In the Thread network, it is enough that `backhaul-dynamic-bootstrap` is set to true.
+When using the autonomous mode in the 6LoWPAN ND configuration, you can set the `prefix-from-backhaul` option to `true` to use the same backhaul prefix on the mesh network side as well. This allows the mesh nodes to be directly connectable from the outside of the mesh network. In the Thread network, it is enough that `backhaul-dynamic-bootstrap` is set to true.
 
-For more details on how to set the backhaul prefix and default route, refer to the [Nanostack Border Router](https://github.com/ARMmbed/nanostack-border-router-private) documentation.
-
+For more details on how to set the backhaul prefix and default route, read the [Nanostack Border Router](https://github.com/ARMmbed/nanostack-border-router-private) documentation.
 
 #### Note on the SLIP backhaul driver
 
-If using K64F, you need to use the UART1 serial line of the board with the SLIP driver. See the `pins` section in the [mbed_app.json](./mbed_app.json) configuration. To use a different UART line, replace the `SERIAL_TX` and `SERIAL_RX` values with correct TX/RX pin names.
+If you are using a K64F board, you need to use the UART1 serial line of the board with the SLIP driver. See the `pins` section in the [mbed_app.json](./mbed_app.json) configuration file. To use a different UART line, replace the `SERIAL_TX` and `SERIAL_RX` values with correct TX/RX pin names.
 
-If you wish to use hardware flow control, set the configuration field `slip_hw_flow_control` to true. By default, it is set to false. Before using hardware flow control, make sure that the other end of your SLIP interface can handle flow control.
+If you wish to use the hardware flow control, set the configuration field `slip_hw_flow_control` to true. By default, it is set to false. Before using hardware flow control, make sure that the other end of your SLIP interface can handle the flow control.
 
 For the pin names of your desired UART line, refer to your development board's documentation.
 
-Example configuration for the SLIP driver:
+An example configuration for the SLIP driver:
 
 ```json
 "target_overrides": {
@@ -191,7 +189,7 @@ Example configuration for the SLIP driver:
 
 ### Switching the RF shield
 
-By default, the application uses an Atmel AT86RF233/212B RF driver. You can alternatively use any RF driver provided in the `drivers/` folder or link in your own driver. The configuration for the RF driver can be set in the `json` file.
+By default, the application uses an Atmel AT86RF233/212B RF driver. You can alternatively use any RF driver provided in the `drivers/` folder or link in your own driver. You can set the configuration for the RF driver in the `json` file.
 
 To select the Atmel radio shield, use the following:
 
@@ -215,7 +213,7 @@ After changing the radio shield, you need to recompile the application.
 
 ## Running the border router application
 
-1. Find the  binary file `nanostack-border-router.bin` in the folder `BUILD`.
+1. Find the  binary file `nanostack-border-router.bin` in the `BUILD` folder.
 2. Copy the binary to the USB mass storage root of the development board. It is automatically flashed to the target MCU. When the flashing is complete, the board restarts itself. Press the **Reset** button of the development board if it does not restart automatically.
 3. The program begins execution.
 4. Open the [serial connection](#serial-connection-settings), for example PuTTY.
