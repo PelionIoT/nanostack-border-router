@@ -124,7 +124,7 @@ The Thread-specific parameters are listed below.
 | `extended-pan-id`                   | 8-byte value used to identify Thread networks in range. |
 | `mesh-local-prefix`                 | ULA prefix used for communication within the Thread network. |
 | `network-name`                      | A human-readable name for the network. |
-| `pskd`                              | Pre-Shared Key for the Commissioner. |
+| `pskc`                              | Pre-Shared Key for the Commissioner. |
 | `pskd`                              | Pre-Shared Key for the device. |
 | `thread-master-key`                 | A key used to derive security material for MAC and MLE protection. |
 | `nanostack.configuration`           | Is needed when building the Thread border router from the Nanostack sources. |
@@ -139,7 +139,7 @@ For the Thread Border Router, there are example configuration files for `SLIP` a
 
 The [mbedtls_thread_config.h](source/mbedtls_thread_config.h) file configures mbed TLS for Thread use.
 
-<span class="notes">**Note:** The configuration examples are for testing purposes only; do not use it for production or expose it.</span>
+<span class="notes">**Note:** The configuration examples are for testing purposes only; do not use them for production or expose them.</span>
 
 
 #### Backhaul connectivity
