@@ -2,7 +2,9 @@
  * Copyright (c) 2016 ARM Limited. All rights reserved.
  */
 
-#ifndef MBED_CONF_APP_THREAD_BR
+#define LOWPAN_ND 0
+#define THREAD 1
+#if MBED_CONF_APP_MESH_MODE == LOWPAN_ND
 
 #include <string.h>
 #include <stdlib.h>
@@ -13,9 +15,10 @@
 #include "multicast_api.h"
 #include "whiteboard_api.h"
 #include "platform/arm_hal_timer.h"
-#include "nanostack-border-router/borderrouter_tasklet.h"
-#include "nanostack-border-router/borderrouter_helpers.h"
-#include "nanostack-border-router/cfg_parser.h"
+#include "borderrouter_tasklet.h"
+#include "borderrouter_helpers.h"
+#include "net_interface.h"
+#include "cfg_parser.h"
 #include "rf_wrapper.h"
 #include "nwk_stats_api.h"
 #include "net_interface.h"
@@ -25,8 +28,7 @@
 #include "ethernet_mac_api.h"
 #include "sw_mac.h"
 
-
-#include "nanostack-border-router/mbed_config.h"
+#include "static_6lowpan_config.h"
 
 #include "ns_trace.h"
 #define TRACE_GROUP "brro"
@@ -195,6 +197,7 @@ static void load_config(void)
     memcpy(br.network_id, prefix, 16);
 
     br.mac_panid = cfg_int(global_config, "PAN_ID", 0x0691);
+    tr_info("PANID: %x", br.mac_panid);
     br.mac_short_adr = cfg_int(global_config, "SHORT_MAC_ADDRESS", 0xffff);
     br.ra_life_time = cfg_int(global_config, "RA_ROUTER_LIFETIME", 1024);
     br.beacon_protocol_id = cfg_int(global_config, "BEACON_PROTOCOL_ID", 4);
@@ -316,9 +319,13 @@ static int8_t rf_interface_init(void)
 
 static void borderrouter_backhaul_phy_status_cb(uint8_t link_up, int8_t driver_id)
 {
-    arm_event_s event;
-    event.sender = br_tasklet_id;
-    event.receiver = br_tasklet_id;
+    arm_event_s event = {
+        .sender = br_tasklet_id,
+        .receiver = br_tasklet_id,
+        .priority = ARM_LIB_MED_PRIORITY_EVENT,
+        .event_type = APPLICATION_EVENT,
+        .event_data = driver_id
+    };
 
     if (link_up) {
         event.event_id = NR_BACKHAUL_INTERFACE_PHY_DRIVER_READY;
@@ -328,10 +335,6 @@ static void borderrouter_backhaul_phy_status_cb(uint8_t link_up, int8_t driver_i
 
     tr_debug("Backhaul driver ID: %d", driver_id);
 
-    event.priority = ARM_LIB_MED_PRIORITY_EVENT;
-    event.event_type = APPLICATION_EVENT;
-    event.event_data = driver_id;
-    event.data_ptr = NULL;
     eventOS_event_send(&event);
 }
 
@@ -460,6 +463,7 @@ static void start_6lowpan(const uint8_t *backhaul_address)
 
         /* Channel list: listen to a channel (default: all channels) */
         uint32_t channel = cfg_int(global_config, "RF_CHANNEL", 0);
+        tr_info("RF channel: %d", channel);
         initialize_channel_list(channel);
 
         // configure as border router and set the operation mode
@@ -654,4 +658,5 @@ static void app_parse_network_event(arm_event_s *event)
             break;
     }
 }
-#endif
+
+#endif // MBED_CONF_APP_MESH_MODE

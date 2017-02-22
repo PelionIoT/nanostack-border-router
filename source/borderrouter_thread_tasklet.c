@@ -2,7 +2,9 @@
  * Copyright (c) 2016 ARM Limited. All rights reserved.
  */
 
-#ifdef MBED_CONF_APP_THREAD_BR
+#define LOWPAN_ND 0
+#define THREAD 1
+#if MBED_CONF_APP_MESH_MODE == THREAD
 
 #include <string.h>
 #include <stdlib.h>
@@ -12,11 +14,11 @@
 #include "eventOS_event_timer.h"
 #include "eventOS_scheduler.h"
 #include "platform/arm_hal_timer.h"
-#include "nanostack-border-router/borderrouter_tasklet.h"
-#include "nanostack-border-router/borderrouter_helpers.h"
+#include "borderrouter_tasklet.h"
+#include "borderrouter_helpers.h"
+#include "net_interface.h"
 #include "rf_wrapper.h"
 #include "nwk_stats_api.h"
-#include "net_interface.h"
 #include "ip6string.h"
 #include "ethernet_mac_api.h"
 #include "mac_api.h"
@@ -25,7 +27,6 @@
 #include "common_functions.h"
 #include "thread_management_if.h"
 #include "thread_br_conn_handler.h"
-#include "nanostack-border-router/mbed_config.h"
 #include "randLIB.h"
 
 #include "ns_trace.h"
@@ -125,7 +126,7 @@ static void eth_network_data_init()
     backhaul_route.prefix_len = atoi(strtok(NULL, "/"));
     stoip6(prefix, strlen(prefix), backhaul_route.prefix);
     tr_info("backhaul route prefix: %s", print_ipv6(backhaul_route.prefix));
-#endif    
+#endif
 }
 
 static int thread_interface_up()
@@ -184,25 +185,25 @@ static void thread_link_configuration_get(link_configuration_s *link_configurati
     MBED_ASSERT(sizeof(extented_panid) == 8);
     const uint8_t mesh_local_prefix[] = MBED_CONF_APP_MESH_LOCAL_PREFIX;
     MBED_ASSERT(sizeof(mesh_local_prefix) == 8);
-    
+
     memcpy(link_configuration->extented_pan_id, extented_panid, sizeof(extented_panid));
     memcpy(link_configuration->mesh_local_ula_prefix, mesh_local_prefix, sizeof(mesh_local_prefix));
-    
+
     link_configuration->panId = MBED_CONF_APP_PAN_ID;
     tr_info("PAN ID %x", link_configuration->panId);
     memcpy(link_configuration->name, MBED_CONF_APP_NETWORK_NAME, strlen(MBED_CONF_APP_NETWORK_NAME));
     link_configuration->timestamp = MBED_CONF_APP_COMMISSIONING_DATASET_TIMESTAMP;
-    
+
     memcpy(link_configuration->PSKc, pskc, sizeof(pskc));
-    memcpy(link_configuration->master_key, master_key, sizeof(master_key));        
+    memcpy(link_configuration->master_key, master_key, sizeof(master_key));
     link_configuration->securityPolicy = SECURITY_POLICY_ALL_SECURITY;
-    
+
     link_configuration->rfChannel = MBED_CONF_APP_RF_CHANNEL;
     tr_info("RF channel %d", link_configuration->rfChannel);
-    link_configuration->channel_page = MBED_CONF_APP_RF_CHANNEL_PAGE;    
-    uint32_t channel_mask = MBED_CONF_APP_RF_CHANNEL_MASK;    
+    link_configuration->channel_page = MBED_CONF_APP_RF_CHANNEL_PAGE;
+    uint32_t channel_mask = MBED_CONF_APP_RF_CHANNEL_MASK;
     common_write_32_bit(channel_mask, link_configuration->channel_mask);
-    
+
     link_configuration->key_rotation = 3600;
     link_configuration->key_sequence = 0;
 }
@@ -215,7 +216,7 @@ static void network_interface_event_handler(arm_event_s *event)
     switch (status) {
         case (ARM_NWK_BOOTSTRAP_READY): { // Interface configured Bootstrap is ready
 
-            connectStatus = true;            
+            connectStatus = true;
             tr_info("BR interface_id: %d", thread_br_conn_handler_eth_interface_id_get());
             if (-1 != thread_br_conn_handler_eth_interface_id_get()) {
                 // metric set to high priority
@@ -312,11 +313,11 @@ void thread_interface_event_handler(arm_event_s *event)
 }
 
 static void mesh_network_up()
-{    
+{
     tr_debug("Create Mesh Interface");
     int8_t thread_if_id = arm_nwk_interface_lowpan_init(api, "ThreadInterface");
     tr_info("thread_if_id: %d", thread_if_id);
-    MBED_ASSERT(thread_if_id>=0);   
+    MBED_ASSERT(thread_if_id>=0);
 
     if (thread_if_id>=0) {
         thread_br_conn_handler_thread_interface_id_set(thread_if_id);
@@ -324,15 +325,15 @@ static void mesh_network_up()
         thread_if_id,
         NET_6LOWPAN_ROUTER,
         NET_6LOWPAN_THREAD);
-    
+
         int err = thread_interface_up();
         MBED_ASSERT(!err);
         if (err) {
-            tr_error("thread_interface_up() failed: %d", err);            
+            tr_error("thread_interface_up() failed: %d", err);
         }
     } else {
         tr_error("arm_nwk_interface_lowpan_init() failed");
-    }    
+    }
 }
 
 void thread_rf_init()
@@ -346,7 +347,7 @@ void thread_rf_init()
     int8_t rf_driver_id = rf_device_register();
     MBED_ASSERT(rf_driver_id>=0);
     if (rf_driver_id>=0) {
-        randLIB_seed_random();      
+        randLIB_seed_random();
 
         if (!api) {
             api = ns_sw_mac_create(rf_driver_id, &storage_sizes);
@@ -368,9 +369,13 @@ void border_router_start(void)
 
 static void borderrouter_backhaul_phy_status_cb(uint8_t link_up, int8_t driver_id)
 {
-    arm_event_s event;
-    event.sender = br_tasklet_id;
-    event.receiver = br_tasklet_id;
+    arm_event_s event = {
+        .sender = br_tasklet_id,
+        .receiver = br_tasklet_id,
+        .priority = ARM_LIB_MED_PRIORITY_EVENT,
+        .event_type = APPLICATION_EVENT,
+        .event_data = driver_id
+    };
 
     if (link_up) {
         event.event_id = NR_BACKHAUL_INTERFACE_PHY_DRIVER_READY;
@@ -380,10 +385,6 @@ static void borderrouter_backhaul_phy_status_cb(uint8_t link_up, int8_t driver_i
 
     tr_debug("Backhaul driver ID: %d", driver_id);
 
-    event.priority = ARM_LIB_MED_PRIORITY_EVENT;
-    event.event_type = APPLICATION_EVENT;
-    event.event_data = driver_id;
-    event.data_ptr = NULL;
     eventOS_event_send(&event);
 }
 
@@ -401,7 +402,7 @@ static int backhaul_interface_up(int8_t driver_id)
         }
 
         backhaul_if_id = arm_nwk_interface_ethernet_init(eth_mac_api, "bh0");
-        
+
         MBED_ASSERT(backhaul_if_id >= 0);
         if (backhaul_if_id >= 0) {
             tr_debug("Backhaul interface ID: %d", backhaul_if_id);
@@ -412,7 +413,7 @@ static int backhaul_interface_up(int8_t driver_id)
             retval = 0;
         }
         else {
-            tr_debug("Could not init ethernet");            
+            tr_debug("Could not init ethernet");
         }
     }
     return retval;
@@ -424,7 +425,7 @@ static int backhaul_interface_down(void)
     if (thread_br_conn_handler_eth_interface_id_get() != -1) {
         arm_nwk_interface_down(thread_br_conn_handler_eth_interface_id_get());
         thread_br_conn_handler_eth_interface_id_set(-1);
-        thread_br_conn_handler_ethernet_connection_update(false);        
+        thread_br_conn_handler_ethernet_connection_update(false);
         retval = 0;
     }
     else {
@@ -461,18 +462,18 @@ static void borderrouter_tasklet(arm_event_s *event)
         case APPLICATION_EVENT:
             if (event->event_id == NR_BACKHAUL_INTERFACE_PHY_DRIVER_READY) {
                 int8_t net_backhaul_id = (int8_t) event->event_data;
-                
+
                 if (backhaul_interface_up(net_backhaul_id) != 0) {
                     tr_debug("Backhaul bootstrap start failed");
                 } else {
-                    tr_debug("Backhaul bootstrap started");                    
+                    tr_debug("Backhaul bootstrap started");
                 }
             } else if (event->event_id == NR_BACKHAUL_INTERFACE_PHY_DOWN) {
                 if (backhaul_interface_down() != 0) {
                     // may happend when booting first time.
                     tr_warning("Backhaul interface down failed");
                 } else {
-                    tr_debug("Backhaul interface is down");                     
+                    tr_debug("Backhaul interface is down");
                 }
             }
             break;
@@ -481,8 +482,8 @@ static void borderrouter_tasklet(arm_event_s *event)
             br_tasklet_id = event->receiver;
             thread_br_conn_handler_init();
             eth_network_data_init();
-            backhaul_driver_init(borderrouter_backhaul_phy_status_cb);            
-            mesh_network_up();            
+            backhaul_driver_init(borderrouter_backhaul_phy_status_cb);
+            mesh_network_up();
             eventOS_event_timer_request(9, ARM_LIB_SYSTEM_TIMER_EVENT, br_tasklet_id, 20000);
             break;
 
@@ -504,4 +505,6 @@ static void borderrouter_tasklet(arm_event_s *event)
             break;
     }
 }
-#endif
+
+#endif // MBED_CONF_APP_MESH_MODE
+

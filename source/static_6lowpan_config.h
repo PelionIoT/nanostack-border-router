@@ -3,23 +3,16 @@
  */
 
 
-#ifndef MBED_CONFIG_H
-#define MBED_CONFIG_H
+#ifndef STATIC_6LOWPAN_CONFIG
+#define STATIC_6LOWPAN_CONFIG
 
-#define STR_HELPER(x) #x
-#define STR(x) STR_HELPER(x)
-
-#ifndef MBED_CONF_APP_THREAD_BR
+#include "cfg_parser.h"
 
 static const char psk_key[16] = MBED_CONF_APP_PSK_KEY;
 static const char tls_psk_key[16] = MBED_CONF_APP_TLS_PSK_KEY;
 
 static conf_t mbed_config[] = {
     /* NAME, STRING_VALUE, INT_VALUE */
-    {"NAME", STR(MBED_CONF_APP_NAME), 0},
-    {"MODEL", STR(MBED_CONF_APP_MODEL), 0},
-    {"MANUFACTURER", STR(MBED_CONF_APP_MANUFACTURER), 0},
-    {"NETWORK_MODE", STR(MBED_CONF_APP_NETWORK_MODE), 0 },
     {"SECURITY_MODE", STR(MBED_CONF_APP_SECURITY_MODE), 0},
     {"PANA_MODE", STR(MBED_CONF_APP_PANA_MODE), 0},
     {"PSK_KEY", psk_key, 0},
@@ -55,6 +48,5 @@ static conf_t mbed_config[] = {
     {NULL, NULL, 0}
 };
 conf_t *global_config = mbed_config;
-#endif //MBED_CONF_APP_THREAD_BR
 
-#endif //MBED_CONFIG_H
+#endif //STATIC_6LOWPAN_CONFIG
