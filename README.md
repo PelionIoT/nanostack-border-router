@@ -51,15 +51,17 @@ The target platform is the hardware on which the border router runs. There are n
 
 If you wish to write your own target, follow the instructions in [Adding target support to mbed OS 5](https://docs.mbed.com/docs/mbed-os-handbook/en/5.3/advanced/porting_guide/).
 
-The border router requires backhaul and RF drivers to be provided for Nanostack. The backhaul is either SLIP or Ethernet. Currently, there are Ethernet drivers for the following backhauls:
+The border router requires backhaul and RF drivers to be provided for Nanostack. The backhaul is either SLIP or Ethernet. Currently, there are drivers for the following backhauls:
 
 * [K64F Ethernet](https://github.com/ARMmbed/sal-nanostack-driver-k64f-eth)
+* [NUCLEO_F429ZI Ethernet](https://github.com/ARMmbed/sal-nanostack-driver-stm32-eth)
 * [SLIP driver](https://github.com/ARMmbed/sal-stack-nanostack-slip)
 
 And following RF drivers:
 
 * [Atmel AT86RF233](https://github.com/ARMmbed/atmel-rf-driver)
 * [Atmel AT86RF212B](https://github.com/ARMmbed/atmel-rf-driver)
+* [STM Spirit1](https://github.com/ARMmbed/stm-spirit1-rf-driver)
 * [NXP MCR20A](https://github.com/ARMmbed/mcr20a-rf-driver)
 
 The existing drivers are found in the `drivers/` folder. More drivers can be linked in.
@@ -203,7 +205,7 @@ To select the Atmel radio shield, use the following:
 
 ```
         "radio-type":{
-            "help": "options are ATMEL, MCR20",
+            "help": "options are ATMEL, MCR20, SPIRIT1",
             "value": "ATMEL"
         },
 ```
@@ -212,10 +214,30 @@ To select the NXP radio shield, use the following:
 
 ```
         "radio-type":{
-            "help": "options are ATMEL, MCR20",
+            "help": "options are ATMEL, MCR20, SPIRIT1",
             "value": "MCR20"
         },
 ```
+
+To select the STM Spirit1 radio shield, use the following:
+
+```
+        "radio-type":{
+            "help": "options are ATMEL, MCR20, SPIRIT1",
+            "value": "SPIRIT1"
+        },
+```
+
+In case you have choosen the STM Spirit1 Sub-1 GHz RF expansion board [X-NUCLEO-IDS01A4](https://github.com/ARMmbed/stm-spirit1-rf-driver), you need also to configure its MAC address in the `mbed_app.json` file, e.g.:
+```json
+    "target_overrides": {
+        "*": {
+            "spirit1.mac-address": "{0xf0, 0xf1, 0xf2, 0xf3, 0xf4, 0xf5, 0xf6, 0xf7}"
+        },
+    }
+```
+
+Note, that this MAC address must be unique within the 6LoWPAN mesh network.
 
 After changing the radio shield, you need to recompile the application.
 

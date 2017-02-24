@@ -6,7 +6,7 @@
         },
         "radio-type":{
             "help": "options are ATMEL, MCR20, SPIRIT1",
-            "value": "ATMEL"
+            "value": "SPIRIT1"
         },
         "backhaul-driver": {
             "help": "options are ETH, SLIP",
@@ -25,7 +25,7 @@
         "slip_serial_baud_rate": "921600",
         "debug-trace": "false",
         "defined-BR-config": "true",
-        "security-mode": "NONE",
+        "security-mode": "PSK",
         "psk-key-id": 1,
         "psk-key": "{0xa0, 0xa1, 0xa2, 0xa3, 0xa4, 0xa5, 0xa6, 0xa7, 0xa8, 0xa9, 0xaa, 0xab, 0xac, 0xad, 0xae, 0xaf}",
         "pana-mode": "",
@@ -36,9 +36,9 @@
         "beacon-protocol-id": 4,
         "prefix": "fd00:db8::",
         "prefix-from-backhaul": true,
-        "rf-channel": 12,
-        "rf-channel-page": 0,
-        "rf-channel-mask": "0x07fff800",
+	"rf-channel": 1,
+	"rf-channel-page": 2,
+	"rf-channel-mask": "(1<<1)",
         "short-mac-address": "0xface",
         "backhaul-dynamic-bootstrap": true,
         "backhaul-prefix": "fd00:db8:ff1::",
@@ -66,17 +66,19 @@
         "*": {
             "target.features_add": ["NANOSTACK", "LOWPAN_BORDER_ROUTER", "COMMON_PAL"],
             "target.features_remove": ["LWIP"],
+            "spirit1.mac-address": "{0xf0, 0xf1, 0xf2, 0xf3, 0xf4, 0xf5, 0xf6, 0xf7}",
             "mbed-trace.enable": 1,
             "nanostack.configuration": "lowpan_border_router",
             "platform.stdio-convert-newlines": true,
             "platform.stdio-baud-rate": 115200
         },
-        "K64F": {
-            "LED": "LED_GREEN",
-            "SERIAL_TX": "PTE0",
-            "SERIAL_RX": "PTE1",
-            "SERIAL_CTS": "PTE2",
-            "SERIAL_RTS": "PTE3"
+        "NUCLEO_F429ZI": {
+    	    "LED": "LED1",
+   	    "SERIAL_TX": "SERIAL_TX",
+    	    "SERIAL_RX": "SERIAL_RX",
+    	    "SERIAL_CTS": "PD_11",
+    	    "SERIAL_RTS": "PD_12"
         }
-    }
+    },
+    "macros": ["PB5_ETH_PATCH"]
 }
