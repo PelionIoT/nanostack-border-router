@@ -11,9 +11,9 @@
 #include "borderrouter_helpers.h"
 #include "common_functions.h"
 #include "eventOS_event_timer.h"
+#include "thread_bbr_ext.h"
 
-
-#define TRACE_GROUP "ThBrConnHandl"
+#define TRACE_GROUP "TBRH"
 #define DHCP_SERVER_SHUTDOWN_TIMEOUT (100)
 
 typedef struct {
@@ -86,6 +86,7 @@ static void thread_br_conn_handler_border_router_startup_attempt(void)
         tr_debug("DHCP server started ");
         if (thread_br_conn_handler_default_route_enable()) {
             thread_br_handler.dhcp_server_running = true;
+            thread_bbr_extension_start(thread_br_handler.thread_interface_id, thread_br_handler.eth_interface_id);
         } else {
             tr_error("Failed to update DHCP default route");
         }
@@ -114,7 +115,6 @@ void thread_br_conn_handler_thread_connection_update(bool status)
 
 void thread_br_conn_handler_ethernet_connection_update(bool status)
 {
-
     thread_br_handler.eth_connection_ready = status;
     if (status) {
         tr_debug("Eth0 connected");
@@ -188,6 +188,7 @@ static void thread_br_conn_handler_border_router_shutdown_request(void)
 void thread_br_conn_handler_thread_interface_id_set(int8_t interfaceId)
 {
     thread_br_handler.thread_interface_id = interfaceId;
+    thread_bbr_extension_mesh_interface_updated_ntf(thread_br_handler.thread_interface_id);
 }
 
 int8_t thread_br_conn_handler_thread_interface_id_get(void)
@@ -208,6 +209,7 @@ bool thread_br_conn_handler_thread_connection_status_get(void)
 void thread_br_conn_handler_eth_interface_id_set(int8_t interfaceId)
 {
     thread_br_handler.eth_interface_id = interfaceId;
+    thread_bbr_extension_bb_interface_updated_ntf(thread_br_handler.eth_interface_id);
 }
 
 int8_t thread_br_conn_handler_eth_interface_id_get(void)
