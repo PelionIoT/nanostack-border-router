@@ -5,7 +5,7 @@
              "value": 50000
         },
         "radio-type":{
-            "help": "options are ATMEL, MCR20",
+            "help": "options are ATMEL, MCR20, SPIRIT1",
             "value": "ATMEL"
         },
         "backhaul-driver": {
