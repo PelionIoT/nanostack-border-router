@@ -419,6 +419,7 @@ static void borderrouter_tasklet(arm_event_s *event)
             break;
 
         case ARM_LIB_TASKLET_INIT_EVENT:
+            print_appl_info();
             br_tasklet_id = event->receiver;
 
             /* initialize the backhaul interface */

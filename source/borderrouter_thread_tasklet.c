@@ -479,6 +479,7 @@ static void borderrouter_tasklet(arm_event_s *event)
             break;
 
         case ARM_LIB_TASKLET_INIT_EVENT:
+            print_appl_info();
             br_tasklet_id = event->receiver;
             thread_br_conn_handler_init();
             eth_network_data_init();

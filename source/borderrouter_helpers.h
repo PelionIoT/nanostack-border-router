@@ -13,6 +13,7 @@ extern "C"
 
 char *print_ipv6(const void *addr_ptr);
 char *print_ipv6_prefix(const uint8_t *prefix, uint8_t prefix_len);
+void print_appl_info(void);
 
 #ifdef __cplusplus
 }
