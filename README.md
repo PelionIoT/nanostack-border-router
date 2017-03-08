@@ -66,7 +66,7 @@ And following RF drivers:
 
 The existing drivers are found in the `drivers/` folder. More drivers can be linked in.
 
-See [Notes on different hardware](https://github.com/ARMmbed/mbed-os-example-mesh-minimal/blob/oob_test_mbed-os-5.4/Hardware.md) to see known combinations that work.
+See [Notes on different hardware](https://github.com/ARMmbed/mbed-os-example-mesh-minimal/blob/master/Hardware.md) to see known combinations that work.
 
 ## Configuring Nanostack Border Router
 
