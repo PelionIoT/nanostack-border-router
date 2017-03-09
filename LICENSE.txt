@@ -1,3 +1,0 @@
-Unless specifically indicated otherwise in a file, files are licensed
-under the mbed OS partner license, as can be found in: mbed-os-license.txt
-
