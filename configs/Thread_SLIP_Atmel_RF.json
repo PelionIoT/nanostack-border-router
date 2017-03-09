@@ -45,7 +45,7 @@
         "SERIAL_CTS": "NC",
         "SERIAL_RTS": "NC"
     },
-    "macros": ["MBEDTLS_USER_CONFIG_FILE=\"source/mbedtls_thread_config.h\""],
+    "macros": ["MBEDTLS_USER_CONFIG_FILE=\"source/mbedtls_thread_config.h\"", "ATMEL_SPI_RST = PTD4"],
     "target_overrides": {
         "*": {
             "target.features_add": ["NANOSTACK", "COMMON_PAL", "THREAD_BORDER_ROUTER"],
