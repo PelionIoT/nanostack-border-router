@@ -129,7 +129,7 @@ static void eth_network_data_init()
 #endif
 }
 
-static int thread_interface_up()
+static int thread_interface_up(void)
 {
     int32_t val;
     device_configuration_s device_config;
@@ -315,24 +315,35 @@ void thread_interface_event_handler(arm_event_s *event)
 static void mesh_network_up()
 {
     tr_debug("Create Mesh Interface");
-    int8_t thread_if_id = arm_nwk_interface_lowpan_init(api, "ThreadInterface");
+
+    int status;
+    int8_t thread_if_id;
+
+    thread_if_id = arm_nwk_interface_lowpan_init(api, "ThreadInterface");
     tr_info("thread_if_id: %d", thread_if_id);
     MBED_ASSERT(thread_if_id>=0);
 
-    if (thread_if_id>=0) {
-        thread_br_conn_handler_thread_interface_id_set(thread_if_id);
-        arm_nwk_interface_configure_6lowpan_bootstrap_set(
-        thread_if_id,
-        NET_6LOWPAN_ROUTER,
-        NET_6LOWPAN_THREAD);
-
-        int err = thread_interface_up();
-        MBED_ASSERT(!err);
-        if (err) {
-            tr_error("thread_interface_up() failed: %d", err);
-        }
-    } else {
+    if (thread_if_id < 0) {
         tr_error("arm_nwk_interface_lowpan_init() failed");
+        return;
+    }
+
+    status = arm_nwk_interface_configure_6lowpan_bootstrap_set(
+                thread_if_id,
+                NET_6LOWPAN_ROUTER,
+                NET_6LOWPAN_THREAD);
+
+    if (status < 0) {
+        tr_error("arm_nwk_interface_configure_6lowpan_bootstrap_set() failed");
+        return;
+    }
+
+    thread_br_conn_handler_thread_interface_id_set(thread_if_id);
+
+    status = thread_interface_up();
+    MBED_ASSERT(!status);
+    if (status) {
+        tr_error("thread_interface_up() failed: %d", status);
     }
 }
 
@@ -479,6 +490,7 @@ static void borderrouter_tasklet(arm_event_s *event)
             break;
 
         case ARM_LIB_TASKLET_INIT_EVENT:
+            print_appl_info();
             br_tasklet_id = event->receiver;
             thread_br_conn_handler_init();
             eth_network_data_init();

@@ -25,10 +25,10 @@ mbed_app.json             Build time configuration file
 ## Building
 
 1. Clone this repository.
-1. Run `mbed deploy`
+1. Run `mbed deploy`.
 1. Select target platform.
 1. Select toolchain.
-1. Configure
+1. Configure.
 1. Build.
 
 For example:
@@ -65,6 +65,8 @@ And following RF drivers:
 * [NXP MCR20A](https://github.com/ARMmbed/mcr20a-rf-driver)
 
 The existing drivers are found in the `drivers/` folder. More drivers can be linked in.
+
+See [Notes on different hardware](https://github.com/ARMmbed/mbed-os-example-mesh-minimal/blob/master/Hardware.md) to see known combinations that work.
 
 ## Configuring Nanostack Border Router
 
@@ -228,7 +230,8 @@ To select the STM Spirit1 radio shield, use the following:
         },
 ```
 
-In case you have choosen the STM Spirit1 Sub-1 GHz RF expansion board [X-NUCLEO-IDS01A4](https://github.com/ARMmbed/stm-spirit1-rf-driver), you need also to configure its MAC address in the `mbed_app.json` file, e.g.:
+In case you have choosen the STM Spirit1 Sub-1 GHz RF expansion board [X-NUCLEO-IDS01A4](https://github.com/ARMmbed/stm-spirit1-rf-driver), you need also to configure its MAC address in the `mbed_app.json` file, for example:
+
 ```json
     "target_overrides": {
         "*": {
@@ -237,7 +240,7 @@ In case you have choosen the STM Spirit1 Sub-1 GHz RF expansion board [X-NUCLEO-
     }
 ```
 
-Note, that this MAC address must be unique within the 6LoWPAN mesh network.
+<span class="notes">**Not**: This MAC address must be unique within the 6LoWPAN mesh network.</span>
 
 After changing the radio shield, you need to recompile the application.
 

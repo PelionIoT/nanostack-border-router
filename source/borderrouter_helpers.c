@@ -2,7 +2,6 @@
  * Copyright (c) 2016 ARM Limited. All rights reserved.
  */
 
-
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -10,6 +9,8 @@
 #include "ip6string.h"
 #include "ns_types.h"
 #include "common_functions.h"
+#include "ns_trace.h"
+#define TRACE_GROUP "app"
 
 static char tmp_print_buffer[128] = {0};
 
@@ -39,4 +40,10 @@ char *print_ipv6_prefix(const uint8_t *prefix, uint8_t prefix_len)
         return "";
     }
     return str;
+}
+
+void print_appl_info(void)
+{
+    tr_info("Starting NanoStack Border Router...");
+    tr_info("Build date: %s %s", __DATE__, __TIME__);
 }
