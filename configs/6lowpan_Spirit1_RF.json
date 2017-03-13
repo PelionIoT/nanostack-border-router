@@ -80,5 +80,5 @@
     	    "SERIAL_RTS": "PD_12"
         }
     },
-    "macros": ["PB5_ETH_PATCH"]
+    "macros": ["SPIRIT1_SPI_MOSI=PB_5"]
 }
