@@ -77,6 +77,9 @@
             "SERIAL_RX": "PTE1",
             "SERIAL_CTS": "PTE2",
             "SERIAL_RTS": "PTE3"
+        },
+        "K66F": {
+            "LED": "LED_GREEN"
         }
     }
 }

@@ -78,6 +78,9 @@
     	    "SERIAL_RX": "SERIAL_RX",
     	    "SERIAL_CTS": "PD_11",
     	    "SERIAL_RTS": "PD_12"
+        },
+        "K66F": {
+            "LED": "LED_GREEN"
         }
     },
     "macros": ["SPIRIT1_SPI_MOSI=PB_5"]

@@ -125,7 +125,9 @@ int main(int argc, char **argv)
     #error "MAC address not defined"
 #endif
 
-    led_ticker.attach_us(toggle_led1, 500000);
+    if (MBED_CONF_APP_LED != NC) {
+        led_ticker.attach_us(toggle_led1, 500000);
+    }
     border_router_start();
 }
 
