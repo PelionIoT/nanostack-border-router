@@ -23,7 +23,7 @@
 #include "arm_hal_interrupt.h"
 
 
-#include "ns_trace.h"
+#include "mbed_trace.h"
 #define TRACE_GROUP "app"
 
 #define APP_DEFINED_HEAP_SIZE MBED_CONF_APP_HEAP_SIZE
@@ -105,9 +105,9 @@ int main(int argc, char **argv)
 {
     ns_hal_init(app_stack_heap, APP_DEFINED_HEAP_SIZE, app_heap_error_handler, 0);
 
-    trace_init(); // set up the tracing library
-    set_trace_print_function(trace_printer);
-    set_trace_config(TRACE_MODE_COLOR | APP_TRACE_LEVEL | TRACE_CARRIAGE_RETURN);
+    mbed_trace_init(); // set up the tracing library
+    mbed_trace_print_function_set(trace_printer);
+    mbed_trace_config_set(TRACE_MODE_COLOR | TRACE_ACTIVE_LEVEL_DEBUG | TRACE_CARRIAGE_RETURN);
 
 
 #define BOARD 0
