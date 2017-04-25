@@ -98,12 +98,15 @@ static void thread_br_conn_handler_border_router_startup_attempt(void)
 void thread_br_conn_handler_thread_connection_update(bool status)
 {
     thread_br_handler.thread_connection_ready = status;
+    tr_debug("mesh0 connection status: %d", status);
+
     if (status) {
-        tr_debug("mesh0 connected");
         thread_br_conn_handler_border_router_startup_attempt();
     } else {
         // Thread network down. Reset DHCP server back to original state
         thread_br_handler.dhcp_server_running = false;
+        // stop mDNS responder as no thread network
+        thread_border_router_mdns_responder_stop();
         if (thread_br_handler.thread_dhcp_shutdown_timer != NULL) {
             // cancel active shutdown timer
             eventOS_timeout_cancel(thread_br_handler.thread_dhcp_shutdown_timer);
@@ -112,17 +115,17 @@ void thread_br_conn_handler_thread_connection_update(bool status)
     }
 }
 
-
 void thread_br_conn_handler_ethernet_connection_update(bool status)
 {
     thread_br_handler.eth_connection_ready = status;
+    tr_debug("Eth0 connection status: %d", status);
+
     if (status) {
-        tr_debug("Eth0 connected");
         thread_br_conn_handler_border_router_startup_attempt();
     } else {
         // Ethernet connection down, request DHCP server shutdown
         thread_br_conn_handler_border_router_shutdown_request();
-        tr_debug("Eth0 disconnected");
+        thread_border_router_mdns_responder_stop();
     }
 }
 
@@ -157,6 +160,7 @@ static bool thread_br_conn_handler_default_route_enable(void)
     if (thread_border_router_prefix_add(thread_br_handler.thread_interface_id, thread_br_handler.dhcp_prefix, thread_br_handler.dhcp_prefix_len, &thread_border_router_info) == 0) {
         thread_border_router_publish(thread_br_handler.thread_interface_id);
         tr_debug("Updated %s prefix", print_ipv6_prefix(thread_br_handler.dhcp_prefix, thread_br_handler.dhcp_prefix_len));
+        thread_border_router_mdns_responder_start(thread_br_handler.thread_interface_id, thread_br_handler.eth_interface_id, "ARM-BR");
         return true;
     } else {
         tr_error("Failed to enable default_route flag to prefix");
@@ -167,12 +171,12 @@ static bool thread_br_conn_handler_default_route_enable(void)
 static void thread_br_conn_handler_dhcp_server_stop_cb(void *arg)
 {
     (void)arg;
+
+    tr_debug("DHCP server stop cb");
     thread_br_handler.thread_dhcp_shutdown_timer = NULL;
     thread_br_handler.dhcp_server_running = false;
     thread_dhcpv6_server_delete(thread_br_handler.thread_interface_id, thread_br_handler.dhcp_prefix);
     thread_border_router_publish(thread_br_handler.thread_interface_id);
-
-    tr_debug("DHCP server stop cb");
     thread_br_handler.dhcp_prefix_len = 0;
     memset(thread_br_handler.dhcp_prefix, 0, 16);
 }
