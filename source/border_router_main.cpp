@@ -128,7 +128,7 @@ int main(int argc, char **argv)
     if (MBED_CONF_APP_LED != NC) {
         led_ticker.attach_us(toggle_led1, 500000);
     }
-    border_router_start();
+    border_router_tasklet_start();
 }
 
 /**
