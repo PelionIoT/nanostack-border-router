@@ -20,7 +20,7 @@ void backhaul_driver_init(void (*backhaul_driver_status_cb)(uint8_t, int8_t));
  * Initializes the border router module: loads configuration and
  * initiates bootstrap for the RF 6LoWPAN and backhaul interfaces.
  */
-void border_router_start(void);
+void border_router_tasklet_start(void);
 
 #ifdef __cplusplus
 }

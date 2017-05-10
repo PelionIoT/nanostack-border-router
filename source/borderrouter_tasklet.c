@@ -115,7 +115,7 @@ static void start_6lowpan(const uint8_t *backhaul_address);
 static int8_t rf_interface_init(void);
 static void load_config(void);
 
-void border_router_start(void)
+void border_router_tasklet_start(void)
 {
     load_config();
     net_init_core();
