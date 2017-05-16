@@ -31,7 +31,7 @@
         "backhaul-prefix": "\"fd00:300::\"",
         "backhaul-next-hop": "\"fe80::1\"",
         "backhaul-default-route": "\"::/0\"",
-        "commissioning-dataset-timestamp": "0x00000001",
+        "commissioning-dataset-timestamp": "0x00010000",
         "pan-id": "0x0700",
         "extended-pan-id": "{0xf1, 0xb5, 0xa1, 0xb2,0xc4, 0xd5, 0xa1, 0xbd }",
         "mesh-local-prefix": "{0xfd, 0x0, 0x0d, 0xb8, 0x0, 0x0, 0x0, 0x0}",
