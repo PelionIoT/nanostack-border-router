@@ -108,7 +108,7 @@ int main(int argc, char **argv)
 
     mbed_trace_init(); // set up the tracing library
     mbed_trace_print_function_set(trace_printer);
-    mbed_trace_config_set(TRACE_MODE_COLOR | TRACE_ACTIVE_LEVEL_DEBUG | TRACE_CARRIAGE_RETURN);
+    mbed_trace_config_set(TRACE_MODE_COLOR | APP_TRACE_LEVEL | TRACE_CARRIAGE_RETURN);
 
 
 #define BOARD 0
