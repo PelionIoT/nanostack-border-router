@@ -71,7 +71,7 @@ static nwk_stats_t nwk_stats;
 
 /* Function forward declarations */
 
-static void thread_link_configuration_get(link_configuration_s *link_configuration);
+static link_configuration_s* thread_link_configuration_get(link_configuration_s *link_configuration);
 static void network_interface_event_handler(arm_event_s *event);
 static void mesh_network_up(void);
 static void eth_network_data_init(void);
@@ -133,7 +133,9 @@ static int thread_interface_up(void)
 {
     int32_t val;
     device_configuration_s device_config;
+    uint8_t rf_mac[8] = {0};
     link_configuration_s link_setup;
+    link_configuration_s *link_setup_ptr;
     int8_t thread_if_id = thread_br_conn_handler_thread_interface_id_get();
 
     tr_info("thread_interface_up");
@@ -147,10 +149,14 @@ static int thread_interface_up(void)
     device_config.PSKd_len = len;
     memset(device_config.PSKd_ptr, 0, len + 1);
     memcpy(device_config.PSKd_ptr, param, len);
+    rf_read_mac_address(rf_mac);
+    memcpy(device_config.eui64, rf_mac, 8);
 
-    thread_link_configuration_get(&link_setup);
+    channel_list.channel_mask[0] = MBED_CONF_APP_RF_CHANNEL_MASK;
+    channel_list.channel_page = (channel_page_e)MBED_CONF_APP_RF_CHANNEL_PAGE;
 
-    val = thread_management_node_init(thread_if_id, &channel_list, &device_config, &link_setup);
+    link_setup_ptr = thread_link_configuration_get(&link_setup);
+    val = thread_management_node_init(thread_if_id, &channel_list, &device_config, link_setup_ptr);
 
     if (val) {
         tr_error("Thread init error with code: %is\r\n", (int)val);
@@ -171,8 +177,13 @@ static int thread_interface_up(void)
     return 0;
 }
 
-static void thread_link_configuration_get(link_configuration_s *link_configuration)
+static link_configuration_s* thread_link_configuration_get(link_configuration_s *link_configuration)
 {
+#if (false == MBED_CONF_APP_THREAD_USE_STATIC_LINK_CONFIG)
+        // NOT using static link configuration values, return NULL
+        return NULL;
+#endif
+
     memset(link_configuration, 0, sizeof(link_configuration_s));
 
     MBED_ASSERT(strlen(MBED_CONF_APP_NETWORK_NAME) > 0 && strlen(MBED_CONF_APP_NETWORK_NAME) < 17);
@@ -206,6 +217,8 @@ static void thread_link_configuration_get(link_configuration_s *link_configurati
 
     link_configuration->key_rotation = 3600;
     link_configuration->key_sequence = 0;
+
+    return link_configuration;
 }
 
 // ethernet interface
