@@ -56,9 +56,6 @@ typedef struct {
     uint8_t next_hop[16];
 } route_info_t;
 
-/* Border router channel list */
-static channel_list_s channel_list;
-
 /* Backhaul prefix */
 static uint8_t backhaul_prefix[16] = {0};
 
@@ -152,11 +149,8 @@ static int thread_interface_up(void)
     rf_read_mac_address(rf_mac);
     memcpy(device_config.eui64, rf_mac, 8);
 
-    channel_list.channel_mask[0] = MBED_CONF_APP_RF_CHANNEL_MASK;
-    channel_list.channel_page = (channel_page_e)MBED_CONF_APP_RF_CHANNEL_PAGE;
-
     link_setup_ptr = thread_link_configuration_get(&link_setup);
-    val = thread_management_node_init(thread_if_id, &channel_list, &device_config, link_setup_ptr);
+    val = thread_management_node_init(thread_if_id, NULL, &device_config, link_setup_ptr);
 
     if (val) {
         tr_error("Thread init error with code: %is\r\n", (int)val);
