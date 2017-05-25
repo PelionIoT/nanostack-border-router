@@ -28,6 +28,7 @@
 #include "thread_management_if.h"
 #include "thread_br_conn_handler.h"
 #include "randLIB.h"
+#include "nsdynmemLIB.h"
 
 #include "ns_trace.h"
 #define TRACE_GROUP "brro"
@@ -445,6 +446,26 @@ static int backhaul_interface_down(void)
     return retval;
 }
 
+#ifdef MBED_CONF_APP_DEBUG_TRACE
+#if MBED_CONF_APP_DEBUG_TRACE == 1
+static void memory_stat_print(void)
+{
+    const mem_stat_t *heap_info = ns_dyn_mem_get_mem_stat();
+    if (heap_info) {
+        tr_info(
+            "Heap size: %" PRIu16 ", "
+            "Reserved: %" PRIu16 ", "
+            "Reserved max: %" PRIu16 ", "
+            "Alloc fail: %" PRIu32 ""
+            ,heap_info->heap_sector_size
+            ,heap_info->heap_sector_allocated_bytes
+            ,heap_info->heap_sector_allocated_bytes_max
+            ,heap_info->heap_alloc_fail_cnt);
+    }
+}
+#endif
+#endif
+
 /**
   * \brief Border Router Main Tasklet
   *
@@ -507,6 +528,7 @@ static void borderrouter_tasklet(arm_event_s *event)
 #if MBED_CONF_APP_DEBUG_TRACE == 1
                 arm_print_routing_table();
                 arm_print_neigh_cache();
+                memory_stat_print();
 #endif
 #endif
                 eventOS_event_timer_request(9, ARM_LIB_SYSTEM_TIMER_EVENT, br_tasklet_id, 20000);

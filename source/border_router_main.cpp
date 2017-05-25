@@ -29,6 +29,7 @@
 #define APP_DEFINED_HEAP_SIZE MBED_CONF_APP_HEAP_SIZE
 static uint8_t app_stack_heap[APP_DEFINED_HEAP_SIZE];
 static uint8_t mac[6] = {0};
+static mem_stat_t heap_info;
 
 static DigitalOut led1(MBED_CONF_APP_LED);
 
@@ -103,7 +104,7 @@ void backhaul_driver_init(void (*backhaul_driver_status_cb)(uint8_t, int8_t))
 
 int main(int argc, char **argv)
 {
-    ns_hal_init(app_stack_heap, APP_DEFINED_HEAP_SIZE, app_heap_error_handler, 0);
+    ns_hal_init(app_stack_heap, APP_DEFINED_HEAP_SIZE, app_heap_error_handler, &heap_info);
 
     mbed_trace_init(); // set up the tracing library
     mbed_trace_print_function_set(trace_printer);
@@ -157,3 +158,4 @@ static void app_heap_error_handler(heap_fail_t event)
 
     while (1);
 }
+
