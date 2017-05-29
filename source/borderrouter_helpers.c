@@ -10,6 +10,7 @@
 #include "ns_types.h"
 #include "common_functions.h"
 #include "ns_trace.h"
+#include "nsdynmemLIB.h"
 #define TRACE_GROUP "app"
 
 static char tmp_print_buffer[128] = {0};
@@ -47,3 +48,20 @@ void print_appl_info(void)
     tr_info("Starting NanoStack Border Router...");
     tr_info("Build date: %s %s", __DATE__, __TIME__);
 }
+
+void print_memory_stats(void)
+{
+    const mem_stat_t *heap_info = ns_dyn_mem_get_mem_stat();
+    if (heap_info) {
+        tr_info(
+            "Heap size: %" PRIu16 ", "
+            "Reserved: %" PRIu16 ", "
+            "Reserved max: %" PRIu16 ", "
+            "Alloc fail: %" PRIu32 ""
+            ,heap_info->heap_sector_size
+            ,heap_info->heap_sector_allocated_bytes
+            ,heap_info->heap_sector_allocated_bytes_max
+            ,heap_info->heap_alloc_fail_cnt);
+    }
+}
+
