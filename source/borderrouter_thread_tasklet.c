@@ -56,9 +56,6 @@ typedef struct {
     uint8_t next_hop[16];
 } route_info_t;
 
-/* Border router channel list */
-static channel_list_s channel_list;
-
 /* Backhaul prefix */
 static uint8_t backhaul_prefix[16] = {0};
 
@@ -71,7 +68,7 @@ static nwk_stats_t nwk_stats;
 
 /* Function forward declarations */
 
-static void thread_link_configuration_get(link_configuration_s *link_configuration);
+static link_configuration_s* thread_link_configuration_get(link_configuration_s *link_configuration);
 static void network_interface_event_handler(arm_event_s *event);
 static void mesh_network_up(void);
 static void eth_network_data_init(void);
@@ -134,6 +131,7 @@ static int thread_interface_up(void)
     int32_t val;
     device_configuration_s device_config;
     link_configuration_s link_setup;
+    link_configuration_s *link_setup_ptr;
     int8_t thread_if_id = thread_br_conn_handler_thread_interface_id_get();
 
     tr_info("thread_interface_up");
@@ -148,9 +146,8 @@ static int thread_interface_up(void)
     memset(device_config.PSKd_ptr, 0, len + 1);
     memcpy(device_config.PSKd_ptr, param, len);
 
-    thread_link_configuration_get(&link_setup);
-
-    val = thread_management_node_init(thread_if_id, &channel_list, &device_config, &link_setup);
+    link_setup_ptr = thread_link_configuration_get(&link_setup);
+    val = thread_management_node_init(thread_if_id, NULL, &device_config, link_setup_ptr);
 
     if (val) {
         tr_error("Thread init error with code: %is\r\n", (int)val);
@@ -171,8 +168,13 @@ static int thread_interface_up(void)
     return 0;
 }
 
-static void thread_link_configuration_get(link_configuration_s *link_configuration)
+static link_configuration_s* thread_link_configuration_get(link_configuration_s *link_configuration)
 {
+#if (false == MBED_CONF_APP_THREAD_USE_STATIC_LINK_CONFIG)
+        // NOT using static link configuration values, return NULL
+        return NULL;
+#endif
+
     memset(link_configuration, 0, sizeof(link_configuration_s));
 
     MBED_ASSERT(strlen(MBED_CONF_APP_NETWORK_NAME) > 0 && strlen(MBED_CONF_APP_NETWORK_NAME) < 17);
@@ -206,6 +208,8 @@ static void thread_link_configuration_get(link_configuration_s *link_configurati
 
     link_configuration->key_rotation = 3600;
     link_configuration->key_sequence = 0;
+
+    return link_configuration;
 }
 
 // ethernet interface
