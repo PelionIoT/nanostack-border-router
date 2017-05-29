@@ -130,7 +130,6 @@ static int thread_interface_up(void)
 {
     int32_t val;
     device_configuration_s device_config;
-    uint8_t rf_mac[8] = {0};
     link_configuration_s link_setup;
     link_configuration_s *link_setup_ptr;
     int8_t thread_if_id = thread_br_conn_handler_thread_interface_id_get();
@@ -146,8 +145,6 @@ static int thread_interface_up(void)
     device_config.PSKd_len = len;
     memset(device_config.PSKd_ptr, 0, len + 1);
     memcpy(device_config.PSKd_ptr, param, len);
-    rf_read_mac_address(rf_mac);
-    memcpy(device_config.eui64, rf_mac, 8);
 
     link_setup_ptr = thread_link_configuration_get(&link_setup);
     val = thread_management_node_init(thread_if_id, NULL, &device_config, link_setup_ptr);
