@@ -170,9 +170,11 @@ static int thread_interface_up(void)
 
 static link_configuration_s* thread_link_configuration_get(link_configuration_s *link_configuration)
 {
+#ifdef MBED_CONF_APP_THREAD_USE_STATIC_LINK_CONFIG
 #if (false == MBED_CONF_APP_THREAD_USE_STATIC_LINK_CONFIG)
         // NOT using static link configuration values, return NULL
         return NULL;
+#endif
 #endif
 
     memset(link_configuration, 0, sizeof(link_configuration_s));
