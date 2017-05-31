@@ -441,6 +441,7 @@ static void borderrouter_tasklet(arm_event_s *event)
 #if MBED_CONF_APP_DEBUG_TRACE == 1
                 arm_print_routing_table();
                 arm_print_neigh_cache();
+                print_memory_stats();
 #endif
 #endif
                 eventOS_event_timer_request(9, ARM_LIB_SYSTEM_TIMER_EVENT, br_tasklet_id, 20000);
@@ -464,7 +465,7 @@ static void start_6lowpan(const uint8_t *backhaul_address)
 
         /* Channel list: listen to a channel (default: all channels) */
         uint32_t channel = cfg_int(global_config, "RF_CHANNEL", 0);
-        tr_info("RF channel: %d", channel);
+        tr_info("RF channel: %d", (int)channel);
         initialize_channel_list(channel);
 
         // configure as border router and set the operation mode

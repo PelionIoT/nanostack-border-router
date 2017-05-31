@@ -511,6 +511,7 @@ static void borderrouter_tasklet(arm_event_s *event)
 #if MBED_CONF_APP_DEBUG_TRACE == 1
                 arm_print_routing_table();
                 arm_print_neigh_cache();
+                print_memory_stats();
 #endif
 #endif
                 eventOS_event_timer_request(9, ARM_LIB_SYSTEM_TIMER_EVENT, br_tasklet_id, 20000);
