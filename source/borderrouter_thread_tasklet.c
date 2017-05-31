@@ -451,8 +451,7 @@ static int backhaul_interface_down(void)
     return retval;
 }
 
-#ifdef MBED_CONF_APP_DEBUG_TRACE
-#if MBED_CONF_APP_DEBUG_TRACE == 1
+#if MBED_CONF_APP_DEBUG_TRACE
 static void print_interface_addresses(void)
 {
     tr_info("Backhaul interface addresses:");
@@ -461,7 +460,6 @@ static void print_interface_addresses(void)
     tr_info("RF interface addresses:");
     print_interface_addr(thread_br_conn_handler_thread_interface_id_get());
 }
-#endif
 #endif
 
 /**
@@ -522,15 +520,13 @@ static void borderrouter_tasklet(arm_event_s *event)
             eventOS_event_timer_cancel(event->event_id, event->receiver);
 
             if (event->event_id == 9) {
-#ifdef MBED_CONF_APP_DEBUG_TRACE
-#if MBED_CONF_APP_DEBUG_TRACE == 1
+#if MBED_CONF_APP_DEBUG_TRACE
                 arm_print_routing_table();
                 arm_print_neigh_cache();
                 print_memory_stats();
                 // Trace interface addresses. This trace can be removed if nanostack prints added/removed
                 // addresses.
                 print_interface_addresses();
-#endif
 #endif
                 eventOS_event_timer_request(9, ARM_LIB_SYSTEM_TIMER_EVENT, br_tasklet_id, 20000);
             }
