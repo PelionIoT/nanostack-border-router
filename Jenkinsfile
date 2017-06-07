@@ -1,7 +1,8 @@
 // List of targets to compile
 def targets = [
   "K64F",
-  "K66F"
+  "K66F",
+  "NUCLEO_F429ZI"
   ]
 
 // Map toolchains to compilers
@@ -30,6 +31,10 @@ for (int i = 0; i < targets.size(); i++) {
       def configurationLabel = configurations.keySet().asList().get(k)
       def configurationFile = configurations.get(configurationLabel)
       def stepName = "${target} ${configurationLabel} ${toolchain}"
+      // SLIP configuration exist only for K64F based Raspberry HAT
+      if (configurationLabel == "THREAD_SLIP" && target != "K64F") {
+        continue;
+      }
       stepsForParallel[stepName] = buildStep(target, compilerLabel, configurationFile, configurationLabel, toolchain)
     }
   }
