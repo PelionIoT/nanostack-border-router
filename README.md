@@ -49,7 +49,7 @@ $ mbed compile
 
 The target platform is the hardware on which the border router runs. There are number of target platforms already available for you in the mbed OS 5.
 
-If you wish to write your own target, follow the instructions in [Adding target support to mbed OS 5](https://docs.mbed.com/docs/mbed-os-handbook/en/5.3/advanced/porting_guide/).
+If you wish to write your own target, follow the instructions in [Adding target support to mbed OS 5](https://docs.mbed.com/docs/mbed-os-handbook/en/latest/advanced/porting_guide/).
 
 The border router requires backhaul and RF drivers to be provided for Nanostack. The backhaul is either SLIP or Ethernet. Currently, there are drivers for the following backhauls:
 
