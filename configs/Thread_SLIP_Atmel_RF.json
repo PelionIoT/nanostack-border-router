@@ -22,7 +22,7 @@
         },
         "backhaul-mld": {
             "help": "Enable proxying Multicast Listener Discovery messages to backhaul network",
-            "value": "true"
+            "value": "false"
         },
         "backhaul-mac": "{0x02, 0x00, 0x00, 0x00, 0x00, 0x01}",
         "slip_hw_flow_control": "true",
