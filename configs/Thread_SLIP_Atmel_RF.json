@@ -20,6 +20,10 @@
             "help": "Where to get EUI48 address. Options are BOARD, CONFIG",
             "value": "BOARD"
         },
+        "backhaul-mld": {
+            "help": "Enable proxying Multicast Listener Discovery messages to backhaul network",
+            "value": "false"
+        },
         "backhaul-mac": "{0x02, 0x00, 0x00, 0x00, 0x00, 0x01}",
         "slip_hw_flow_control": "true",
         "slip_serial_baud_rate": "921600",
