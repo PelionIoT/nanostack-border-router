@@ -12,7 +12,6 @@
 #include "common_functions.h"
 #include "eventOS_event_timer.h"
 #include "thread_bbr_ext.h"
-#include "multicast_api.h"
 
 #define TRACE_GROUP "TBRH"
 #define DHCP_SERVER_SHUTDOWN_TIMEOUT (100)
@@ -128,14 +127,6 @@ void thread_br_conn_handler_ethernet_connection_update(bool status)
         thread_br_conn_handler_border_router_shutdown_request();
         thread_border_router_mdns_responder_stop();
     }
-
-#ifndef MBED_CONF_APP_BACKHAUL_MLD
-#define MBED_CONF_APP_BACKHAUL_MLD true
-#endif
-#if (MBED_CONF_APP_BACKHAUL_MLD == true)
-    tr_debug("Configuring MLD proxying to upstream (interface_id = %d)", thread_br_handler.eth_interface_id);
-    multicast_fwd_set_proxy_upstream(thread_br_handler.eth_interface_id);
-#endif
 }
 
 void thread_br_conn_handler_eth_ready()
