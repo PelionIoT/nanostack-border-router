@@ -17,6 +17,10 @@
 #define TRACE_GROUP "TBRH"
 #define DHCP_SERVER_SHUTDOWN_TIMEOUT (100)
 
+#ifndef MBED_CONF_APP_BACKHAUL_MLD
+#define MBED_CONF_APP_BACKHAUL_MLD true
+#endif
+
 typedef struct {
     
     uint8_t dhcp_prefix[16];
@@ -129,9 +133,6 @@ void thread_br_conn_handler_ethernet_connection_update(bool status)
         thread_border_router_mdns_responder_stop();
     }
 
-#ifndef MBED_CONF_APP_BACKHAUL_MLD
-#define MBED_CONF_APP_BACKHAUL_MLD true
-#endif
 #if (MBED_CONF_APP_BACKHAUL_MLD == true)
     tr_debug("Configuring MLD proxying to upstream (interface_id = %d)", thread_br_handler.eth_interface_id);
     multicast_fwd_set_proxy_upstream(thread_br_handler.eth_interface_id);
