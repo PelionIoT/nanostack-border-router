@@ -19,10 +19,6 @@ extern "C" {
 #define thread_bbr_extension_bb_interface_updated_ntf(bb_interface_id);
 #define thread_bbr_extension_start(thread_interface_id, bb_interface_id);
 
-/* mDNS, these can be removed once mDNS is available in MBED-OS 5.5(?) */
-#define thread_border_router_mdns_responder_stop();
-#define thread_border_router_mdns_responder_start(interface_id, eth_interface_id, instance_name);
-
 #endif // MBED_CONF_APP_THREAD_BBR_EXTENSION
 
 #ifdef __cplusplus
