@@ -1,3 +1,16 @@
+properties ([[$class: 'ParametersDefinitionProperty', parameterDefinitions: [
+  [$class: 'StringParameterDefinition', name: 'mbed_os_revision', defaultValue: '', description: 'Revision of mbed-os to build. To access mbed-os PR use format "pull/PR number/head"']
+  ]]])
+
+if (params.mbed_os_revision == '') {
+  echo 'Use mbed OS revision from mbed-os.lib'
+} else {
+  echo "Use mbed OS revision ${params.mbed_os_revision}"
+  if (params.mbed_os_revision.matches('pull/\\d+/head')) {
+    echo "Revision is a Pull Request"
+  }
+}
+
 // List of targets to compile
 def targets = [
   "K64F",
@@ -52,6 +65,17 @@ def buildStep(target, compilerLabel, configurationFile, configurationLabel, tool
         dir("nanostack-border-router") {
           checkout scm
           execute("mbed deploy --protocol ssh")
+          // Update mbed-os revision if requested
+          if (params.mbed_os_revision != '') {
+            dir ("mbed-os") {
+              if (params.mbed_os_revision.matches('pull/\\d+/head')) {
+                execute("git fetch origin ${params.mbed_os_revision}:_PR_")
+                execute("git checkout _PR_")
+              } else {
+                execute ("git checkout ${params.mbed_os_revision}")
+              }
+            }
+          }
           execute("mbed compile --build out/${configurationLabel}/${target}/${compilerLabel}/ -m ${target} -t ${toolchain} --app-config ./configs/${configurationFile}")
         }
         archive '**/nanostack-border-router.bin'
