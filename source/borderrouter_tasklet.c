@@ -211,9 +211,14 @@ static void load_config(void)
 
     /* generate DODAG ID */
     memcpy(rpl_setup_info.DODAG_ID, nd_prefix, 8);
-    memcpy(&rpl_setup_info.DODAG_ID[8], gp16_address_suffix, 6);
-    rpl_setup_info.DODAG_ID[14] = (br.mac_short_adr >> 8);
-    rpl_setup_info.DODAG_ID[15] = br.mac_short_adr;
+    if (br.mac_short_adr < 0xfffe) {
+        memcpy(&rpl_setup_info.DODAG_ID[8], gp16_address_suffix, 6);
+        rpl_setup_info.DODAG_ID[14] = (br.mac_short_adr >> 8);
+        rpl_setup_info.DODAG_ID[15] = br.mac_short_adr;
+    } else {
+        rf_read_mac_address(&rpl_setup_info.DODAG_ID[8]);
+        rpl_setup_info.DODAG_ID[8] ^= 2;
+    }
 
     /* DODAG configuration */
     dodag_config.DAG_DIO_INT_DOUB = cfg_int(global_config, "RPL_IDOUBLINGS", 12);
