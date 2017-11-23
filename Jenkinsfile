@@ -18,12 +18,12 @@ def targets = [
   "NUCLEO_F429ZI"
   ]
 
-// Map toolchains to compilers
+// Map toolchains to CI labels
 def toolchains = [
   ARM: "armcc",
   ARMC6: "armc6",
   GCC_ARM: "arm-none-eabi-gcc",
-  IAR: "IAR8"
+  IAR: "iar_arm"
   ]
 
 // Configurations
