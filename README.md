@@ -47,7 +47,7 @@ $ mbed compile
 
 ## Selecting the target platform
 
-The target platform is the hardware on which the border router runs. There are number of target platforms already available for you in the mbed OS 5.
+The target platform is the hardware on which the border router runs. There are number of target platforms already available for you in the mbed OS.
 
 If you wish to write your own target, follow the instructions in [Adding target support to mbed OS 5](https://docs.mbed.com/docs/mbed-os-handbook/en/latest/advanced/porting_guide/).
 
@@ -91,9 +91,6 @@ Applications using Nanostack Border Router need to use a `.json` file for the co
 | `multicast-addr`                      | Multicast forwarding is supported by default. This defines the multicast address to which the border router application forwards multicast packets (on the backhaul and RF interface). Example format: `ff05::5` |
 |`ra-router-lifetime`|Defines the router advertisement interval in seconds (default 1024 if left out).|
 |`beacon-protocol-id`|Is used to identify beacons. This should not be changed (default 4 if left out).|
-|`nanostack.configuration`|Is needed when building the 6LoWPAN ND border router from the Nanostack sources.|
-
-The `LOWPAN_BORDER_ROUTER` feature is the Nanostack library, which implements the 6LoWPAN ND border router networking stack.
 
 To learn more about 6LoWPAN and the configuration parameters, read the [6LoWPAN overview] (https://docs.mbed.com/docs/arm-ipv66lowpan-stack/en/latest/quick_start_intro/index.html).
 
@@ -132,10 +129,7 @@ The Thread-specific parameters are listed below.
 | `pskc`                              | Pre-Shared Key for the Commissioner. |
 | `pskd`                              | Pre-Shared Key for the device. |
 | `thread-master-key`                 | A key used to derive security material for MAC and MLE protection. |
-| `nanostack.configuration`           | Is needed when building the Thread border router from the Nanostack sources. |
 
-
-The `THREAD_BORDER_ROUTER` feature is the Nanostack library, which implements the Thread border router networking stack.
 
 For the Thread Border Router, there are example configuration files for `SLIP` and `ETH` backhaul connectivity:
 
@@ -178,7 +172,6 @@ If you use the static bootstrap mode, you need to configure a default route on t
 
 When using the autonomous mode in the 6LoWPAN ND configuration, you can set the `prefix-from-backhaul` option to `true` to use the same backhaul prefix on the mesh network side as well. This allows the mesh nodes to be directly connectable from the outside of the mesh network. In the Thread network, it is enough that `backhaul-dynamic-bootstrap` is set to true.
 
-For more details on how to set the backhaul prefix and default route, read the [Nanostack Border Router](https://github.com/ARMmbed/nanostack-border-router-private) documentation.
 
 #### Note on the SLIP backhaul driver
 
