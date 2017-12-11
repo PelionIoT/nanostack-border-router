@@ -19,7 +19,7 @@ configs/                  Contains example configuration files
 drivers/                  Contains PHY drivers
 mbed-os/                  Contains mbed OS itself
 source/                   Contains the application code
-mbed_app.json             Build time configuration file
+mbed_app.json             Build time configuration file (copied from configs folder).
 ```
 
 ## Building
@@ -70,7 +70,7 @@ See [Notes on different hardware](https://github.com/ARMmbed/mbed-os-example-mes
 
 ## Configuring Nanostack Border Router
 
-Applications using Nanostack Border Router need to use a `.json` file for the configuration. The example configurations can be found in the `configs/` folder.
+Applications using Nanostack Border Router need to use a `.json` file for the configuration. The example configurations can be found in the `configs/` folder. You can copy one of these files to the base folder of the application and then compile.
 
 ### The backhaul configuration options
 
@@ -175,7 +175,7 @@ When using the autonomous mode in the 6LoWPAN ND configuration, you can set the 
 
 #### Note on the SLIP backhaul driver
 
-If you are using a K64F board, you need to use the UART1 serial line of the board with the SLIP driver. See the `pins` section in the [mbed_app.json](./mbed_app.json) configuration file. To use a different UART line, replace the `SERIAL_TX` and `SERIAL_RX` values with correct TX/RX pin names.
+If you are using a K64F board, you need to use the UART1 serial line of the board with the SLIP driver. See the `pins` section in the `mbed_app.json` configuration file. To use a different UART line, replace the `SERIAL_TX` and `SERIAL_RX` values with correct TX/RX pin names.
 
 If you wish to use the hardware flow control, set the configuration field `slip_hw_flow_control` to true. By default, it is set to false. Before using hardware flow control, make sure that the other end of your SLIP interface can handle the flow control.
 
