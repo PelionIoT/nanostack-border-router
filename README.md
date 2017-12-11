@@ -19,7 +19,7 @@ configs/                  Contains example configuration files
 drivers/                  Contains PHY drivers
 mbed-os/                  Contains mbed OS itself
 source/                   Contains the application code
-mbed_app.json             Build time configuration file (copied from configs folder).
+mbed_app.json             Build time configuration file (to be copied from the configs folder).
 ```
 
 ## Building
@@ -70,7 +70,7 @@ See [Notes on different hardware](https://github.com/ARMmbed/mbed-os-example-mes
 
 ## Configuring Nanostack Border Router
 
-Applications using Nanostack Border Router need to use a `.json` file for the configuration. The example configurations can be found in the `configs/` folder. You can copy one of these files to the base folder of the application and then compile.
+Applications using Nanostack Border Router need to use a `.json` file for the configuration. The example configurations can be found in the `configs/` folder. You can copy one of these files to the base folder of the application, rename as `mbed_app.json` and then compile.
 
 ### The backhaul configuration options
 
