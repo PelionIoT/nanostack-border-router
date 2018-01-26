@@ -9,7 +9,7 @@
             "value": "ATMEL"
         },
         "backhaul-driver": {
-            "help": "options are ETH, SLIP",
+            "help": "options are ETH, SLIP, EMAC",
             "value": "ETH"
         },
         "mesh-mode": {
@@ -54,6 +54,8 @@
         "*": {
             "target.features_add": ["NANOSTACK", "COMMON_PAL", "THREAD_BORDER_ROUTER"],
             "target.features_remove": ["LWIP"],
+            "target.network-default-interface-type": "ETHERNET",
+            "nsapi.default-stack": "NANOSTACK",
             "mbed-trace.enable": 1,
             "nanostack.configuration": "thread_border_router",
             "platform.stdio-convert-newlines": true,
