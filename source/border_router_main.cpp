@@ -10,6 +10,12 @@
 #include "drivers/eth_driver.h"
 #include "sal-stack-nanostack-slip/Slip.h"
 
+#include "Nanostack.h"
+#include "NanostackEthernetInterface.h"
+#include "MeshInterfaceNanostack.h"
+#include "EMACInterface.h"
+#include "EMAC.h"
+
 #ifdef  MBED_CONF_APP_DEBUG_TRACE
 #if MBED_CONF_APP_DEBUG_TRACE == 1
 #define APP_TRACE_LEVEL TRACE_ACTIVE_LEVEL_DEBUG
@@ -19,6 +25,7 @@
 #endif //MBED_CONF_APP_DEBUG_TRACE
 
 #include "ns_hal_init.h"
+#include "mesh_system.h"
 #include "cmsis_os.h"
 #include "arm_hal_interrupt.h"
 
@@ -28,8 +35,17 @@
 
 #define APP_DEFINED_HEAP_SIZE MBED_CONF_APP_HEAP_SIZE
 static uint8_t app_stack_heap[APP_DEFINED_HEAP_SIZE];
-static uint8_t mac[6] = {0};
 static mem_stat_t heap_info;
+
+#define BOARD 1
+#define CONFIG 2
+#if MBED_CONF_APP_BACKHAUL_MAC_SRC == BOARD
+static uint8_t mac[6];
+#elif MBED_CONF_APP_BACKHAUL_MAC_SRC == CONFIG
+static const uint8_t mac[] = MBED_CONF_APP_BACKHAUL_MAC;
+#else
+#error "MAC address not defined"
+#endif
 
 static DigitalOut led1(MBED_CONF_APP_LED);
 
@@ -50,6 +66,23 @@ static void trace_printer(const char *str)
     printf("%s\n", str);
 }
 
+#undef ETH
+#undef SLIP
+#undef EMAC
+#define ETH 1
+#define SLIP 2
+#define EMAC 3
+#if MBED_CONF_APP_BACKHAUL_DRIVER == EMAC
+static void (*emac_actual_cb)(uint8_t, int8_t);
+static int8_t emac_driver_id;
+static void emac_link_cb(bool up)
+{
+    if (emac_actual_cb) {
+        emac_actual_cb(up, emac_driver_id);
+    }
+}
+#endif
+
 /**
  * \brief Initializes the SLIP MAC backhaul driver.
  * This function is called by the border router module.
@@ -57,10 +90,6 @@ static void trace_printer(const char *str)
 void backhaul_driver_init(void (*backhaul_driver_status_cb)(uint8_t, int8_t))
 {
 // Values allowed in "backhaul-driver" option
-#undef ETH
-#undef SLIP
-#define ETH 0
-#define SLIP 1
 #if MBED_CONF_APP_BACKHAUL_DRIVER == SLIP
     SlipMACDriver *pslipmacdriver;
     int8_t slipdrv_id = -1;
@@ -89,6 +118,37 @@ void backhaul_driver_init(void (*backhaul_driver_status_cb)(uint8_t, int8_t))
     }
 
     tr_error("Backhaul driver init failed, retval = %d", slipdrv_id);
+#elif MBED_CONF_APP_BACKHAUL_DRIVER == EMAC
+#undef EMAC
+    tr_info("Using EMAC backhaul driver...");
+    NetworkInterface *net = NetworkInterface::get_default_instance();
+    if (!net) {
+        tr_error("Default network interface not found");
+        exit(1);
+    }
+    EMACInterface *emacif = net->emacInterface();
+    if (!emacif) {
+        tr_error("Default interface is not EMAC-based");
+        exit(1);
+    }
+    EMAC &emac = emacif->get_emac();
+    Nanostack::EthernetInterface *ns_if;
+#if MBED_CONF_APP_BACKHAUL_MAC_SRC == BOARD
+    /* Let the core code choose address - either from board or EMAC (for
+     * ETH and SLIP we pass in the board address already in mac[]) */
+    nsapi_error_t err = Nanostack::get_instance().add_ethernet_interface(emac, true, &ns_if);
+    /* Read back what they chose into our mac[] */
+    ns_if->get_mac_address(mac);
+#else
+    nsapi_error_t err = Nanostack::get_instance().add_ethernet_interface(emac, true, &ns_if, mac);
+#endif
+    if (err < 0) {
+        tr_error("Backhaul driver init failed, retval = %d", err);
+    } else {
+        emac_actual_cb = backhaul_driver_status_cb;
+        emac_driver_id = ns_if->get_driver_id();
+        emac.set_link_state_cb(emac_link_cb);
+    }
 #elif MBED_CONF_APP_BACKHAUL_DRIVER == ETH
     tr_info("Using ETH backhaul driver...");
     arm_eth_phy_device_register(mac, backhaul_driver_status_cb);
@@ -96,7 +156,9 @@ void backhaul_driver_init(void (*backhaul_driver_status_cb)(uint8_t, int8_t))
 #else
 #error "Unsupported backhaul driver"
 #endif
-
+#undef SLIP
+#undef ETH
+#undef EMAC
 }
 
 /**
@@ -112,20 +174,12 @@ int main(int argc, char **argv)
     mbed_trace_print_function_set(trace_printer);
     mbed_trace_config_set(TRACE_MODE_COLOR | APP_TRACE_LEVEL | TRACE_CARRIAGE_RETURN);
 
+    // Have to let mesh_system do net_init_core in case we use
+    // Nanostack::add_ethernet_interface()
+    mesh_system_init();
 
-#define BOARD 0
-#define CONFIG 1
 #if MBED_CONF_APP_BACKHAUL_MAC_SRC == BOARD
-    /* Setting the MAC Address from UID.
-     * Takes UID Mid low and UID low and shuffles them around. */
     mbed_mac_address((char *)mac);
-#elif MBED_CONF_APP_BACKHAUL_MAC_SRC == CONFIG
-    const uint8_t mac48[] = MBED_CONF_APP_BACKHAUL_MAC;
-    for (uint32_t i = 0; i < sizeof(mac); ++i) {
-        mac[i] = mac48[i];
-    }
-#else
-    #error "MAC address not defined"
 #endif
 
     if (MBED_CONF_APP_LED != NC) {
