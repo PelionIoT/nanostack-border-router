@@ -247,7 +247,6 @@ static void network_interface_event_handler(arm_event_s *event)
                                       next_hop_ptr, 0xffffffff, 128,
                                       thread_br_conn_handler_eth_interface_id_get());
                 }
-                thread_br_conn_handler_eth_ready();
                 tr_info("Backhaul interface addresses:");
                 print_interface_addr(thread_br_conn_handler_eth_interface_id_get());
                 thread_br_conn_handler_ethernet_connection_update(connectStatus);
@@ -498,8 +497,6 @@ static void borderrouter_tasklet(arm_event_s *event)
                 }
             } else if (event->event_id == NR_BACKHAUL_INTERFACE_PHY_DOWN) {
                 if (backhaul_interface_down() != 0) {
-                    // may happend when booting first time.
-                    tr_warning("Backhaul interface down failed");
                 } else {
                     tr_debug("Backhaul interface is down");
                 }
