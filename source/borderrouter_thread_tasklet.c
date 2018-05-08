@@ -200,7 +200,7 @@ static link_configuration_s* thread_link_configuration_get(link_configuration_s 
 
     memcpy(link_configuration->PSKc, pskc, sizeof(pskc));
     memcpy(link_configuration->master_key, master_key, sizeof(master_key));
-    link_configuration->securityPolicy = SECURITY_POLICY_ALL_SECURITY;
+    link_configuration->securityPolicy = MBED_CONF_APP_THREAD_SECURITY_POLICY;
 
     link_configuration->rfChannel = MBED_CONF_APP_RF_CHANNEL;
     tr_info("RF channel %d", link_configuration->rfChannel);
