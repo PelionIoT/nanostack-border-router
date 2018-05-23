@@ -57,6 +57,8 @@ static void trace_printer(const char *str)
 void backhaul_driver_init(void (*backhaul_driver_status_cb)(uint8_t, int8_t))
 {
 // Values allowed in "backhaul-driver" option
+#undef ETH
+#undef SLIP
 #define ETH 0
 #define SLIP 1
 #if MBED_CONF_APP_BACKHAUL_DRIVER == SLIP
