@@ -63,7 +63,6 @@ driver can be used, or a native Nanostack driver. Currently, there are Nanostack
 for the following backhauls:
 
 * [K64F Ethernet](https://github.com/ARMmbed/sal-nanostack-driver-k64f-eth)
-* [NUCLEO_F429ZI Ethernet](https://github.com/ARMmbed/sal-nanostack-driver-stm32-eth)
 * [SLIP driver](https://github.com/ARMmbed/sal-stack-nanostack-slip)
 
 The existing drivers are found in the `drivers/` folder. More drivers can be linked in.
