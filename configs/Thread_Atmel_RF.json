@@ -2,7 +2,7 @@
     "config": {
         "heap-size": {
              "help": "The amount of static RAM to reserve for nsdynmemlib heap",
-             "value": 50000
+             "value": 40000
         },
         "radio-type":{
             "help": "options are ATMEL, MCR20",
