@@ -10,7 +10,7 @@
         },
         "backhaul-driver": {
             "help": "options are ETH, SLIP, EMAC",
-            "value": "ETH"
+            "value": "EMAC"
         },
         "mesh-mode": {
             "help": "Mesh networking mode. Options are LOWPAN_ND and THREAD",
