@@ -373,7 +373,6 @@ void thread_rf_init()
 
 void border_router_tasklet_start(void)
 {
-    net_init_core();
     thread_rf_init();
     protocol_stats_start(&nwk_stats);
 
