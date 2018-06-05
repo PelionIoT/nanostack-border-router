@@ -117,6 +117,7 @@ static void load_config(void);
 
 void border_router_tasklet_start(void)
 {
+    net_init_core();
     /* initialize Radio module*/
     net_6lowpan_id = rf_interface_init();
 

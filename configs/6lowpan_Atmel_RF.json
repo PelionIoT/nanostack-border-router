@@ -2,15 +2,15 @@
     "config": {
         "heap-size": {
              "help": "The amount of static RAM to reserve for nsdynmemlib heap",
-             "value": 40000
+             "value": 50000
         },
         "radio-type":{
             "help": "options are ATMEL, MCR20, SPIRIT1",
             "value": "ATMEL"
         },
         "backhaul-driver": {
-            "help": "options are ETH, SLIP, EMAC",
-            "value": "EMAC"
+            "help": "options are ETH, SLIP",
+            "value": "ETH"
         },
         "mesh-mode": {
             "help": "Mesh networking mode. Options are LOWPAN_ND and THREAD",
@@ -70,8 +70,6 @@
         "*": {
             "target.features_add": ["NANOSTACK", "LOWPAN_BORDER_ROUTER", "COMMON_PAL"],
             "target.features_remove": ["LWIP"],
-            "target.network-default-interface-type": "ETHERNET",
-            "nsapi.default-stack": "NANOSTACK",
             "mbed-trace.enable": 1,
             "nanostack.configuration": "lowpan_border_router",
             "platform.stdio-convert-newlines": true,
