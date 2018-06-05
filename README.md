@@ -51,19 +51,18 @@ The target platform is the hardware on which the border router runs. There are n
 
 If you wish to write your own target, follow the instructions in [Adding target support to mbed OS 5](https://docs.mbed.com/docs/mbed-os-handbook/en/latest/advanced/porting_guide/).
 
-The border router requires an RF driver to be provided for Nanostack. Currently, there are the following drivers:
+The border router requires backhaul and RF drivers to be provided for Nanostack. The backhaul is either SLIP or Ethernet. Currently, there are drivers for the following backhauls:
+
+* [K64F Ethernet](https://github.com/ARMmbed/sal-nanostack-driver-k64f-eth)
+* [NUCLEO_F429ZI Ethernet](https://github.com/ARMmbed/sal-nanostack-driver-stm32-eth)
+* [SLIP driver](https://github.com/ARMmbed/sal-stack-nanostack-slip)
+
+And following RF drivers:
 
 * [Atmel AT86RF233](https://github.com/ARMmbed/atmel-rf-driver)
 * [Atmel AT86RF212B](https://github.com/ARMmbed/atmel-rf-driver)
 * [STM Spirit1](https://github.com/ARMmbed/stm-spirit1-rf-driver)
 * [NXP MCR20A](https://github.com/ARMmbed/mcr20a-rf-driver)
-
-The backhaul is either SLIP or Ethernet. For Ethernet either an mbed OS "EMAC"
-driver can be used, or a native Nanostack driver. Currently, there are Nanostack drivers
-for the following backhauls:
-
-* [K64F Ethernet](https://github.com/ARMmbed/sal-nanostack-driver-k64f-eth)
-* [SLIP driver](https://github.com/ARMmbed/sal-stack-nanostack-slip)
 
 The existing drivers are found in the `drivers/` folder. More drivers can be linked in.
 
@@ -149,7 +148,7 @@ The Nanostack border router application can be connected to a backhaul network. 
 ```
 "config": {
     "backhaul-driver": {
-        "help": "options are ETH, SLIP, EMAC",
+        "help": "options are ETH, SLIP",
         "value": "ETH"
     },
     "backhaul-mac-src": {
@@ -165,9 +164,7 @@ The Nanostack border router application can be connected to a backhaul network. 
 }
 ```
 
-You can select your preferred option through the configuration file (field `backhaul-driver` in the `config` section). The value `SLIP` includes the SLIP driver, while the value `ETH` compiles the border router application with Nanostack native Ethernet backhaul support. `EMAC` uses the board's default mbed OS network driver, which must be EMAC-based (derived from EMACInterface).
-
-You can define the MAC address on the backhaul interface manually (field `backhaul-mac-src` value `CONFIG`). Alternatively, you can use the MAC address provided by the development board (field `backhaul-mac-src` value `BOARD`). By default, the backhaul driver is set to `ETH` and the MAC address source is `BOARD`.
+You can select your preferred option through the configuration file (field `backhaul-driver` in the `config` section). The value `SLIP` includes the SLIP driver, while the value `ETH` compiles the border router application with Ethernet backhaul support. You can define the MAC address on the backhaul interface manually (field `backhaul-mac-src` value `CONFIG`). Alternatively, you can use the MAC address provided by the development board (field `backhaul-mac-src` value `BOARD`). By default, the backhaul driver is set to `ETH` and the MAC address source is `BOARD`.
 
 You can also set the backhaul bootstrap mode (field `backhaul-dynamic-bootstrap`). By default, the bootstrap mode is set to true, which means the autonomous mode. With the autonomous mode, the border router learns the prefix information automatically from an IPv6 gateway in the Ethernet/SLIP segment. When the parameter is set to false, it enables you to set up a manual configuration of `backhaul-prefix` and `backhaul-default-route`.
 
@@ -195,14 +192,6 @@ An example configuration for the SLIP driver:
         "SERIAL_RTS": "PTE3"
     }
 ```
-
-#### Note on EMAC backhaul
-
-When `backhaul_driver` is set to `EMAC`, the border router will use the target's default network driver, as supplied by `NetworkInterface::get_default_instance`. This must be EMAC-based, derived from EMACInterface. If th - the same driver that a default-constructed `EthernetInterface` would use, so in principle it should work on any board where `EthernetInterface` works.
-
-To use a different interface, change the setting of `target.default-network-interface-type` in `mbed_app.json` to point to a different interface type, or add an overriding definition of `NetworkInterface::get_default_instance` to the application - this will override any default supplied by the target board.
-
-To use Wi-Fi or other more complex EMAC drivers, necessary configuration parameters must be supplied, either via `mbed_app.json` or configuration in the `NetworkInterface::get_default_instance` override. Also, the driver must follow the guidelines of `EMACInterface` - the border router does not call the `EMACInterface`'s `connect` method, so the driver must work with only a `powerup` call to the `EMAC`.
 
 ### Switching the RF shield
 
