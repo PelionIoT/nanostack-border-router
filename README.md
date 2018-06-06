@@ -306,6 +306,3 @@ In the PuTTY main screen, save the session and click **Open**. This opens a cons
 [INFO][brro]: 6LoWPAN Border Router Bootstrap Complete.
 ```
 
-## Known Issues
- * Application does not link with NUCLEO_F429ZI boards, issue #[113](https://github.com/ARMmbed/nanostack-border-router/issues/113)
-
