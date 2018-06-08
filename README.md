@@ -255,7 +255,7 @@ The Application can enable use of file system as instructed in [mbed OS storage 
 
 Thread network stack is able to write/read network configuration settings to/from file system once the feature is activated. Activation happens by telling file system root path to nanostack. To set the root-path, use function:
 
-<code>ns_file_system_set_root_path(root-path)</code>
+`ns_file_system_set_root_path(root-path)`
 
 Once the root-path is set, Thread stack will read configuration settings from the file system and write configuration back to file system once configuration is changed.
 
@@ -305,3 +305,7 @@ In the PuTTY main screen, save the session and click **Open**. This opens a cons
 [INFO][brro]:    [2] 2001:999:21:9ce:0:ff:fe00:face
 [INFO][brro]: 6LoWPAN Border Router Bootstrap Complete.
 ```
+
+## Known Issues
+ * Application does not link with NUCLEO_F429ZI boards, issue #[113](https://github.com/ARMmbed/nanostack-border-router/issues/113)
+
