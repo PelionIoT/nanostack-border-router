@@ -249,6 +249,17 @@ In case you have choosen the STM Spirit1 Sub-1 GHz RF expansion board [X-NUCLEO-
 
 After changing the radio shield, you need to recompile the application.
 
+## File system support
+
+The Application can enable use of file system as instructed in [mbed OS storage documentation](https://os.mbed.com/docs/latest/reference/storage.html). File system is not enabled by default due variety of possible configurations.
+
+Thread network stack is able to write/read network configuration settings to/from file system once the feature is activated. Activation happens by telling file system root path to nanostack. To set the root-path, use function:
+
+<code>ns_file_system_set_root_path(root-path)</code>
+
+Once the root-path is set, Thread stack will read configuration settings from the file system and write configuration back to file system once configuration is changed.
+
+
 ## Running the border router application
 
 1. Find the  binary file `nanostack-border-router.bin` in the `BUILD` folder.
