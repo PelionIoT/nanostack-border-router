@@ -40,9 +40,9 @@
         "beacon-protocol-id": 4,
         "prefix": "fd00:db8::",
         "prefix-from-backhaul": true,
-	"rf-channel": 1,
-	"rf-channel-page": 2,
-	"rf-channel-mask": "(1<<1)",
+        "rf-channel": 1,
+        "rf-channel-page": 2,
+        "rf-channel-mask": "(1<<1)",
         "short-mac-address": "0xface",
         "backhaul-dynamic-bootstrap": true,
         "backhaul-prefix": "fd00:db8:ff1::",
@@ -76,17 +76,21 @@
             "mbed-trace.enable": 1,
             "nanostack.configuration": "lowpan_border_router",
             "platform.stdio-convert-newlines": true,
-            "platform.stdio-baud-rate": 115200
+            "platform.stdio-baud-rate": 115200,
+            "kinetis-emac.tx-ring-len":4,
+            "kinetis-emac.rx-ring-len":4
         },
         "NUCLEO_F429ZI": {
-    	    "LED": "LED1",
-   	    "SERIAL_TX": "SERIAL_TX",
-    	    "SERIAL_RX": "SERIAL_RX",
-    	    "SERIAL_CTS": "PD_11",
-    	    "SERIAL_RTS": "PD_12"
+            "LED": "LED1",
+            "SERIAL_TX": "SERIAL_TX",
+            "SERIAL_RX": "SERIAL_RX",
+            "SERIAL_CTS": "PD_11",
+            "SERIAL_RTS": "PD_12"
         },
         "K66F": {
-            "LED": "LED_GREEN"
+            "LED": "LED_GREEN",
+            "kinetis-emac.tx-ring-len":4,
+            "kinetis-emac.rx-ring-len":4
         }
     },
     "macros": ["SPIRIT1_SPI_MOSI=PB_5"]
