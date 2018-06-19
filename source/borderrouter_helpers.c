@@ -54,11 +54,11 @@ void print_memory_stats(void)
     const mem_stat_t *heap_info = ns_dyn_mem_get_mem_stat();
     if (heap_info) {
         tr_info(
-            "Heap size: %d, Reserved: %d, Reserved max: %d, Alloc fail: %d"
-            ,(unsigned int)heap_info->heap_sector_size
-            ,(unsigned int)heap_info->heap_sector_allocated_bytes
-            ,(unsigned int)heap_info->heap_sector_allocated_bytes_max
-            ,(unsigned int)heap_info->heap_alloc_fail_cnt);
+            "Heap size: %lu, Reserved: %lu, Reserved max: %lu, Alloc fail: %lu"
+            ,(unsigned long)heap_info->heap_sector_size
+            ,(unsigned long)heap_info->heap_sector_allocated_bytes
+            ,(unsigned long)heap_info->heap_sector_allocated_bytes_max
+            ,(unsigned long)heap_info->heap_alloc_fail_cnt);
     }
 }
 
