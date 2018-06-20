@@ -14,8 +14,8 @@ if (params.mbed_os_revision == '') {
 // List of targets to compile
 def targets = [
   "K64F",
-  "K66F"
-  //"NUCLEO_F429ZI"
+  "K66F",
+  "NUCLEO_F429ZI"
   ]
 
 // Map toolchains to CI labels
