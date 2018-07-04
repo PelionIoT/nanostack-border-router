@@ -16,6 +16,10 @@
             "help": "Mesh networking mode. Options are LOWPAN_ND and THREAD",
             "value": "THREAD"
         },
+        "storage-device":{
+            "help": "Values for storage (Thread) devices are: MESH_SD_CARD and MESH_HEAP",
+            "value": "MESH_SD_CARD"
+        },
         "backhaul-mac-src": {
             "help": "Where to get EUI48 address. Options are BOARD, CONFIG",
             "value": "BOARD"
@@ -41,7 +45,7 @@
         "pskd": "\"ABCDEFGH\"",
         "pskc": "{0xc8, 0xa6, 0x2e, 0xae, 0xf3, 0x68, 0xf3, 0x46, 0xa9, 0x9e, 0x57, 0x85, 0x98, 0x9d, 0x1c, 0xd0}",
         "thread-master-key": "{0x10, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff}",
-        "thread-use-static-link-config": true,
+        "thread-use-static-link-config": false,
         "thread-security-policy": 255,
         "LED": "NC",
         "SERIAL_TX": "NC",

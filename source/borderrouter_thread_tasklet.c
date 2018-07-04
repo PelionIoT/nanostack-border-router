@@ -28,6 +28,7 @@
 #include "thread_management_if.h"
 #include "thread_br_conn_handler.h"
 #include "randLIB.h"
+#include "mesh_nvm.h"
 
 #include "ns_trace.h"
 #define TRACE_GROUP "brro"
@@ -332,6 +333,8 @@ static void mesh_network_up()
         tr_error("arm_nwk_interface_lowpan_init() failed");
         return;
     }
+	
+    mesh_nvm_initialize();
 
     status = arm_nwk_interface_configure_6lowpan_bootstrap_set(
                 thread_if_id,
