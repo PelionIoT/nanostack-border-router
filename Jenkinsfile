@@ -66,6 +66,8 @@ def buildStep(target, compilerLabel, configurationFile, configurationLabel, tool
         dir("nanostack-border-router") {
           checkout scm
           execute("mbed deploy --protocol ssh")
+          execute ("mbed add mcr20a-rf-driver")
+          execute ("mbed add atmel-rf-driver")
           // Update mbed-os revision if requested
           if (params.mbed_os_revision != '') {
             dir ("mbed-os") {

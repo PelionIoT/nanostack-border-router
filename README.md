@@ -26,6 +26,7 @@ mbed_app.json             Build time configuration file
 
 1. Clone this repository.
 1. Run `mbed deploy`.
+1. Add connectivity driver, if not provided by Mbed OS
 1. Select target platform.
 1. Select toolchain.
 1. Configure.
@@ -44,6 +45,20 @@ $ mbed toolchain GCC_ARM
 
 $ mbed compile
 ```
+
+### Adding connectivity driver
+
+This application requires 802.15.4 RF driver to be provided for the networking stack. Driver can be either external, or provided by the Mbed OS.
+
+External driver can be added by calling
+
+```
+mbed add <driver>
+```
+
+For example MCR20A RF driver is added by calling `mbed add mcr20a-rf-driver`
+
+Atmel AT86RF driver is added by calling `mbed add atmel-rf-driver`
 
 ## Selecting the target platform
 
