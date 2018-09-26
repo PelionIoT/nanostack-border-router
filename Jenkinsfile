@@ -1,5 +1,5 @@
 properties ([[$class: 'ParametersDefinitionProperty', parameterDefinitions: [
-  [$class: 'StringParameterDefinition', name: 'mbed_os_revision', defaultValue: '', description: 'Revision of mbed-os to build. To access mbed-os PR use format "pull/PR number/head"']
+  [$class: 'StringParameterDefinition', name: 'mbed_os_revision', defaultValue: '', description: 'Revision of mbed-os to build. By default mbed-os.lib is used. To access mbed-os PR use format "pull/PR number/head"']
   ]]])
 
 if (params.mbed_os_revision == '') {
@@ -21,7 +21,7 @@ def targets = [
 // Map toolchains to CI labels
 def toolchains = [
   ARM: "armcc",
-  ARMC6: "armc6",
+//  ARMC6: "armc6",
   GCC_ARM: "arm-none-eabi-gcc",
   IAR: "iar_arm"
   ]
@@ -66,8 +66,6 @@ def buildStep(target, compilerLabel, configurationFile, configurationLabel, tool
         dir("nanostack-border-router") {
           checkout scm
           execute("mbed deploy --protocol ssh")
-          execute ("mbed add mcr20a-rf-driver")
-          execute ("mbed add atmel-rf-driver")
           // Update mbed-os revision if requested
           if (params.mbed_os_revision != '') {
             dir ("mbed-os") {
