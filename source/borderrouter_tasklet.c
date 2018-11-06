@@ -4,6 +4,7 @@
 
 #define LOWPAN_ND 0
 #define THREAD 1
+#define LOWPAN_WS 2
 #if MBED_CONF_APP_MESH_MODE == LOWPAN_ND
 
 #include <string.h>
