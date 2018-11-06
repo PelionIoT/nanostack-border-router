@@ -2,7 +2,7 @@
     "config": {
         "heap-size": {
              "help": "The amount of static RAM to reserve for nsdynmemlib heap",
-             "value": 65535
+             "value": 100000
         },
         "radio-type":{
             "help": "options are ATMEL, MCR20",
@@ -25,16 +25,16 @@
             "value": "false"
         },
         "backhaul-mac": "{0x02, 0x00, 0x00, 0x00, 0x00, 0x01}",
-        "rf-channel": 22,
+        "rf-channel": 26,
         "rf-channel-page": 0,
         "rf-channel-mask": "0x07fff800",
-        "debug-trace":  1,
+        "debug-trace":  true,
         "backhaul-dynamic-bootstrap": true,
         "backhaul-prefix": "\"fd00:300::\"",
         "backhaul-next-hop": "\"fe80::1\"",
         "backhaul-default-route": "\"::/0\"",
         "commissioning-dataset-timestamp": "0x00010000",
-        "pan-id": "0x0700",
+        "pan-id": "0xBAAB",
         "extended-pan-id": "{0xf1, 0xb5, 0xa1, 0xb2,0xc4, 0xd5, 0xa1, 0xbd }",
         "mesh-local-prefix": "{0xfd, 0x0, 0x0d, 0xb8, 0x0,0x0, 0x0, 0x0}",
         "network-name": "\"Thread Network\"",

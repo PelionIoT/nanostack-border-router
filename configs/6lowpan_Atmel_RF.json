@@ -2,7 +2,7 @@
     "config": {
         "heap-size": {
              "help": "The amount of static RAM to reserve for nsdynmemlib heap",
-             "value": 40000
+             "value": 100000
         },
         "radio-type":{
             "help": "options are ATMEL, MCR20, SPIRIT1",
@@ -27,7 +27,7 @@
         "backhaul-mac": "{0x02, 0x00, 0x00, 0x00, 0x00, 0x01}",
         "slip_hw_flow_control": "false",
         "slip_serial_baud_rate": "921600",
-        "debug-trace": "false",
+        "debug-trace": "true",
         "defined-BR-config": "true",
         "security-mode": "NONE",
         "psk-key-id": 1,
@@ -35,12 +35,12 @@
         "pana-mode": "",
         "tls-psk-key": "{0xcf, 0xce, 0xcd, 0xcc, 0xcb, 0xca, 0xc9, 0xc8, 0xc7, 0xc6, 0xc5, 0xc4, 0xc3, 0xc2, 0xc1, 0xc0}",
         "tls-psk-key-id": 1,
-        "pan-id": "0x0691",
+        "pan-id": "0xABBA",
         "network-id": "network000000000",
         "beacon-protocol-id": 4,
         "prefix": "fd00:db8::",
         "prefix-from-backhaul": true,
-        "rf-channel": 12,
+        "rf-channel": 17,
         "rf-channel-page": 0,
         "rf-channel-mask": "0x07fff800",
         "short-mac-address": "0xface",

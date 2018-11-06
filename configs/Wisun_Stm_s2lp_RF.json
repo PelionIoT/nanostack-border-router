@@ -25,7 +25,7 @@
             "value": "false"
         },
         "backhaul-mac": "{0x02, 0x00, 0x00, 0x00, 0x00, 0x01}",
-        "debug-trace": "false",
+        "debug-trace": "true",
         "backhaul-dynamic-bootstrap": true,
         "backhaul-prefix": "\"fd00:db8:ff1::\"",
         "backhaul-default-route": "\"::/0\"",
@@ -43,7 +43,7 @@
         "operating-mode": 255,
         "uc-fixed-channel": "0xffff",
         "bc-fixed-channel": "0xffff",
-        "network-name": "\"Wi-SUN Network\"",
+        "network-name": "\"ARM-WS-LAB-NWK\"",
         "certificate-header": {
             "help": "Certificate header",
             "value": "\"wisun_certificates.h\""
