@@ -43,12 +43,6 @@ char *print_ipv6_prefix(const uint8_t *prefix, uint8_t prefix_len)
     return str;
 }
 
-void print_appl_info(void)
-{
-    tr_info("Starting NanoStack Border Router...");
-    tr_info("Build date: %s %s", __DATE__, __TIME__);
-}
-
 void print_memory_stats(void)
 {
     const mem_stat_t *heap_info = ns_dyn_mem_get_mem_stat();

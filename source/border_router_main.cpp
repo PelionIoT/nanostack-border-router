@@ -84,7 +84,7 @@ static void emac_link_cb(bool up)
 #endif
 
 /**
- * \brief Initializes the SLIP MAC backhaul driver.
+ * \brief Initializes the MAC backhaul driver.
  * This function is called by the border router module.
  */
 void backhaul_driver_init(void (*backhaul_driver_status_cb)(uint8_t, int8_t))
@@ -159,6 +159,16 @@ void backhaul_driver_init(void (*backhaul_driver_status_cb)(uint8_t, int8_t))
 #undef SLIP
 #undef ETH
 #undef EMAC
+}
+
+
+void appl_info_trace(void)
+{
+    tr_info("Starting NanoStack Border Router...");
+    tr_info("Build date: %s %s", __DATE__, __TIME__);
+#ifdef MBED_MAJOR_VERSION
+    tr_info("Mbed OS version: %d.%d.%d\n", MBED_MAJOR_VERSION, MBED_MINOR_VERSION, MBED_PATCH_VERSION);
+#endif
 }
 
 /**

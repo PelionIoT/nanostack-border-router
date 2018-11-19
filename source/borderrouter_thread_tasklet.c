@@ -388,16 +388,13 @@ static void borderrouter_backhaul_phy_status_cb(uint8_t link_up, int8_t driver_i
         .receiver = br_tasklet_id,
         .priority = ARM_LIB_MED_PRIORITY_EVENT,
         .event_type = APPLICATION_EVENT,
+        .event_id =  NR_BACKHAUL_INTERFACE_PHY_DOWN,
         .event_data = driver_id
     };
 
     if (link_up) {
         event.event_id = NR_BACKHAUL_INTERFACE_PHY_DRIVER_READY;
-    } else {
-        event.event_id = NR_BACKHAUL_INTERFACE_PHY_DOWN;
     }
-
-    tr_debug("Backhaul driver ID: %d", driver_id);
 
     eventOS_event_send(&event);
 }
@@ -486,12 +483,15 @@ static void borderrouter_tasklet(arm_event_s *event)
             if (event->event_id == NR_BACKHAUL_INTERFACE_PHY_DRIVER_READY) {
                 int8_t net_backhaul_id = (int8_t) event->event_data;
 
+                tr_debug("Backhaul driver ID: %d", net_backhaul_id);
+
                 if (backhaul_interface_up(net_backhaul_id) != 0) {
                     tr_debug("Backhaul bootstrap start failed");
                 } else {
                     tr_debug("Backhaul bootstrap started");
                 }
             } else if (event->event_id == NR_BACKHAUL_INTERFACE_PHY_DOWN) {
+                tr_debug("Backhaul driver ID: %d", (int8_t) event->event_data);
                 if (backhaul_interface_down() != 0) {
                 } else {
                     tr_debug("Backhaul interface is down");
@@ -500,7 +500,7 @@ static void borderrouter_tasklet(arm_event_s *event)
             break;
 
         case ARM_LIB_TASKLET_INIT_EVENT:
-            print_appl_info();
+            appl_info_trace();
             br_tasklet_id = event->receiver;
             thread_br_conn_handler_init();
             eth_network_data_init();

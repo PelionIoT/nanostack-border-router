@@ -17,6 +17,11 @@ extern "C"
 void backhaul_driver_init(void (*backhaul_driver_status_cb)(uint8_t, int8_t));
 
 /**
+* Trace application details
+*/
+void appl_info_trace(void);
+
+/**
  * Initializes the border router module: loads configuration and
  * initiates bootstrap for the RF 6LoWPAN and backhaul interfaces.
  */
