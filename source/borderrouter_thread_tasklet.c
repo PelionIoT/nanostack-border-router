@@ -38,6 +38,7 @@
 #define MESH_METRIC 1000
 #define THREAD_MAX_CHILD_COUNT 32
 
+const uint8_t addr_unspecified[16] = {0};
 static mac_api_t *api;
 static eth_mac_api_t *eth_mac_api;
 
@@ -68,7 +69,7 @@ static nwk_stats_t nwk_stats;
 
 /* Function forward declarations */
 
-static link_configuration_s* thread_link_configuration_get(link_configuration_s *link_configuration);
+static link_configuration_s *thread_link_configuration_get(link_configuration_s *link_configuration);
 static void network_interface_event_handler(arm_event_s *event);
 static void mesh_network_up(void);
 static void eth_network_data_init(void);
@@ -168,12 +169,12 @@ static int thread_interface_up(void)
     return 0;
 }
 
-static link_configuration_s* thread_link_configuration_get(link_configuration_s *link_configuration)
+static link_configuration_s *thread_link_configuration_get(link_configuration_s *link_configuration)
 {
 #ifdef MBED_CONF_APP_THREAD_USE_STATIC_LINK_CONFIG
 #if (false == MBED_CONF_APP_THREAD_USE_STATIC_LINK_CONFIG)
-        // NOT using static link configuration values, return NULL
-        return NULL;
+    // NOT using static link configuration values, return NULL
+    return NULL;
 #endif
 #endif
 
@@ -232,11 +233,9 @@ static void network_interface_event_handler(arm_event_s *event)
 
                 if (backhaul_bootstrap_mode == NET_IPV6_BOOTSTRAP_STATIC) {
                     uint8_t *next_hop_ptr;
-
-                    if (memcmp(backhaul_route.next_hop, (const uint8_t[16]) {0}, 16) == 0) {
+                    if (memcmp(backhaul_route.next_hop, addr_unspecified, 16) == 0) {
                         next_hop_ptr = NULL;
-                    }
-                    else {
+                    } else {
                         next_hop_ptr = backhaul_route.next_hop;
                     }
                     tr_debug("Default route prefix: %s/%d", print_ipv6(backhaul_route.prefix),
@@ -326,7 +325,7 @@ static void mesh_network_up()
 
     thread_if_id = arm_nwk_interface_lowpan_init(api, "ThreadInterface");
     tr_info("thread_if_id: %d", thread_if_id);
-    MBED_ASSERT(thread_if_id>=0);
+    MBED_ASSERT(thread_if_id >= 0);
 
     if (thread_if_id < 0) {
         tr_error("arm_nwk_interface_lowpan_init() failed");
@@ -334,9 +333,9 @@ static void mesh_network_up()
     }
 
     status = arm_nwk_interface_configure_6lowpan_bootstrap_set(
-                thread_if_id,
-                NET_6LOWPAN_ROUTER,
-                NET_6LOWPAN_THREAD);
+                 thread_if_id,
+                 NET_6LOWPAN_ROUTER,
+                 NET_6LOWPAN_THREAD);
 
     if (status < 0) {
         tr_error("arm_nwk_interface_configure_6lowpan_bootstrap_set() failed");
@@ -361,8 +360,8 @@ void thread_rf_init()
     storage_sizes.key_description_table_size = 6;
 
     int8_t rf_driver_id = rf_device_register();
-    MBED_ASSERT(rf_driver_id>=0);
-    if (rf_driver_id>=0) {
+    MBED_ASSERT(rf_driver_id >= 0);
+    if (rf_driver_id >= 0) {
         randLIB_seed_random();
 
         if (!api) {
@@ -426,8 +425,7 @@ static int backhaul_interface_up(int8_t driver_id)
                 backhaul_if_id, backhaul_bootstrap_mode, backhaul_prefix);
             arm_nwk_interface_up(backhaul_if_id);
             retval = 0;
-        }
-        else {
+        } else {
             tr_debug("Could not init ethernet");
         }
     }
@@ -442,8 +440,7 @@ static int backhaul_interface_down(void)
         thread_br_conn_handler_eth_interface_id_set(-1);
         thread_br_conn_handler_ethernet_connection_update(false);
         retval = 0;
-    }
-    else {
+    } else {
         tr_debug("Could not set eth down");
     }
     return retval;

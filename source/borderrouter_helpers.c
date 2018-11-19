@@ -55,10 +55,10 @@ void print_memory_stats(void)
     if (heap_info) {
         tr_info(
             "Heap size: %lu, Reserved: %lu, Reserved max: %lu, Alloc fail: %lu"
-            ,(unsigned long)heap_info->heap_sector_size
-            ,(unsigned long)heap_info->heap_sector_allocated_bytes
-            ,(unsigned long)heap_info->heap_sector_allocated_bytes_max
-            ,(unsigned long)heap_info->heap_alloc_fail_cnt);
+            , (unsigned long)heap_info->heap_sector_size
+            , (unsigned long)heap_info->heap_sector_allocated_bytes
+            , (unsigned long)heap_info->heap_sector_allocated_bytes_max
+            , (unsigned long)heap_info->heap_alloc_fail_cnt);
     }
 }
 

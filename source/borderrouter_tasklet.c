@@ -36,6 +36,7 @@
 #define NR_BACKHAUL_INTERFACE_PHY_DRIVER_READY 2
 #define NR_BACKHAUL_INTERFACE_PHY_DOWN  3
 
+const uint8_t addr_unspecified[16] = {0};
 static mac_api_t *api;
 static eth_mac_api_t *eth_mac_api;
 
@@ -357,7 +358,7 @@ static int backhaul_interface_up(int8_t driver_id)
 
         if (backhaul_if_id >= 0) {
             tr_debug("Backhaul interface ID: %d", backhaul_if_id);
-            if (memcmp(backhaul_prefix, (const uint8_t[8]) { 0 }, 8) == 0) {
+            if (memcmp(backhaul_prefix, addr_unspecified, 8) == 0) {
                 memcpy(backhaul_prefix, rpl_setup_info.DODAG_ID, 8);
             }
             arm_nwk_interface_configure_ipv6_bootstrap_set(
@@ -475,7 +476,7 @@ static void start_6lowpan(const uint8_t *backhaul_address)
 
         // configure as border router and set the operation mode
         retval = arm_nwk_interface_configure_6lowpan_bootstrap_set(net_6lowpan_id,
-                 operating_mode, operating_mode_extension);
+                                                                   operating_mode, operating_mode_extension);
 
         if (retval < 0) {
             tr_error("Configuring 6LoWPAN bootstrap failed, retval = %d", retval);
@@ -504,7 +505,7 @@ static void start_6lowpan(const uint8_t *backhaul_address)
 
         /* configure both /64 and /128 context prefixes */
         retval = arm_nwk_6lowpan_border_router_context_update(net_6lowpan_id, ((1 << 4) | 0x03),
-                 128, 0xffff, rpl_setup_info.DODAG_ID);
+                                                              128, 0xffff, rpl_setup_info.DODAG_ID);
 
         if (retval < 0) {
             tr_error("Setting ND context failed, retval = %d", retval);
@@ -599,14 +600,12 @@ static void app_parse_network_event(arm_event_s *event)
                 }
 
                 if (backhaul_bootstrap_mode == NET_IPV6_BOOTSTRAP_STATIC) {
-                    int8_t retval;
                     uint8_t *next_hop_ptr;
-
-                    if (memcmp(backhaul_route.next_hop, (const uint8_t[16]) {0}, 16) == 0) {
+                    int8_t retval;
+                    if (memcmp(backhaul_route.next_hop, addr_unspecified, 16) == 0) {
                         tr_info("Next hop not defined");
                         next_hop_ptr = NULL;
-                    }
-                    else {
+                    } else {
                         next_hop_ptr = backhaul_route.next_hop;
                     }
 

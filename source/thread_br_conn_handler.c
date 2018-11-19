@@ -18,7 +18,7 @@
 #define TRACE_GROUP "TBRH"
 
 typedef struct {
-    
+
     int8_t  thread_interface_id;
     int8_t  eth_interface_id;
     bool    eth_connection_ready;
@@ -29,10 +29,10 @@ static thread_br_handler_t thread_br_handler;
 
 void thread_br_conn_handler_init(void)
 {
-	thread_br_handler.thread_interface_id = -1;
+    thread_br_handler.thread_interface_id = -1;
     thread_br_handler.thread_connection_ready = 0;
 
-	thread_br_handler.eth_interface_id = -1;
+    thread_br_handler.eth_interface_id = -1;
     thread_br_handler.eth_connection_ready = 0;
 }
 
@@ -54,9 +54,8 @@ void thread_br_conn_handler_thread_interface_id_set(int8_t interfaceId)
 {
     thread_br_handler.thread_interface_id = interfaceId;
     thread_bbr_extension_mesh_interface_updated_ntf(thread_br_handler.thread_interface_id);
-    if (thread_br_handler.thread_interface_id > -1 &&
-  		thread_br_handler.eth_interface_id > -1) {
-    	thread_bbr_start(thread_br_handler.thread_interface_id, thread_br_handler.eth_interface_id);
+    if (thread_br_handler.thread_interface_id > -1 && thread_br_handler.eth_interface_id > -1) {
+        thread_bbr_start(thread_br_handler.thread_interface_id, thread_br_handler.eth_interface_id);
     }
 }
 
@@ -79,9 +78,8 @@ void thread_br_conn_handler_eth_interface_id_set(int8_t interfaceId)
 {
     thread_br_handler.eth_interface_id = interfaceId;
     thread_bbr_extension_bb_interface_updated_ntf(thread_br_handler.eth_interface_id);
-    if (thread_br_handler.thread_interface_id > -1 &&
-  		thread_br_handler.eth_interface_id > -1) {
-    	thread_bbr_start(thread_br_handler.thread_interface_id, thread_br_handler.eth_interface_id);
+    if (thread_br_handler.thread_interface_id > -1 && thread_br_handler.eth_interface_id > -1) {
+        thread_bbr_start(thread_br_handler.thread_interface_id, thread_br_handler.eth_interface_id);
     }
 }
 
