@@ -68,8 +68,6 @@
     },
     "target_overrides": {
         "*": {
-            "target.features_add": ["NANOSTACK", "LOWPAN_BORDER_ROUTER", "COMMON_PAL"],
-            "target.features_remove": ["LWIP"],
             "target.network-default-interface-type": "ETHERNET",
             "nsapi.default-stack": "NANOSTACK",
             "mbed-trace.enable": 1,

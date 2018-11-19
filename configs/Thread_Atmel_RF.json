@@ -52,8 +52,6 @@
     "macros": ["MBEDTLS_USER_CONFIG_FILE=\"source/mbedtls_thread_config.h\""],
     "target_overrides": {
         "*": {
-            "target.features_add": ["NANOSTACK", "COMMON_PAL", "THREAD_BORDER_ROUTER"],
-            "target.features_remove": ["LWIP"],
             "target.network-default-interface-type": "ETHERNET",
             "nsapi.default-stack": "NANOSTACK",
             "mbed-trace.enable": 1,
