@@ -1,5 +1,6 @@
 properties ([[$class: 'ParametersDefinitionProperty', parameterDefinitions: [
-  [$class: 'StringParameterDefinition', name: 'mbed_os_revision', defaultValue: '', description: 'Revision of mbed-os to build. By default mbed-os.lib is used. To access mbed-os PR use format "pull/PR number/head"']
+  [$class: 'StringParameterDefinition', name: 'mbed_os_revision', defaultValue: '', description: 'Revision of mbed-os to build. By default mbed-os.lib is used. To access mbed-os PR use format "pull/PR number/head"'],
+  [$class: 'ChoiceParameterDefinition', name: 'profile', defaultValue: "debug", choices: ["debug", "develop", "release"], description: 'Select compilation profile from list: debug, develop or release.']
   ]]])
 
 if (params.mbed_os_revision == '') {
@@ -10,6 +11,8 @@ if (params.mbed_os_revision == '') {
     echo "Revision is a Pull Request"
   }
 }
+
+echo "Use build profile: ${params.profile}"
 
 // List of targets to compile
 def targets = [
@@ -77,7 +80,7 @@ def buildStep(target, compilerLabel, configurationFile, configurationLabel, tool
               }
             }
           }
-          execute("mbed compile --build out/${configurationLabel}/${target}/${toolchain}/ -m ${target} -t ${toolchain} --app-config ./configs/${configurationFile}")
+          execute("mbed compile --build out/${configurationLabel}/${target}/${toolchain}/ -m ${target} -t ${toolchain} --app-config ./configs/${configurationFile} --profile ${params.profile}")
         }
         archive '**/nanostack-border-router.bin'
       }
