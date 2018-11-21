@@ -69,7 +69,8 @@
             "mbed-trace.enable": 1,
             "nanostack.configuration": "lowpan_border_router",
             "platform.stdio-convert-newlines": true,
-            "platform.stdio-baud-rate": 115200
+            "platform.stdio-baud-rate": 115200,
+            "mbed-mesh-api.use-malloc-for-heap": true
         },
         "K64F": {
             "LED": "LED_GREEN",

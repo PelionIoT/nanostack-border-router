@@ -76,7 +76,8 @@
             "platform.stdio-convert-newlines": true,
             "platform.stdio-baud-rate": 115200,
             "kinetis-emac.tx-ring-len":4,
-            "kinetis-emac.rx-ring-len":4
+            "kinetis-emac.rx-ring-len":4,
+            "mbed-mesh-api.use-malloc-for-heap": true
         },
         "NUCLEO_F429ZI": {
             "LED": "LED1",
