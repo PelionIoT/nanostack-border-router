@@ -68,8 +68,6 @@
     },
     "target_overrides": {
         "*": {
-            "target.features_add": ["NANOSTACK", "LOWPAN_BORDER_ROUTER", "COMMON_PAL"],
-            "target.features_remove": ["LWIP"],
             "spirit1.mac-address": "{0xf0, 0xf1, 0xf2, 0xf3, 0xf4, 0xf5, 0xf6, 0xf7}",
             "target.network-default-interface-type": "ETHERNET",
             "nsapi.default-stack": "NANOSTACK",
@@ -78,7 +76,8 @@
             "platform.stdio-convert-newlines": true,
             "platform.stdio-baud-rate": 115200,
             "kinetis-emac.tx-ring-len":4,
-            "kinetis-emac.rx-ring-len":4
+            "kinetis-emac.rx-ring-len":4,
+            "mbed-mesh-api.use-malloc-for-heap": true
         },
         "NUCLEO_F429ZI": {
             "LED": "LED1",

@@ -21,7 +21,7 @@ void thread_br_conn_handler_eth_ready(void);
 void   thread_br_conn_handler_thread_interface_id_set(int8_t interfaceId);
 void   thread_br_conn_handler_eth_interface_id_set(int8_t interfaceId);
 
-// Getters thread_br_conn_handler       
+// Getters thread_br_conn_handler
 bool   thread_br_conn_handler_eth_connection_status_get(void);
 bool   thread_br_conn_handler_thread_connection_status_get(void);
 int8_t thread_br_conn_handler_thread_interface_id_get(void);
