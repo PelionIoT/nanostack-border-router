@@ -356,6 +356,33 @@ static int backhaul_interface_down(void)
     return retval;
 }
 
+static void print_interface_addr(int id)
+{
+    uint8_t address_buf[128];
+    int address_count = 0;
+    char buf[128];
+
+    if (arm_net_address_list_get(id, 128, address_buf, &address_count) == 0) {
+        uint8_t *t_buf = address_buf;
+        for (int i = 0; i < address_count; ++i) {
+            ip6tos(t_buf, buf);
+            tr_info(" [%d] %s", i, buf);
+            t_buf += 16;
+        }
+    }
+}
+
+#if MBED_CONF_APP_DEBUG_TRACE
+static void print_interface_addresses(void)
+{
+    tr_info("Backhaul interface addresses:");
+    print_interface_addr(wisun_br_conn_handler_eth_interface_id_get());
+
+    tr_info("RF interface addresses:");
+    print_interface_addr(wisun_br_conn_handler_wisun_interface_id_get());
+}
+#endif
+
 /**
   * \brief Border Router Main Tasklet
   *
@@ -447,33 +474,6 @@ static void borderrouter_backhaul_phy_status_cb(uint8_t link_up, int8_t driver_i
     tr_debug("Backhaul driver ID: %d", driver_id);
 
     eventOS_event_send(&event);
-}
-
-#if MBED_CONF_APP_DEBUG_TRACE
-static void print_interface_addresses(void)
-{
-    tr_info("Backhaul interface addresses:");
-    print_interface_addr(wisun_br_conn_handler_eth_interface_id_get());
-
-    tr_info("RF interface addresses:");
-    print_interface_addr(wisun_br_conn_handler_wisun_interface_id_get());
-}
-#endif
-
-static void print_interface_addr(int id)
-{
-    uint8_t address_buf[128];
-    int address_count = 0;
-    char buf[128];
-
-    if (arm_net_address_list_get(id, 128, address_buf, &address_count) == 0) {
-        uint8_t *t_buf = address_buf;
-        for (int i = 0; i < address_count; ++i) {
-            ip6tos(t_buf, buf);
-            tr_info(" [%d] %s", i, buf);
-            t_buf += 16;
-        }
-    }
 }
 
 // ethernet interface

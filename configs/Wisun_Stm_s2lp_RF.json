@@ -2,7 +2,7 @@
     "config": {
         "heap-size": {
              "help": "The amount of static RAM to reserve for nsdynmemlib heap",
-             "value": 65535
+             "value": 100000
         },
         "radio-type":{
             "help": "options are ATMEL, MCR20, SPIRIT1, S2LP",
@@ -54,7 +54,8 @@
             "mbed-trace.enable": 1,
             "nanostack.configuration": "nanostack_full",
             "platform.stdio-convert-newlines": true,
-            "platform.stdio-baud-rate": 115200
+            "platform.stdio-baud-rate": 115200,
+            "platform.stdio-buffered-serial": true
         },
         "K64F": {
             "kinetis-emac.tx-ring-len":4,
