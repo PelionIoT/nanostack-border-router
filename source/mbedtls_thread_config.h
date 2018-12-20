@@ -60,9 +60,6 @@
 /* Save ROM and a few bytes of RAM by specifying our own ciphersuite list */
 #define MBEDTLS_SSL_CIPHERSUITES MBEDTLS_TLS_ECJPAKE_WITH_AES_128_CCM_8
 
-/* Needed by SecureStore encrypt_decrypt_data */
-#define MBEDTLS_CIPHER_MODE_CTR
-
 /* Optimization. Remove all not needed stuff */
 /* For type TYPE_THREAD_SLEEPY_END_DEVICE
 #undef MBEDTLS_X509_USE_C
@@ -101,7 +98,7 @@
 #undef MBEDTLS_DEBUG_C
 #undef MBEDTLS_ECDSA_C
 #undef MBEDTLS_ERROR_C
-#define MBEDTLS_GCM_C
+#undef MBEDTLS_GCM_C
 #undef MBEDTLS_PEM_PARSE_C
 #undef MBEDTLS_RSA_C
 #undef MBEDTLS_VERSION_C
@@ -124,6 +121,7 @@
 #undef MBEDTLS_DEPRECATED_REMOVED
 #undef MBEDTLS_CAMELLIA_SMALL_MEMORY
 #undef MBEDTLS_CIPHER_MODE_CFB
+#undef MBEDTLS_CIPHER_MODE_CTR
 #undef MBEDTLS_CIPHER_NULL_CIPHER
 #undef MBEDTLS_CIPHER_PADDING_ONE_AND_ZEROS
 #undef MBEDTLS_CIPHER_PADDING_ZEROS_AND_LEN

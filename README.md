@@ -55,10 +55,7 @@ External driver can be added by calling
 ```
 mbed add <driver>
 ```
-
-For example MCR20A RF driver is added by calling `mbed add mcr20a-rf-driver`
-
-Atmel AT86RF driver is added by calling `mbed add atmel-rf-driver`
+For example STM Spirit1 RF driver is added by calling `mbed add stm-spirit1-rf-driver`
 
 ## Selecting the target platform
 
@@ -66,16 +63,19 @@ The target platform is the hardware on which the border router runs. There are n
 
 If you wish to write your own target, follow the instructions in [Adding target support to mbed OS 5](https://docs.mbed.com/docs/mbed-os-handbook/en/latest/advanced/porting_guide/).
 
-The border router requires an RF driver to be provided for Nanostack. Currently, there are the following drivers:
+The border router requires an RF driver to be provided for Nanostack. Currently, there are the following drivers available in the Mbed OS:
 
 * [Atmel AT86RF233](https://github.com/ARMmbed/atmel-rf-driver)
 * [Atmel AT86RF212B](https://github.com/ARMmbed/atmel-rf-driver)
-* [STM Spirit1](https://github.com/ARMmbed/stm-spirit1-rf-driver)
 * [NXP MCR20A](https://github.com/ARMmbed/mcr20a-rf-driver)
+* [STM-s2lp](https://github.com/ARMmbed/mbed-os/tree/master/components/802.15.4_RF)
+
+Following external driver can be added as described [above](#adding-connectivity-driver):
+
+* [STM Spirit1](https://github.com/ARMmbed/stm-spirit1-rf-driver)
 
 The backhaul is either SLIP or Ethernet. For Ethernet either an mbed OS "EMAC"
-driver can be used, or a native Nanostack driver. Currently, there are Nanostack drivers
-for the following backhauls:
+driver can be used, or a native Nanostack driver. Currently, native Nanostack drivers exists for the following backhauls:
 
 * [K64F Ethernet](https://github.com/ARMmbed/sal-nanostack-driver-k64f-eth)
 * [SLIP driver](https://github.com/ARMmbed/sal-stack-nanostack-slip)
@@ -108,7 +108,7 @@ Applications using Nanostack Border Router need to use a `.json` file for the co
 |`ra-router-lifetime`|Defines the router advertisement interval in seconds (default 1024 if left out).|
 |`beacon-protocol-id`|Is used to identify beacons. This should not be changed (default 4 if left out).|
 
-To learn more about 6LoWPAN and the configuration parameters, read the [6LoWPAN overview] (https://docs.mbed.com/docs/arm-ipv66lowpan-stack/en/latest/quick_start_intro/index.html).
+To learn more about 6LoWPAN and the configuration parameters, read the [6LoWPAN overview](https://os.mbed.com/docs/latest/reference/mesh-tech.html).
 
 See [configs/6lowpan_Atmel_RF.json](configs/6lowpan_Atmel_RF.json) for an example configuration file.
 
@@ -165,7 +165,7 @@ The Nanostack border router application can be connected to a backhaul network. 
 "config": {
     "backhaul-driver": {
         "help": "options are ETH, SLIP, EMAC",
-        "value": "ETH"
+        "value": "EMAC"
     },
     "backhaul-mac-src": {
         "help": "Where to get EUI48 address. Options are BOARD, CONFIG",
@@ -182,7 +182,7 @@ The Nanostack border router application can be connected to a backhaul network. 
 
 You can select your preferred option through the configuration file (field `backhaul-driver` in the `config` section). The value `SLIP` includes the SLIP driver, while the value `ETH` compiles the border router application with Nanostack native Ethernet backhaul support. `EMAC` uses the board's default mbed OS network driver, which must be EMAC-based (derived from EMACInterface).
 
-You can define the MAC address on the backhaul interface manually (field `backhaul-mac-src` value `CONFIG`). Alternatively, you can use the MAC address provided by the development board (field `backhaul-mac-src` value `BOARD`). By default, the backhaul driver is set to `ETH` and the MAC address source is `BOARD`.
+You can define the MAC address on the backhaul interface manually (field `backhaul-mac-src` value `CONFIG`). Alternatively, you can use the MAC address provided by the development board (field `backhaul-mac-src` value `BOARD`). By default, the backhaul driver is set to `EMAC` and the MAC address source is `BOARD`.
 
 You can also set the backhaul bootstrap mode (field `backhaul-dynamic-bootstrap`). By default, the bootstrap mode is set to true, which means the autonomous mode. With the autonomous mode, the border router learns the prefix information automatically from an IPv6 gateway in the Ethernet/SLIP segment. When the parameter is set to false, it enables you to set up a manual configuration of `backhaul-prefix` and `backhaul-default-route`.
 
@@ -213,7 +213,7 @@ An example configuration for the SLIP driver:
 
 #### Note on EMAC backhaul
 
-When `backhaul_driver` is set to `EMAC`, the border router will use the target's default network driver, as supplied by `NetworkInterface::get_default_instance`. This must be EMAC-based, derived from EMACInterface. If th - the same driver that a default-constructed `EthernetInterface` would use, so in principle it should work on any board where `EthernetInterface` works.
+When `backhaul_driver` is set to `EMAC`, the border router will use the target's default network driver, as supplied by `NetworkInterface::get_default_instance`. This must be EMAC-based, derived from EMACInterface. If it is the same driver that a default-constructed `EthernetInterface` would use, so in principle it should work on any board where `EthernetInterface` works.
 
 To use a different interface, change the setting of `target.default-network-interface-type` in `mbed_app.json` to point to a different interface type, or add an overriding definition of `NetworkInterface::get_default_instance` to the application - this will override any default supplied by the target board.
 
@@ -260,7 +260,7 @@ In case you have choosen the STM Spirit1 Sub-1 GHz RF expansion board [X-NUCLEO-
     }
 ```
 
-<span class="notes">**Not**: This MAC address must be unique within the 6LoWPAN mesh network.</span>
+<span class="notes">**Note**: This MAC address must be unique within the 6LoWPAN mesh network.</span>
 
 After changing the radio shield, you need to recompile the application.
 
@@ -268,7 +268,7 @@ After changing the radio shield, you need to recompile the application.
 
 The Application can enable use of file system as instructed in [mbed OS storage documentation](https://os.mbed.com/docs/latest/reference/storage.html). File system is not enabled by default due variety of possible configurations.
 
-Thread network stack is able to write/read network configuration settings to/from file system once the feature is activated. Activation happens by telling file system root path to nanostack. To set the root-path, use function:
+Thread network stack is able to write/read network configuration settings to/from file system once the feature is activated. Activation happens by telling file system root path to Nanostack. To set the root-path, use function:
 
 `ns_file_system_set_root_path(root-path)`
 
