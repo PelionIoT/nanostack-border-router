@@ -5,9 +5,6 @@
 #ifndef MBEDTLS_THREAD_CONFIG_H_
 #define MBEDTLS_THREAD_CONFIG_H_
 
-/* System support */
-#undef MBEDTLS_HAVE_ASM
-
 /* mbed TLS feature support */
 #define MBEDTLS_ECP_DP_SECP256R1_ENABLED
 #define MBEDTLS_ECP_NIST_OPTIM
@@ -20,8 +17,6 @@
 #define MBEDTLS_SSL_EXPORT_KEYS
 #define MBEDTLS_SSL_ALL_ALERT_MESSAGES
 #define MBEDTLS_SSL_MAX_CONTENT_LEN 4096
-
-#define MBEDTLS_SHA256_SMALLER //reduce ROM usage ~1,4kB, perf hit 30%
 
 /* mbed TLS modules */
 #define MBEDTLS_AES_C
