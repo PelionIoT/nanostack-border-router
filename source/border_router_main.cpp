@@ -167,7 +167,21 @@ void appl_info_trace(void)
     tr_info("Starting NanoStack Border Router...");
     tr_info("Build date: %s %s", __DATE__, __TIME__);
 #ifdef MBED_MAJOR_VERSION
-    tr_info("Mbed OS version: %d.%d.%d\n", MBED_MAJOR_VERSION, MBED_MINOR_VERSION, MBED_PATCH_VERSION);
+    tr_info("Mbed OS: %d", MBED_VERSION);
+#endif
+
+#if defined(MBED_SYS_STATS_ENABLED)
+    mbed_stats_sys_t stats;
+    mbed_stats_sys_get(&stats);
+
+    /* ARM = 1, GCC_ARM = 2, IAR = 3 */
+    tr_info("Compiler ID: %d", stats.compiler_id);
+    /* Compiler versions:
+       ARM: PVVbbbb (P = Major; VV = Minor; bbbb = build number)
+       GCC: VVRRPP  (VV = Version; RR = Revision; PP = Patch)
+       IAR: VRRRPPP (V = Version; RRR = Revision; PPP = Patch)
+    */
+    tr_info("Compiler Version: %d", stats.compiler_version);
 #endif
 }
 
@@ -175,7 +189,6 @@ void appl_info_trace(void)
  * \brief The entry point for this application.
  * Sets up the application and starts the border router module.
  */
-
 int main(int argc, char **argv)
 {
     ns_hal_init(app_stack_heap, APP_DEFINED_HEAP_SIZE, app_heap_error_handler, &heap_info);
