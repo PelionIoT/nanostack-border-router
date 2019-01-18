@@ -29,6 +29,12 @@
 #include "ethernet_mac_api.h"
 #include "sw_mac.h"
 
+#if MBED_CONF_APP_USE_FHSS == 1
+#include "fhss_api.h"
+#include "fhss_config.h"
+#include "net_fhss.h"
+#endif
+
 #include "static_6lowpan_config.h"
 
 #include "ns_trace.h"
@@ -40,7 +46,10 @@
 const uint8_t addr_unspecified[16] = {0};
 static mac_api_t *api;
 static eth_mac_api_t *eth_mac_api;
-
+#if MBED_CONF_APP_USE_FHSS == 1
+static fhss_api_t *fhss_api;
+extern fhss_timer_t fhss_functions;
+#endif
 /* The border router tasklet runs in grounded/non-storing mode */
 #define RPL_FLAGS RPL_GROUNDED | BR_DODAG_MOP_NON_STORING | RPL_DODAG_PREF(0)
 
@@ -86,6 +95,11 @@ static route_info_t backhaul_route;
 
 /* Should prefix on the backhaul used for PAN as well? */
 static uint8_t rf_prefix_from_backhaul = 0;
+
+#if MBED_CONF_APP_USE_FHSS == 1
+static fhss_configuration_t fhss_configuration;
+static fhss_synch_configuration_t fhss_synch_configuration;
+#endif
 
 static net_6lowpan_mode_e operating_mode = NET_6LOWPAN_BORDER_ROUTER;
 static net_6lowpan_mode_extension_e operating_mode_extension = NET_6LOWPAN_ND_WITH_MLE;
@@ -301,6 +315,34 @@ static void load_config(void)
     }
 }
 
+#if MBED_CONF_APP_USE_FHSS == 1
+static void init_fhss(void)
+{
+    tr_info("Init fhss");
+
+    fhss_configuration.fhss_tuning_parameters.tx_processing_delay = 0;
+    fhss_configuration.fhss_tuning_parameters.rx_processing_delay = 0;
+    fhss_configuration.fhss_tuning_parameters.ack_processing_delay =0;
+
+    fhss_configuration.fhss_max_synch_interval = 240;
+    fhss_configuration.fhss_number_of_channel_retries = 1;
+    fhss_configuration.channel_mask[0] = 0x01ffffff;
+
+    fhss_timer_t *fhss_timer_ptr = &fhss_functions;
+
+    fhss_api = ns_fhss_create(&fhss_configuration, fhss_timer_ptr, NULL);
+
+    fhss_synch_configuration.fhss_number_of_bc_channels = 5;
+    fhss_synch_configuration.fhss_number_of_tx_slots = 2;
+    fhss_synch_configuration.fhss_superframe_length = 50000;
+    fhss_synch_configuration.fhss_number_of_superframes = 8;
+
+    ns_sw_mac_fhss_register(api, fhss_api);
+
+    ns_fhss_configuration_set(fhss_api, &fhss_synch_configuration);
+}
+#endif
+
 static int8_t rf_interface_init(void)
 {
     static char phy_name[] = "mesh0";
@@ -317,6 +359,9 @@ static int8_t rf_interface_init(void)
         if (!api) {
             api = ns_sw_mac_create(rf_phy_device_register_id, &storage_sizes);
         }
+#if MBED_CONF_APP_USE_FHSS == 1
+        init_fhss();
+#endif
         rfid = arm_nwk_interface_lowpan_init(api, phy_name);
         tr_debug("RF interface ID: %d", rfid);
     }
