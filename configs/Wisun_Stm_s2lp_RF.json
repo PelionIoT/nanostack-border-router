@@ -27,9 +27,9 @@
         "backhaul-mac": "{0x02, 0x00, 0x00, 0x00, 0x00, 0x01}",
         "debug-trace": "false",
         "backhaul-dynamic-bootstrap": true,
-        "backhaul-prefix": "fd00:db8:ff1::",
-        "backhaul-default-route": "::/0",
-        "backhaul-next-hop": "fe80::1",
+        "backhaul-prefix": "\"fd00:db8:ff1::\"",
+        "backhaul-default-route": "\"::/0\"",
+        "backhaul-next-hop": "\"fe80::1\"",
         "multicast-addr": "ff05::7",
         "LED": "NC",
         "SERIAL_TX": "NC",
@@ -53,7 +53,8 @@
             "nanostack.configuration": "ws_border_router",
             "platform.stdio-convert-newlines": true,
             "platform.stdio-baud-rate": 115200,
-            "platform.stdio-buffered-serial": true
+            "platform.stdio-buffered-serial": true,
+            "mbed-mesh-api.use-malloc-for-heap": true
         },
         "K64F": {
             "kinetis-emac.tx-ring-len":4,
