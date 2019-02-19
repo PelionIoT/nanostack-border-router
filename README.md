@@ -1,6 +1,8 @@
 # Nanostack Border Router
 
-Nanostack Border Router is a generic mbed border router implementation that provides the 6LoWPAN ND or Thread border router initialization logic.
+Nanostack Border Router is a generic mbed border router implementation that provides the 6LoWPAN ND, Thread or Wi-SUN border router initialization logic.
+
+Note: Wi-SUN is currently available for partners only.
 
 Border router is a network gateway between a wireless 6LoWPAN mesh network and a backhaul network. It controls and relays traffic between the two networks. In a typical setup, a 6LoWPAN border router is connected to another router in the backhaul network (over Ethernet or a serial line) which in turn forwards traffic to/from the internet or a private company LAN, for instance.
 
@@ -146,6 +148,26 @@ The Thread-specific parameters are listed below.
 | `pskd`                              | Pre-Shared Key for the device. |
 | `thread-master-key`                 | A key used to derive security material for MAC and MLE protection. |
 
+### Wi-SUN configuration
+
+The Wi-SUN -specific parameters are listed below.
+
+| Field                               | Description                                                   |
+|-------------------------------------|---------------------------------------------------------------|
+| `network-name`                      | Network name for Wi-SUN the network, MUST be same for all the devices in the network |
+| `regulatory-domain`                 | Defines regulatory domain, refer to [ws_management_api](https://github.com/ARMmbed/mbed-os/blob/master/features/nanostack/sal-stack-nanostack/nanostack/ws_management_api.h) for correct values for your region. |
+| `operating-class`                   | Defines operating class, limited by the regulatory domain |
+| `operating-mode`                    | Defines the operating mode, limited by the regulatory domain |
+| `uc-channel-function`               | Unicast channel function |
+| `bc-channel-function`               | Broadcast channel function |
+| `uc-fixed-channel`                  | Fixed channel for unicast |
+| `bc-fixed-channel`                  | Fixed channel for broadcast |
+| `uc-dwell-interval`                 | Unicast dwell interval. Range: 15-255 milliseconds |
+| `bc-interval`                       | Broadcast interval. Duration between broadcast dwell intervals. Range: 0-16777216 milliseconds |
+| `bc-dwell-interval`                 | Broadcast dwell interval. Range: 15-255 milliseconds |
+
+Regulatory domain, operating class and operating mode are defined in the Wi-SUN PHY-specification.
+
 
 For the Thread Border Router, there are example configuration files for `SLIP` and `ETH` backhaul connectivity:
 
@@ -227,7 +249,7 @@ To select the Atmel radio shield, use the following:
 
 ```
         "radio-type":{
-            "help": "options are ATMEL, MCR20, SPIRIT1",
+            "help": "options are ATMEL, MCR20, SPIRIT1, S2LP",
             "value": "ATMEL"
         },
 ```
@@ -236,7 +258,7 @@ To select the NXP radio shield, use the following:
 
 ```
         "radio-type":{
-            "help": "options are ATMEL, MCR20, SPIRIT1",
+            "help": "options are ATMEL, MCR20, SPIRIT1, S2LP",
             "value": "MCR20"
         },
 ```
@@ -245,8 +267,16 @@ To select the STM Spirit1 radio shield, use the following:
 
 ```
         "radio-type":{
-            "help": "options are ATMEL, MCR20, SPIRIT1",
+            "help": "options are ATMEL, MCR20, SPIRIT1, S2LP",
             "value": "SPIRIT1"
+        },
+```
+
+To select the STM S2LP radio shield, use the following:
+```
+        "radio-type":{
+            "help": "options are ATMEL, MCR20, SPIRIT1, S2LP",
+            "value": "S2LP"
         },
 ```
 
@@ -263,6 +293,10 @@ In case you have choosen the STM Spirit1 Sub-1 GHz RF expansion board [X-NUCLEO-
 <span class="notes">**Note**: This MAC address must be unique within the 6LoWPAN mesh network.</span>
 
 After changing the radio shield, you need to recompile the application.
+
+#### Wi-SUN RF shield
+
+Currently there is only one radio shield with a support for Wi-SUN, the STM S2LP radio shield.
 
 ## File system support
 
