@@ -33,7 +33,8 @@ def toolchains = [
 def configurations = [
   LOWPAN: "6lowpan_Atmel_RF.json",
   THREAD: "Thread_Atmel_RF.json",
-  THREAD_SLIP: "Thread_SLIP_Atmel_RF.json"
+  THREAD_SLIP: "Thread_SLIP_Atmel_RF.json",
+  WI_SUN: "Wisun_Stm_s2lp_RF.json"
   ]
 
 def stepsForParallel = [:]
@@ -48,8 +49,8 @@ for (int i = 0; i < targets.size(); i++) {
       def configurationLabel = configurations.keySet().asList().get(k)
       def configurationFile = configurations.get(configurationLabel)
       def stepName = "${target} ${configurationLabel} ${toolchain}"
-      // SLIP configuration exist only for K64F based Raspberry HAT
-      if (configurationLabel == "THREAD_SLIP" && target != "K64F") {
+      // SLIP configuration exist only for K64F based Raspberry HAT and Wi-SUN configuration exist only for K64F
+      if ((configurationLabel == "THREAD_SLIP" || configurationLabel == "WI_SUN") && target != "K64F") {
         continue;
       }
       stepsForParallel[stepName] = buildStep(target, compilerLabel, configurationFile, configurationLabel, toolchain)
