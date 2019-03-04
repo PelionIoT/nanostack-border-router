@@ -43,7 +43,7 @@
         "operating-mode": 255,
         "uc-fixed-channel": "0xffff",
         "bc-fixed-channel": "0xffff",
-        "network-name": "\"ARM-WS-TESTING\""
+        "network-name": "\"Wi-SUN Network\""
     },
     "target_overrides": {
         "*": {

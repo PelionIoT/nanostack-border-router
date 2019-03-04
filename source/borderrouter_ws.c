@@ -112,8 +112,6 @@ typedef struct {
 } ws_config_t;
 static ws_config_t ws_conf;
 
-static const char default_network_name[] = "ARM-WS-TESTING";
-
 static void mesh_network_up()
 {
     tr_debug("Create Mesh Interface");
@@ -175,13 +173,8 @@ static void eth_network_data_init()
 
 void load_config(void)
 {
-#ifdef MBED_CONF_APP_NETWORK_NAME
     ws_conf.network_name = malloc(sizeof(MBED_CONF_APP_NETWORK_NAME) + 1);
     strcpy(ws_conf.network_name, MBED_CONF_APP_NETWORK_NAME);
-#else
-    ws_conf.network_name = malloc(sizeof(default_network_name) + 1);
-    strcpy(ws_conf.network_name, default_network_name);
-#endif //MBED_CONF_APP_NETWORK_NAME
 #ifdef MBED_CONF_APP_REGULATORY_DOMAIN
     ws_conf.regulatory_domain = MBED_CONF_APP_REGULATORY_DOMAIN;
 #else
