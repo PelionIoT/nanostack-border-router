@@ -43,8 +43,26 @@
         "operating-mode": 255,
         "uc-fixed-channel": "0xffff",
         "bc-fixed-channel": "0xffff",
-        "network-name": "\"Wi-SUN Network\""
+        "network-name": "\"Wi-SUN Network\"",
+        "certificate-header": {
+            "help": "Certificate header",
+            "value": "\"wisun_certificates.h\""
+        },
+        "root-certificate": {
+            "help": "Root certificate in PEM format (must be a null terminated c-string)",
+            "value": "WISUN_ROOT_CERTIFICATE"
+        },
+        "own-certificate": {
+            "help": "Own certificate in PEM format (must be a null terminated c-string)",
+            "value": "WISUN_SERVER_CERTIFICATE"
+        },
+        "own-certificate-key": {
+            "help": "Own certificate's key in PEM format (must be a null terminated c-string)",
+            "value": "WISUN_SERVER_KEY"
+        }
+        
     },
+    "macros": ["MBEDTLS_USER_CONFIG_FILE=\"source/mbedtls_wisun_config.h\""],    
     "target_overrides": {
         "*": {
             "target.network-default-interface-type": "ETHERNET",

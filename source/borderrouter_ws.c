@@ -28,6 +28,9 @@
 #include "sw_mac.h"
 #include "nwk_stats_api.h"
 #include "randLIB.h"
+#ifdef MBED_CONF_APP_CERTIFICATE_HEADER
+#include MBED_CONF_APP_CERTIFICATE_HEADER
+#endif
 
 #include "ns_trace.h"
 #define TRACE_GROUP "brro"
@@ -309,6 +312,17 @@ static int wisun_interface_up(void)
         }
     }
 
+#if defined(MBED_CONF_APP_CERTIFICATE_HEADER)
+    arm_certificate_chain_entry_s chain_info;
+    memset(&chain_info, 0, sizeof(arm_certificate_chain_entry_s));
+    chain_info.cert_chain[0] = (const uint8_t *) MBED_CONF_APP_ROOT_CERTIFICATE;
+    chain_info.cert_len[0] = strlen((const char *) MBED_CONF_APP_ROOT_CERTIFICATE);
+    chain_info.cert_chain[1] = (const uint8_t *) MBED_CONF_APP_OWN_CERTIFICATE;
+    chain_info.cert_len[1] = strlen((const char *) MBED_CONF_APP_OWN_CERTIFICATE);
+    chain_info.key_chain[1] = (const uint8_t *) MBED_CONF_APP_OWN_CERTIFICATE_KEY;
+    chain_info.chain_length = 2;
+    arm_network_certificate_chain_set((const arm_certificate_chain_entry_s *) &chain_info);
+#endif
     ret = arm_nwk_interface_up(ws_br_handler.ws_interface_id);
     if (ret != 0) {
         tr_error("mesh0 up Fail with code: %"PRIi32"", ret);
