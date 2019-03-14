@@ -165,6 +165,10 @@ The Wi-SUN -specific parameters are listed below.
 | `uc-dwell-interval`                 | Unicast dwell interval. Range: 15-255 milliseconds |
 | `bc-interval`                       | Broadcast interval. Duration between broadcast dwell intervals. Range: 0-16777216 milliseconds |
 | `bc-dwell-interval`                 | Broadcast dwell interval. Range: 15-255 milliseconds |
+| `certificate-header`                | Wi-SUN certificate header file |
+| `root-certificate`                  | Root certificate |
+| `own-certificate`                   | Own certificate |
+| `own-certificate-key`               | Own certificate's key |
 
 Regulatory domain, operating class and operating mode are defined in the Wi-SUN PHY-specification.
 
