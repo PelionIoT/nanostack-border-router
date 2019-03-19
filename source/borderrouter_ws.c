@@ -316,9 +316,9 @@ static int wisun_interface_up(void)
     arm_certificate_chain_entry_s chain_info;
     memset(&chain_info, 0, sizeof(arm_certificate_chain_entry_s));
     chain_info.cert_chain[0] = (const uint8_t *) MBED_CONF_APP_ROOT_CERTIFICATE;
-    chain_info.cert_len[0] = strlen((const char *) MBED_CONF_APP_ROOT_CERTIFICATE);
+    chain_info.cert_len[0] = strlen((const char *) MBED_CONF_APP_ROOT_CERTIFICATE) + 1;
     chain_info.cert_chain[1] = (const uint8_t *) MBED_CONF_APP_OWN_CERTIFICATE;
-    chain_info.cert_len[1] = strlen((const char *) MBED_CONF_APP_OWN_CERTIFICATE);
+    chain_info.cert_len[1] = strlen((const char *) MBED_CONF_APP_OWN_CERTIFICATE) + 1;
     chain_info.key_chain[1] = (const uint8_t *) MBED_CONF_APP_OWN_CERTIFICATE_KEY;
     chain_info.chain_length = 2;
     arm_network_certificate_chain_set((const arm_certificate_chain_entry_s *) &chain_info);
