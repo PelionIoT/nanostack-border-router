@@ -100,6 +100,8 @@ Applications using Nanostack Border Router need to use a `.json` file for the co
 | `backhaul-next-hop`                   | The next-hop value for the backhaul default route; should be a link-local address of a neighboring router, default: empty (on-link prefix). Example format: `fe80::1` |
 | `backhaul-mld`                        | Enable sending Multicast Listener Discovery reports to backhaul network when a new multicast listener is registered in mesh network. Values: true or false |
 
+Note: Static IPv6 configuration with Wi-SUN is currently not allowed. Please use automatic configuration instead.
+
 ### 6LoWPAN ND border router options
 
 | Field                               | Description                                                   |
