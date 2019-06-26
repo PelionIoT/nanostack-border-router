@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 ARM Limited. All rights reserved.
+ * Copyright (c) 2016-2019 ARM Limited. All rights reserved.
  */
 
 #include <string.h>
@@ -28,14 +28,10 @@
 #include "mesh_system.h"
 #include "cmsis_os.h"
 #include "arm_hal_interrupt.h"
-
+#include "nanostack_heap_region.h"
 
 #include "mbed_trace.h"
 #define TRACE_GROUP "app"
-
-#define APP_DEFINED_HEAP_SIZE MBED_CONF_APP_HEAP_SIZE
-static uint8_t app_stack_heap[APP_DEFINED_HEAP_SIZE];
-static mem_stat_t heap_info;
 
 #define BOARD 1
 #define CONFIG 2
@@ -50,8 +46,6 @@ static const uint8_t mac[] = MBED_CONF_APP_BACKHAUL_MAC;
 static DigitalOut led1(MBED_CONF_APP_LED);
 
 static Ticker led_ticker;
-
-static void app_heap_error_handler(heap_fail_t event);
 
 static void toggle_led1()
 {
@@ -191,8 +185,6 @@ void appl_info_trace(void)
  */
 int main(int argc, char **argv)
 {
-    ns_hal_init(app_stack_heap, APP_DEFINED_HEAP_SIZE, app_heap_error_handler, &heap_info);
-
     mbed_trace_init(); // set up the tracing library
     mbed_trace_print_function_set(trace_printer);
     mbed_trace_config_set(TRACE_MODE_COLOR | APP_TRACE_LEVEL | TRACE_CARRIAGE_RETURN);
@@ -200,6 +192,8 @@ int main(int argc, char **argv)
     // Have to let mesh_system do net_init_core in case we use
     // Nanostack::add_ethernet_interface()
     mesh_system_init();
+
+    nanostack_heap_region_add();
 
 #if MBED_CONF_APP_BACKHAUL_MAC_SRC == BOARD
     mbed_mac_address((char *)mac);
@@ -210,31 +204,3 @@ int main(int argc, char **argv)
     }
     border_router_tasklet_start();
 }
-
-/**
- * \brief Error handler for errors in dynamic memory handling.
- */
-static void app_heap_error_handler(heap_fail_t event)
-{
-    tr_error("Dyn mem error %x", (int8_t)event);
-
-    switch (event) {
-        case NS_DYN_MEM_NULL_FREE:
-            break;
-        case NS_DYN_MEM_DOUBLE_FREE:
-            break;
-        case NS_DYN_MEM_ALLOCATE_SIZE_NOT_VALID:
-            break;
-        case NS_DYN_MEM_POINTER_NOT_VALID:
-            break;
-        case NS_DYN_MEM_HEAP_SECTOR_CORRUPTED:
-            break;
-        case NS_DYN_MEM_HEAP_SECTOR_UNITIALIZED:
-            break;
-        default:
-            break;
-    }
-
-    while (1);
-}
-
