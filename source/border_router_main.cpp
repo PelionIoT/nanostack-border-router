@@ -16,6 +16,21 @@
 #include "EMACInterface.h"
 #include "EMAC.h"
 
+#undef ETH
+#undef SLIP
+#undef EMAC
+#undef CELL
+#define ETH 1
+#define SLIP 2
+#define EMAC 3
+#define CELL 4
+
+#if MBED_CONF_APP_BACKHAUL_DRIVER == CELL
+#include "NanostackPPPInterface.h"
+#include "PPPInterface.h"
+#include "PPP.h"
+#endif
+
 #ifdef  MBED_CONF_APP_DEBUG_TRACE
 #if MBED_CONF_APP_DEBUG_TRACE == 1
 #define APP_TRACE_LEVEL TRACE_ACTIVE_LEVEL_DEBUG
@@ -60,12 +75,6 @@ static void trace_printer(const char *str)
     printf("%s\n", str);
 }
 
-#undef ETH
-#undef SLIP
-#undef EMAC
-#define ETH 1
-#define SLIP 2
-#define EMAC 3
 #if MBED_CONF_APP_BACKHAUL_DRIVER == EMAC
 static void (*emac_actual_cb)(uint8_t, int8_t);
 static int8_t emac_driver_id;
@@ -143,6 +152,40 @@ void backhaul_driver_init(void (*backhaul_driver_status_cb)(uint8_t, int8_t))
         emac_driver_id = ns_if->get_driver_id();
         emac.set_link_state_cb(emac_link_cb);
     }
+#elif MBED_CONF_APP_BACKHAUL_DRIVER == CELL
+    tr_info("Using CELLULAR backhaul driver...");
+    /* Creates PPP service and onboard network stack already here for cellular
+     * connection to be able to override the link state changed callback */
+    PPP *ppp = &PPP::get_default_instance();
+    if (!ppp) {
+        tr_error("PPP not found");
+        exit(1);
+    }
+    OnboardNetworkStack *stack = &OnboardNetworkStack::get_default_instance();
+    if (!stack) {
+        tr_error("Onboard network stack not found");
+        exit(1);
+    }
+    OnboardNetworkStack::Interface *interface;
+    if (stack->add_ppp_interface(*ppp, true, &interface) != NSAPI_ERROR_OK) {
+        tr_error("Cannot add PPP interface");
+        exit(1);
+    }
+    Nanostack::PPPInterface *ns_if = static_cast<Nanostack::PPPInterface *>(interface);
+    ns_if->set_link_state_changed_callback(backhaul_driver_status_cb);
+
+    // Cellular interface configures it to PPP service and onboard stack created above
+    CellularInterface *net = CellularInterface::get_default_instance();
+    if (!net) {
+        tr_error("Default cellular interface not found");
+        exit(1);
+    }
+    net->set_default_parameters(); // from cellular nsapi .json configuration
+    net->set_blocking(false);
+    if (net->connect() != NSAPI_ERROR_OK) {
+        tr_error("Connect failure");
+        exit(1);
+    }
 #elif MBED_CONF_APP_BACKHAUL_DRIVER == ETH
     tr_info("Using ETH backhaul driver...");
     arm_eth_phy_device_register(mac, backhaul_driver_status_cb);
@@ -150,9 +193,10 @@ void backhaul_driver_init(void (*backhaul_driver_status_cb)(uint8_t, int8_t))
 #else
 #error "Unsupported backhaul driver"
 #endif
-#undef SLIP
 #undef ETH
+#undef SLIP
 #undef EMAC
+#undef CELL
 }
 
 

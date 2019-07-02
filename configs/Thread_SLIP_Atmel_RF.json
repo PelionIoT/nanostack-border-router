@@ -5,7 +5,7 @@
             "value": "ATMEL"
         },
         "backhaul-driver": {
-            "help": "options are ETH, SLIP, EMAC",
+            "help": "options are ETH, SLIP, EMAC, CELL",
             "value": "SLIP"
         },
         "mesh-mode": {
