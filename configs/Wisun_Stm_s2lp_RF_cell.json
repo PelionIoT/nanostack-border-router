@@ -1,12 +1,16 @@
 {
     "config": {
+        "heap-size": {
+             "help": "The amount of static RAM to reserve for nsdynmemlib heap",
+             "value": 100000
+        },
         "radio-type":{
             "help": "options are ATMEL, MCR20, SPIRIT1, S2LP",
             "value": "S2LP"
         },
         "backhaul-driver": {
             "help": "options are ETH, SLIP, EMAC, CELL",
-            "value": "EMAC"
+            "value": "CELL"
         },
         "mesh-mode": {
             "help": "Mesh networking mode. Options are LOWPAN_ND, LOWPAN_WS and THREAD",
@@ -19,10 +23,6 @@
         "backhaul-mld": {
             "help": "Enable proxying Multicast Listener Discovery messages to backhaul network",
             "value": "false"
-        },
-        "nanostack_extended_heap": {
-            "help": "Add additional memory region to nanostack heap. Valid only for selected platforms. Region size may vary depending of the toolchain.",
-            "value": true
         },
         "backhaul-mac": "{0x02, 0x00, 0x00, 0x00, 0x00, 0x01}",
         "debug-trace": "true",
@@ -60,21 +60,31 @@
             "help": "Own certificate's key in PEM format (must be a null terminated c-string)",
             "value": "WISUN_SERVER_KEY"
         }
-        
     },
     "macros": ["MBEDTLS_USER_CONFIG_FILE=\"source/mbedtls_wisun_config.h\""],    
     "target_overrides": {
         "*": {
-            "target.network-default-interface-type": "ETHERNET",
             "nsapi.default-stack": "NANOSTACK",
             "mbed-trace.enable": 1,
             "nanostack.configuration": "ws_border_router",
             "platform.stdio-convert-newlines": true,
             "platform.stdio-baud-rate": 115200,
-            "mbed-mesh-api.heap-size": 65535,
-            "mbed-mesh-api.heap-stat-info": "&memory_heap_stat",
-            "mbed-mesh-api.heap-stat-info-definition": "mem_stat_t memory_heap_stat;",
-            "platform.stdio-buffered-serial": true
+            "platform.stdio-buffered-serial": true,
+            "mbed-mesh-api.use-malloc-for-heap": true,  
+            "ppp.enabled": true,
+            "ppp.ipv4-enabled": false,
+            "ppp.ipv6-enabled": true,
+            "nsapi.default-cellular-plmn": 0,
+            "nsapi.default-cellular-sim-pin": null,
+            "nsapi.default-cellular-apn": 0,
+            "nsapi.default-cellular-username": 0,
+            "nsapi.default-cellular-password": 0,
+            "cellular.debug-at": false,
+            "QUECTEL_EC2X.provide-default": true,
+            "QUECTEL_EC2X.tx": "D1",
+            "QUECTEL_EC2X.rx": "D0",
+            "QUECTEL_EC2X.pwr": "D2",
+            "QUECTEL_EC2X.rst": "D4"
         },
         "K64F": {
             "kinetis-emac.tx-ring-len":4,
