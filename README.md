@@ -2,7 +2,6 @@
 
 Nanostack Border Router is a generic mbed border router implementation that provides the 6LoWPAN ND, Thread or Wi-SUN border router initialization logic.
 
-Note: Wi-SUN is currently available for partners only.
 
 Border router is a network gateway between a wireless 6LoWPAN mesh network and a backhaul network. It controls and relays traffic between the two networks. In a typical setup, a 6LoWPAN border router is connected to another router in the backhaul network (over Ethernet or a serial line) which in turn forwards traffic to/from the internet or a private company LAN, for instance.
 
@@ -100,7 +99,6 @@ Applications using Nanostack Border Router need to use a `.json` file for the co
 | `backhaul-next-hop`                   | The next-hop value for the backhaul default route; should be a link-local address of a neighboring router, default: empty (on-link prefix). Example format: `fe80::1` |
 | `backhaul-mld`                        | Enable sending Multicast Listener Discovery reports to backhaul network when a new multicast listener is registered in mesh network. Values: true or false |
 
-Note: Static IPv6 configuration with Wi-SUN is currently not allowed. Please use automatic configuration instead.
 
 ### 6LoWPAN ND border router options
 
