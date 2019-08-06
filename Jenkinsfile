@@ -18,13 +18,12 @@ echo "Use build profile: ${params.profile}"
 def targets = [
   "K64F",
   "K66F",
-  "NUCLEO_F429ZI"
+  "DISCO_F769NI"
   ]
 
 // Map toolchains to CI labels
 def toolchains = [
-  ARM: "armcc",
-//  ARMC6: "armc6",
+  ARM: "armc6",
   GCC_ARM: "arm-none-eabi-gcc",
   IAR: "iar_arm"
   ]
@@ -49,8 +48,8 @@ for (int i = 0; i < targets.size(); i++) {
       def configurationLabel = configurations.keySet().asList().get(k)
       def configurationFile = configurations.get(configurationLabel)
       def stepName = "${target} ${configurationLabel} ${toolchain}"
-      // SLIP configuration exist only for K64F based Raspberry HAT and Wi-SUN configuration exist only for K64F
-      if ((configurationLabel == "THREAD_SLIP" || configurationLabel == "WI_SUN") && target != "K64F") {
+      // SLIP configuration exist only for K64F based Raspberry HAT
+      if ((configurationLabel == "THREAD_SLIP") && target != "K64F") {
         continue;
       }
       stepsForParallel[stepName] = buildStep(target, compilerLabel, configurationFile, configurationLabel, toolchain)
@@ -69,6 +68,7 @@ def buildStep(target, compilerLabel, configurationFile, configurationLabel, tool
         deleteDir()
         dir("nanostack-border-router") {
           checkout scm
+          execute("git clean -ffdx")
           execute("mbed deploy --protocol ssh")
           // Update mbed-os revision if requested
           if (params.mbed_os_revision != '') {
