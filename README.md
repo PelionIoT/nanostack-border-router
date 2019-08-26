@@ -1,15 +1,14 @@
 # Nanostack Border Router
 
-Nanostack Border Router is a generic mbed border router implementation that provides the 6LoWPAN ND, Thread or Wi-SUN border router initialization logic.
+Nanostack Border Router is a generic Mbed border router implementation that provides the 6LoWPAN ND, Thread or Wi-SUN border router initialization logic.
 
-
-Border router is a network gateway between a wireless 6LoWPAN mesh network and a backhaul network. It controls and relays traffic between the two networks. In a typical setup, a 6LoWPAN border router is connected to another router in the backhaul network (over Ethernet or a serial line) which in turn forwards traffic to/from the internet or a private company LAN, for instance.
+A border router is a network gateway between a wireless 6LoWPAN mesh network and a backhaul network. It controls and relays traffic between the two networks. In a typical setup, a 6LoWPAN border router is connected to another router in the backhaul network (over Ethernet or a serial line) which in turn forwards traffic to and from the internet or a private company LAN, for instance.
 
 ![](images/br_role.png)
 
 ## Structure
 
-This application runs on mbed OS and utilizes PHY drivers and Nanostack to form a border router.
+This application runs on Mbed OS and uses PHY drivers and Nanostack to form a border router.
 
 ![](images/structure.png)
 
@@ -18,7 +17,7 @@ The code layout is organized like this:
 ```
 configs/                  Contains example configuration files
 drivers/                  Contains PHY drivers
-mbed-os/                  Contains mbed OS itself
+mbed-os/                  Contains Mbed OS, itself
 source/                   Contains the application code
 mbed_app.json             Build time configuration file
 ```
@@ -27,7 +26,7 @@ mbed_app.json             Build time configuration file
 
 1. Clone this repository.
 1. Run `mbed deploy`.
-1. Add connectivity driver, if not provided by Mbed OS
+1. Add connectivity driver, if not provided by Mbed OS.
 1. Select target platform.
 1. Select toolchain.
 1. Configure.
@@ -49,45 +48,45 @@ $ mbed compile
 
 ### Adding connectivity driver
 
-This application requires 802.15.4 RF driver to be provided for the networking stack. Driver can be either external, or provided by the Mbed OS.
+This application requires the 802.15.4 RF driver to be provided for the networking stack. The driver can be either external, or provided by Mbed OS.
 
-External driver can be added by calling
+You can add an external driver by calling:
 
 ```
 mbed add <driver>
 ```
-For example STM Spirit1 RF driver is added by calling `mbed add stm-spirit1-rf-driver`
+
+For example, STM Spirit1 RF driver is added by calling `mbed add stm-spirit1-rf-driver`
 
 ## Selecting the target platform
 
-The target platform is the hardware on which the border router runs. There are number of target platforms already available for you in the mbed OS.
+The target platform is the hardware on which the border router runs. There are target platforms already available in Mbed OS.
 
-If you wish to write your own target, follow the instructions in [Adding target support to mbed OS 5](https://docs.mbed.com/docs/mbed-os-handbook/en/latest/advanced/porting_guide/).
+To write your own target, follow the instructions in [Adding target support to Mbed OS 5](https://os.mbed.com/docs/mbed-os/latest/porting/porting-targets.html).
 
 The border router requires an RF driver to be provided for Nanostack. Currently, there are the following drivers available in the Mbed OS:
 
-* [Atmel AT86RF233](https://github.com/ARMmbed/atmel-rf-driver)
-* [Atmel AT86RF212B](https://github.com/ARMmbed/atmel-rf-driver)
-* [NXP MCR20A](https://github.com/ARMmbed/mcr20a-rf-driver)
-* [STM-s2lp](https://github.com/ARMmbed/mbed-os/tree/master/components/802.15.4_RF)
+* [Atmel AT86RF233](https://github.com/ARMmbed/atmel-rf-driver).
+* [Atmel AT86RF212B](https://github.com/ARMmbed/atmel-rf-driver).
+* [NXP MCR20A](https://github.com/ARMmbed/mcr20a-rf-driver).
+* [STM-s2lp](https://github.com/ARMmbed/mbed-os/tree/master/components/802.15.4_RF).
 
 Following external driver can be added as described [above](#adding-connectivity-driver):
 
-* [STM Spirit1](https://github.com/ARMmbed/stm-spirit1-rf-driver)
+* [STM Spirit1](https://github.com/ARMmbed/stm-spirit1-rf-driver).
 
-The backhaul is either SLIP or Ethernet. For Ethernet either an mbed OS "EMAC"
-driver can be used, or a native Nanostack driver. Currently, native Nanostack drivers exists for the following backhauls:
+The backhaul is either SLIP or Ethernet. For Ethernet either an Mbed OS "EMAC" driver can be used, or a native Nanostack driver. Currently, native Nanostack drivers exists for the following backhauls:
 
-* [K64F Ethernet](https://github.com/ARMmbed/sal-nanostack-driver-k64f-eth)
-* [SLIP driver](https://github.com/ARMmbed/sal-stack-nanostack-slip)
+* [K64F Ethernet](https://github.com/ARMmbed/sal-nanostack-driver-k64f-eth).
+* [SLIP driver](https://github.com/ARMmbed/sal-stack-nanostack-slip).
 
-The existing drivers are found in the `drivers/` folder. More drivers can be linked in.
+The existing drivers are in the `drivers/` folder. More drivers can be linked in.
 
 See [Notes on different hardware](https://github.com/ARMmbed/mbed-os-example-mesh-minimal/blob/master/Hardware.md) to see known combinations that work.
 
 ## Configuring Nanostack Border Router
 
-Applications using Nanostack Border Router need to use a `.json` file for the configuration. The example configurations can be found in the `configs/` folder.
+Applications using Nanostack Border Router need to use a `.json` file for the configuration. You can find the example configurations in the `configs/` folder.
 
 ### The backhaul configuration options
 
@@ -99,7 +98,6 @@ Applications using Nanostack Border Router need to use a `.json` file for the co
 | `backhaul-next-hop`                   | The next-hop value for the backhaul default route; should be a link-local address of a neighboring router, default: empty (on-link prefix). Example format: `fe80::1` |
 | `backhaul-mld`                        | Enable sending Multicast Listener Discovery reports to backhaul network when a new multicast listener is registered in mesh network. Values: true or false |
 
-
 ### 6LoWPAN ND border router options
 
 | Field                               | Description                                                   |
@@ -110,7 +108,7 @@ Applications using Nanostack Border Router need to use a `.json` file for the co
 |`ra-router-lifetime`|Defines the router advertisement interval in seconds (default 1024 if left out).|
 |`beacon-protocol-id`|Is used to identify beacons. This should not be changed (default 4 if left out).|
 
-To learn more about 6LoWPAN and the configuration parameters, read the [6LoWPAN overview](https://os.mbed.com/docs/latest/reference/mesh-tech.html).
+To learn more about 6LoWPAN and the configuration parameters, please read the [6LoWPAN overview](https://os.mbed.com/docs/latest/reference/mesh-tech.html).
 
 See [configs/6lowpan_Atmel_RF.json](configs/6lowpan_Atmel_RF.json) for an example configuration file.
 
@@ -144,13 +142,13 @@ The Thread-specific parameters are listed below.
 | `extended-pan-id`                   | 8-byte value used to identify Thread networks in range. |
 | `mesh-local-prefix`                 | ULA prefix used for communication within the Thread network. |
 | `network-name`                      | A human-readable name for the network. |
-| `pskc`                              | Pre-Shared Key for the Commissioner. |
-| `pskd`                              | Pre-Shared Key for the device. |
+| `pskc`                              | Preshared Key for the commissioner. |
+| `pskd`                              | Preshared Key for the device. |
 | `thread-master-key`                 | A key used to derive security material for MAC and MLE protection. |
 
 ### Wi-SUN configuration
 
-The Wi-SUN -specific parameters are listed below.
+The Wi-SUN specific parameters are listed below.
 
 | Field                               | Description                                                   |
 |-------------------------------------|---------------------------------------------------------------|
@@ -175,17 +173,16 @@ Regulatory domain, operating class and operating mode are defined in the Wi-SUN 
 
 For the Thread Border Router, there are example configuration files for `SLIP` and `ETH` backhaul connectivity:
 
- * [configs/Thread_Atmel_RF.json](configs/Thread_Atmel_RF.json)
- * [configs/Thread_SLIP_Atmel_RF.json](configs/Thread_SLIP_Atmel_RF.json)
+ * [configs/Thread_Atmel_RF.json](configs/Thread_Atmel_RF.json).
+ * [configs/Thread_SLIP_Atmel_RF.json](configs/Thread_SLIP_Atmel_RF.json).
 
-The [mbedtls_thread_config.h](source/mbedtls_thread_config.h) file configures mbed TLS for Thread use.
+The [mbedtls_thread_config.h](source/mbedtls_thread_config.h) file configures Mbed TLS for Thread use.
 
 <span class="notes">**Note:** The configuration examples are for testing purposes only; do not use them for production or expose them.</span>
 
-
 #### Backhaul connectivity
 
-The Nanostack border router application can be connected to a backhaul network. This enables you to connect the devices in a 6LoWPAN mesh network to the internet or a private LAN. Currently, the application supports SLIP (IPv6 encapsulation over a serial line) and Ethernet backhaul connectivity.
+The Nanostack border router application can be connected to a backhaul network. This enables you to connect the devices in a 6LoWPAN mesh network to the internet or a private LAN. The application supports SLIP (IPv6 encapsulation over a serial line) and Ethernet backhaul connectivity:
 
 ```
 "config": {
@@ -206,7 +203,7 @@ The Nanostack border router application can be connected to a backhaul network. 
 }
 ```
 
-You can select your preferred option through the configuration file (field `backhaul-driver` in the `config` section). The value `SLIP` includes the SLIP driver, while the value `ETH` compiles the border router application with Nanostack native Ethernet backhaul support. `EMAC` uses the board's default mbed OS network driver, which must be EMAC-based (derived from EMACInterface).
+You can select your preferred option through the configuration file (field `backhaul-driver` in the `config` section). The value `SLIP` includes the SLIP driver, and the value `ETH` compiles the border router application with Nanostack native Ethernet backhaul support. `EMAC` uses the board's default Mbed OS network driver, which must be EMAC-based (derived from EMACInterface).
 
 You can define the MAC address on the backhaul interface manually (field `backhaul-mac-src` value `CONFIG`). Alternatively, you can use the MAC address provided by the development board (field `backhaul-mac-src` value `BOARD`). By default, the backhaul driver is set to `EMAC` and the MAC address source is `BOARD`.
 
@@ -216,12 +213,11 @@ If you use the static bootstrap mode, you need to configure a default route on t
 
 When using the autonomous mode in the 6LoWPAN ND configuration, you can set the `prefix-from-backhaul` option to `true` to use the same backhaul prefix on the mesh network side as well. This allows the mesh nodes to be directly connectable from the outside of the mesh network. In the Thread network, it is enough that `backhaul-dynamic-bootstrap` is set to true.
 
-
 #### Note on the SLIP backhaul driver
 
-If you are using a K64F board, you need to use the UART1 serial line of the board with the SLIP driver. See the `pins` section in the [mbed_app.json](./mbed_app.json) configuration file. To use a different UART line, replace the `SERIAL_TX` and `SERIAL_RX` values with correct TX/RX pin names.
+If you are using a K64F board, use the UART1 serial line of the board with the SLIP driver. See the `pins` section in the [mbed_app.json](./mbed_app.json) configuration file. To use a different UART line, replace the `SERIAL_TX` and `SERIAL_RX` values with correct TX/RX pin names.
 
-If you wish to use the hardware flow control, set the configuration field `slip_hw_flow_control` to true. By default, it is set to false. Before using hardware flow control, make sure that the other end of your SLIP interface can handle the flow control.
+To use the hardware flow control, set the configuration field `slip_hw_flow_control` to true. By default, it is set to false. Before using hardware flow control, make sure the other end of your SLIP interface can handle the flow control.
 
 For the pin names of your desired UART line, refer to your development board's documentation.
 
@@ -239,17 +235,17 @@ An example configuration for the SLIP driver:
 
 #### Note on EMAC backhaul
 
-When `backhaul_driver` is set to `EMAC`, the border router will use the target's default network driver, as supplied by `NetworkInterface::get_default_instance`. This must be EMAC-based, derived from EMACInterface. If it is the same driver that a default-constructed `EthernetInterface` would use, so in principle it should work on any board where `EthernetInterface` works.
+When `backhaul_driver` is set to `EMAC`, the border router uses the target's default network driver, as supplied by `NetworkInterface::get_default_instance`. This must be EMAC-based, derived from EMACInterface. If it is the same driver that a default-constructed `EthernetInterface` would use, so in principle it should work on any board where `EthernetInterface` works.
 
-To use a different interface, change the setting of `target.default-network-interface-type` in `mbed_app.json` to point to a different interface type, or add an overriding definition of `NetworkInterface::get_default_instance` to the application - this will override any default supplied by the target board.
+To use a different interface, change the setting of `target.default-network-interface-type` in `mbed_app.json` to point to a different interface type, or add an overriding definition of `NetworkInterface::get_default_instance` to the application - this overrides any default supplied by the target board.
 
-To use Wi-Fi or other more complex EMAC drivers, necessary configuration parameters must be supplied, either via `mbed_app.json` or configuration in the `NetworkInterface::get_default_instance` override. Also, the driver must follow the guidelines of `EMACInterface` - the border router does not call the `EMACInterface`'s `connect` method, so the driver must work with only a `powerup` call to the `EMAC`.
+To use Wi-Fi or other more complex EMAC drivers, necessary configuration parameters must be supplied, either using `mbed_app.json` or configuration in the `NetworkInterface::get_default_instance` override. Also, the driver must follow the guidelines of `EMACInterface` - the border router does not call the `EMACInterface`'s `connect` method, so the driver must work with only a `powerup` call to the `EMAC`.
 
 ### Switching the RF shield
 
 By default, the application uses an Atmel AT86RF233/212B RF driver. You can alternatively use any RF driver provided in the `drivers/` folder or link in your own driver. You can set the configuration for the RF driver in the `json` file.
 
-To select the Atmel radio shield, use the following:
+To select the Atmel radio shield, use:
 
 ```
         "radio-type":{
@@ -258,7 +254,7 @@ To select the Atmel radio shield, use the following:
         },
 ```
 
-To select the NXP radio shield, use the following:
+To select the NXP radio shield, use:
 
 ```
         "radio-type":{
@@ -267,7 +263,7 @@ To select the NXP radio shield, use the following:
         },
 ```
 
-To select the STM Spirit1 radio shield, use the following:
+To select the STM Spirit1 radio shield, use:
 
 ```
         "radio-type":{
@@ -276,7 +272,8 @@ To select the STM Spirit1 radio shield, use the following:
         },
 ```
 
-To select the STM S2LP radio shield, use the following:
+To select the STM S2LP radio shield, use:
+
 ```
         "radio-type":{
             "help": "options are ATMEL, MCR20, SPIRIT1, S2LP",
@@ -284,7 +281,7 @@ To select the STM S2LP radio shield, use the following:
         },
 ```
 
-In case you have choosen the STM Spirit1 Sub-1 GHz RF expansion board [X-NUCLEO-IDS01A4](https://github.com/ARMmbed/stm-spirit1-rf-driver), you need also to configure its MAC address in the `mbed_app.json` file, for example:
+If you have chosen the STM Spirit1 Sub-1 GHz RF expansion board [X-NUCLEO-IDS01A4](https://github.com/ARMmbed/stm-spirit1-rf-driver), you need to configure its MAC address in the `mbed_app.json` file. For example:
 
 ```json
     "target_overrides": {
@@ -296,22 +293,21 @@ In case you have choosen the STM Spirit1 Sub-1 GHz RF expansion board [X-NUCLEO-
 
 <span class="notes">**Note**: This MAC address must be unique within the 6LoWPAN mesh network.</span>
 
-After changing the radio shield, you need to recompile the application.
+After changing the radio shield, recompile the application.
 
 #### Wi-SUN RF shield
 
-Currently there is only one radio shield with a support for Wi-SUN, the STM S2LP radio shield.
+Currently, only one radio shield, the STM S2LP radio shield, supports Wi-SUN.
 
 ## File system support
 
-The Application can enable use of file system as instructed in [mbed OS storage documentation](https://os.mbed.com/docs/latest/reference/storage.html). File system is not enabled by default due variety of possible configurations.
+The application can use the file system as instructed in [Mbed OS storage documentation](https://os.mbed.com/docs/latest/reference/storage.html). The file system is not enabled by default due to a variety of possible configurations.
 
-Thread network stack is able to write/read network configuration settings to/from file system once the feature is activated. Activation happens by telling file system root path to Nanostack. To set the root-path, use function:
+Thread network stack is able to write and read network configuration settings to and from the file system after the feature is activated. Activation happens by telling the file system the root path to Nanostack. To set the root path, use the function:
 
 `ns_file_system_set_root_path(root-path)`
 
-Once the root-path is set, Thread stack will read configuration settings from the file system and write configuration back to file system once configuration is changed.
-
+After you have set the root path, Thread stack reads the configuration settings from the file system. Thread stack writes the configuration back to the file system after the configuration changes.
 
 ## Running the border router application
 
@@ -324,13 +320,13 @@ Once the root-path is set, Thread stack will read configuration settings from th
 
 Serial connection settings for the Nanorouter are as follows:
 
-* Baud-rate = 115200
-* Data bits = 8
-* Stop bits = 1
+* Baud-rate = 115200.
+* Data bits = 8.
+* Stop bits = 1.
 
 If there is no input from the serial terminal, press the **Reset** button of the development board.
 
-In the PuTTY main screen, save the session and click **Open**. This opens a console window showing debug messages from the application. If the console screen is blank, you may need to press the **Reset** button of the board to see the debug information. The serial output from the 6LoWPAN border router looks something like this in the console:
+In the PuTTY main screen, save the session, and click **Open**. This opens a console window showing debug messages from the application. If the console screen is blank, you may need to press the **Reset** button of the board to see the debug information. The serial output from the 6LoWPAN border router looks something like this in the console:
 
 ```
 [INFO][app ]: Starting Nanostack border router...
