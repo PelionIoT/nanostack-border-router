@@ -6,6 +6,7 @@
 
 /* Enable nanostack extended heap only for specific targets and toolchains */
 #if (MBED_CONF_APP_NANOSTACK_EXTENDED_HEAP == true)
+
 #if defined(TARGET_K64F)
 #define NANOSTACK_EXTENDED_HEAP_REGION_SIZE (60*1024)
 #endif
@@ -20,11 +21,6 @@
 
 #if defined(__IAR_SYSTEMS_ICC__) || defined(__IAR_SYSTEMS_ASM__) || defined(__ICCARM__)
 // currently - no IAR suport
-#undef NANOSTACK_EXTENDED_HEAP_REGION_SIZE
-#endif
-
-#if (MBED_VERSION < 60000)
-// To be removed once nsdynmemlib  region api is available in Mbed OS
 #undef NANOSTACK_EXTENDED_HEAP_REGION_SIZE
 #endif
 
