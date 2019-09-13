@@ -1,9 +1,5 @@
 {
     "config": {
-        "heap-size": {
-             "help": "The amount of static RAM to reserve for nsdynmemlib heap",
-             "value": 100000
-        },
         "radio-type":{
             "help": "options are ATMEL, MCR20, SPIRIT1, S2LP",
             "value": "S2LP"
@@ -24,6 +20,10 @@
             "help": "Enable proxying Multicast Listener Discovery messages to backhaul network",
             "value": "false"
         },
+        "nanostack_extended_heap": {
+            "help": "Add additional memory region to nanostack heap. Valid only for selected platforms. Region size may vary depending of the toolchain.",
+            "value": true
+        },        
         "backhaul-mac": "{0x02, 0x00, 0x00, 0x00, 0x00, 0x01}",
         "debug-trace": "true",
         "backhaul-dynamic-bootstrap": true,
@@ -69,8 +69,10 @@
             "nanostack.configuration": "ws_border_router",
             "platform.stdio-convert-newlines": true,
             "platform.stdio-baud-rate": 115200,
+            "mbed-mesh-api.heap-size": 65535,
+            "mbed-mesh-api.heap-stat-info": "&memory_heap_stat",
+            "mbed-mesh-api.heap-stat-info-definition": "mem_stat_t memory_heap_stat;",
             "platform.stdio-buffered-serial": true,
-            "mbed-mesh-api.use-malloc-for-heap": true,  
             "ppp.enabled": true,
             "ppp.ipv4-enabled": false,
             "ppp.ipv6-enabled": true,
