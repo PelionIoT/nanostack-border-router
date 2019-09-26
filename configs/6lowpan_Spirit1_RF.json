@@ -1,15 +1,11 @@
 {
     "config": {
-        "heap-size": {
-             "help": "The amount of static RAM to reserve for nsdynmemlib heap",
-             "value": 40000
-        },
         "radio-type":{
             "help": "options are ATMEL, MCR20, SPIRIT1",
             "value": "SPIRIT1"
         },
         "backhaul-driver": {
-            "help": "options are ETH, SLIP, EMAC",
+            "help": "options are ETH, SLIP, EMAC, CELL",
             "value": "EMAC"
         },
         "mesh-mode": {
@@ -23,6 +19,10 @@
         "backhaul-mld": {
             "help": "Enable proxying Multicast Listener Discovery messages to backhaul network",
             "value": "false"
+        },
+        "nanostack_extended_heap": {
+            "help": "Add additional memory region to nanostack heap. Valid only for selected platforms. Region size may vary depending of the toolchain.",
+            "value": false
         },
         "backhaul-mac": "{0x02, 0x00, 0x00, 0x00, 0x00, 0x01}",
         "slip_hw_flow_control": "false",
@@ -75,9 +75,11 @@
             "nanostack.configuration": "lowpan_border_router",
             "platform.stdio-convert-newlines": true,
             "platform.stdio-baud-rate": 115200,
+            "mbed-mesh-api.heap-size": 40000,
+            "mbed-mesh-api.heap-stat-info": "&memory_heap_stat",
+            "mbed-mesh-api.heap-stat-info-definition": "mem_stat_t memory_heap_stat;",
             "kinetis-emac.tx-ring-len":4,
-            "kinetis-emac.rx-ring-len":4,
-            "mbed-mesh-api.use-malloc-for-heap": true
+            "kinetis-emac.rx-ring-len":4
         },
         "NUCLEO_F429ZI": {
             "LED": "LED1",

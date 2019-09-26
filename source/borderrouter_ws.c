@@ -71,7 +71,7 @@ typedef struct {
 
 typedef struct {
     int8_t  ws_interface_id;
-    int8_t  eth_interface_id;
+    int8_t  net_interface_id;
 } ws_br_handler_t;
 
 static ws_br_handler_t ws_br_handler;
@@ -255,8 +255,8 @@ void wisun_rf_init()
         }
 
         if (ws_br_handler.ws_interface_id > -1 &&
-                ws_br_handler.eth_interface_id > -1) {
-            ws_bbr_start(ws_br_handler.ws_interface_id, ws_br_handler.eth_interface_id);
+                ws_br_handler.net_interface_id > -1) {
+            ws_bbr_start(ws_br_handler.ws_interface_id, ws_br_handler.net_interface_id);
         }
     }
 }
@@ -335,7 +335,7 @@ static int wisun_interface_up(void)
 void border_router_tasklet_start(void)
 {
     ws_br_handler.ws_interface_id = -1;
-    ws_br_handler.eth_interface_id = -1;
+    ws_br_handler.net_interface_id = -1;
 
     load_config();
     wisun_rf_init();
@@ -346,11 +346,20 @@ void border_router_tasklet_start(void)
         ARM_LIB_TASKLET_INIT_EVENT);
 }
 
+#undef ETH
+#undef SLIP
+#undef EMAC
+#undef CELL
+#define ETH 1
+#define SLIP 2
+#define EMAC 3
+#define CELL 4
+
 static int backhaul_interface_up(int8_t driver_id)
 {
     int retval = -1;
     tr_debug("backhaul_interface_up: %i", driver_id);
-    if (ws_br_handler.eth_interface_id != -1) {
+    if (ws_br_handler.net_interface_id != -1) {
         tr_debug("Border RouterInterface already at active state");
         return retval;
     }
@@ -359,17 +368,24 @@ static int backhaul_interface_up(int8_t driver_id)
         eth_mac_api = ethernet_mac_create(driver_id);
     }
 
-    ws_br_handler.eth_interface_id = arm_nwk_interface_ethernet_init(eth_mac_api, "bh0");
+#if MBED_CONF_APP_BACKHAUL_DRIVER == CELL
+    if (eth_mac_api->iid64_get) {
+        ws_br_handler.net_interface_id = arm_nwk_interface_ppp_init(eth_mac_api, "ppp0");
+    } else
+#endif
+    {
+        ws_br_handler.net_interface_id = arm_nwk_interface_ethernet_init(eth_mac_api, "bh0");
+    }
 
-    MBED_ASSERT(ws_br_handler.eth_interface_id >= 0);
-    if (ws_br_handler.eth_interface_id >= 0) {
-        tr_debug("Backhaul interface ID: %d", ws_br_handler.eth_interface_id);
+    MBED_ASSERT(ws_br_handler.net_interface_id >= 0);
+    if (ws_br_handler.net_interface_id >= 0) {
+        tr_debug("Backhaul interface ID: %d", ws_br_handler.net_interface_id);
         if (ws_br_handler.ws_interface_id > -1) {
-            ws_bbr_start(ws_br_handler.ws_interface_id, ws_br_handler.eth_interface_id);
+            ws_bbr_start(ws_br_handler.ws_interface_id, ws_br_handler.net_interface_id);
         }
         arm_nwk_interface_configure_ipv6_bootstrap_set(
-            ws_br_handler.eth_interface_id, backhaul_bootstrap_mode, backhaul_prefix);
-        arm_nwk_interface_up(ws_br_handler.eth_interface_id);
+            ws_br_handler.net_interface_id, backhaul_bootstrap_mode, backhaul_prefix);
+        arm_nwk_interface_up(ws_br_handler.net_interface_id);
         retval = 0;
     } else {
         tr_error("Could not init ethernet");
@@ -378,12 +394,17 @@ static int backhaul_interface_up(int8_t driver_id)
     return retval;
 }
 
+#undef ETH
+#undef SLIP
+#undef EMAC
+#undef CELL
+
 static int backhaul_interface_down(void)
 {
     int retval = -1;
-    if (ws_br_handler.eth_interface_id != -1) {
-        arm_nwk_interface_down(ws_br_handler.eth_interface_id);
-        ws_br_handler.eth_interface_id = -1;
+    if (ws_br_handler.net_interface_id != -1) {
+        arm_nwk_interface_down(ws_br_handler.net_interface_id);
+        ws_br_handler.net_interface_id = -1;
         retval = 0;
     } else {
         tr_debug("Could not set eth down");
@@ -411,7 +432,7 @@ static void print_interface_addr(int id)
 static void print_interface_addresses(void)
 {
     tr_info("Backhaul interface addresses:");
-    print_interface_addr(ws_br_handler.eth_interface_id);
+    print_interface_addr(ws_br_handler.net_interface_id);
 
     tr_info("RF interface addresses:");
     print_interface_addr(ws_br_handler.ws_interface_id);
@@ -435,7 +456,7 @@ static void borderrouter_tasklet(arm_event_s *event)
     switch (event_type) {
         case ARM_LIB_NWK_INTERFACE_EVENT:
 
-            if (event->event_id == ws_br_handler.eth_interface_id) {
+            if (event->event_id == ws_br_handler.net_interface_id) {
                 network_interface_event_handler(event);
             } else {
                 wisun_interface_event_handler(event);
@@ -514,10 +535,10 @@ static void network_interface_event_handler(arm_event_s *event)
     switch (status) {
         case (ARM_NWK_BOOTSTRAP_READY): { // Interface configured Bootstrap is ready
 
-            tr_info("BR interface_id: %d", ws_br_handler.eth_interface_id);
-            if (-1 != ws_br_handler.eth_interface_id) {
+            tr_info("BR interface_id: %d", ws_br_handler.net_interface_id);
+            if (-1 != ws_br_handler.net_interface_id) {
                 // metric set to high priority
-                if (0 != arm_net_interface_set_metric(ws_br_handler.eth_interface_id, 0)) {
+                if (0 != arm_net_interface_set_metric(ws_br_handler.net_interface_id, 0)) {
                     tr_warn("Failed to set metric for eth0.");
                 }
 
@@ -537,10 +558,10 @@ static void network_interface_event_handler(arm_event_s *event)
                     arm_net_route_add(backhaul_route.prefix,
                                       backhaul_route.prefix_len,
                                       next_hop_ptr, 0xffffffff, 128,
-                                      ws_br_handler.eth_interface_id);
+                                      ws_br_handler.net_interface_id);
                 }
                 tr_info("Backhaul interface addresses:");
-                print_interface_addr(ws_br_handler.eth_interface_id);
+                print_interface_addr(ws_br_handler.net_interface_id);
             }
             break;
         }

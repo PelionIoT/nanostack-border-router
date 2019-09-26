@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 ARM Limited. All rights reserved.
+ * Copyright (c) 2016-2019 ARM Limited. All rights reserved.
  */
 
 #include <string.h>
@@ -16,6 +16,21 @@
 #include "EMACInterface.h"
 #include "EMAC.h"
 
+#undef ETH
+#undef SLIP
+#undef EMAC
+#undef CELL
+#define ETH 1
+#define SLIP 2
+#define EMAC 3
+#define CELL 4
+
+#if MBED_CONF_APP_BACKHAUL_DRIVER == CELL
+#include "NanostackPPPInterface.h"
+#include "PPPInterface.h"
+#include "PPP.h"
+#endif
+
 #ifdef  MBED_CONF_APP_DEBUG_TRACE
 #if MBED_CONF_APP_DEBUG_TRACE == 1
 #define APP_TRACE_LEVEL TRACE_ACTIVE_LEVEL_DEBUG
@@ -28,14 +43,10 @@
 #include "mesh_system.h"
 #include "cmsis_os.h"
 #include "arm_hal_interrupt.h"
-
+#include "nanostack_heap_region.h"
 
 #include "mbed_trace.h"
 #define TRACE_GROUP "app"
-
-#define APP_DEFINED_HEAP_SIZE MBED_CONF_APP_HEAP_SIZE
-static uint8_t app_stack_heap[APP_DEFINED_HEAP_SIZE];
-static mem_stat_t heap_info;
 
 #define BOARD 1
 #define CONFIG 2
@@ -51,8 +62,6 @@ static DigitalOut led1(MBED_CONF_APP_LED);
 
 static Ticker led_ticker;
 
-static void app_heap_error_handler(heap_fail_t event);
-
 static void toggle_led1()
 {
     led1 = !led1;
@@ -66,12 +75,6 @@ static void trace_printer(const char *str)
     printf("%s\n", str);
 }
 
-#undef ETH
-#undef SLIP
-#undef EMAC
-#define ETH 1
-#define SLIP 2
-#define EMAC 3
 #if MBED_CONF_APP_BACKHAUL_DRIVER == EMAC
 static void (*emac_actual_cb)(uint8_t, int8_t);
 static int8_t emac_driver_id;
@@ -149,6 +152,40 @@ void backhaul_driver_init(void (*backhaul_driver_status_cb)(uint8_t, int8_t))
         emac_driver_id = ns_if->get_driver_id();
         emac.set_link_state_cb(emac_link_cb);
     }
+#elif MBED_CONF_APP_BACKHAUL_DRIVER == CELL
+    tr_info("Using CELLULAR backhaul driver...");
+    /* Creates PPP service and onboard network stack already here for cellular
+     * connection to be able to override the link state changed callback */
+    PPP *ppp = &PPP::get_default_instance();
+    if (!ppp) {
+        tr_error("PPP not found");
+        exit(1);
+    }
+    OnboardNetworkStack *stack = &OnboardNetworkStack::get_default_instance();
+    if (!stack) {
+        tr_error("Onboard network stack not found");
+        exit(1);
+    }
+    OnboardNetworkStack::Interface *interface;
+    if (stack->add_ppp_interface(*ppp, true, &interface) != NSAPI_ERROR_OK) {
+        tr_error("Cannot add PPP interface");
+        exit(1);
+    }
+    Nanostack::PPPInterface *ns_if = static_cast<Nanostack::PPPInterface *>(interface);
+    ns_if->set_link_state_changed_callback(backhaul_driver_status_cb);
+
+    // Cellular interface configures it to PPP service and onboard stack created above
+    CellularInterface *net = CellularInterface::get_default_instance();
+    if (!net) {
+        tr_error("Default cellular interface not found");
+        exit(1);
+    }
+    net->set_default_parameters(); // from cellular nsapi .json configuration
+    net->set_blocking(false);
+    if (net->connect() != NSAPI_ERROR_OK) {
+        tr_error("Connect failure");
+        exit(1);
+    }
 #elif MBED_CONF_APP_BACKHAUL_DRIVER == ETH
     tr_info("Using ETH backhaul driver...");
     arm_eth_phy_device_register(mac, backhaul_driver_status_cb);
@@ -156,9 +193,10 @@ void backhaul_driver_init(void (*backhaul_driver_status_cb)(uint8_t, int8_t))
 #else
 #error "Unsupported backhaul driver"
 #endif
-#undef SLIP
 #undef ETH
+#undef SLIP
 #undef EMAC
+#undef CELL
 }
 
 
@@ -191,8 +229,6 @@ void appl_info_trace(void)
  */
 int main(int argc, char **argv)
 {
-    ns_hal_init(app_stack_heap, APP_DEFINED_HEAP_SIZE, app_heap_error_handler, &heap_info);
-
     mbed_trace_init(); // set up the tracing library
     mbed_trace_print_function_set(trace_printer);
     mbed_trace_config_set(TRACE_MODE_COLOR | APP_TRACE_LEVEL | TRACE_CARRIAGE_RETURN);
@@ -200,6 +236,8 @@ int main(int argc, char **argv)
     // Have to let mesh_system do net_init_core in case we use
     // Nanostack::add_ethernet_interface()
     mesh_system_init();
+
+    nanostack_heap_region_add();
 
 #if MBED_CONF_APP_BACKHAUL_MAC_SRC == BOARD
     mbed_mac_address((char *)mac);
@@ -210,31 +248,3 @@ int main(int argc, char **argv)
     }
     border_router_tasklet_start();
 }
-
-/**
- * \brief Error handler for errors in dynamic memory handling.
- */
-static void app_heap_error_handler(heap_fail_t event)
-{
-    tr_error("Dyn mem error %x", (int8_t)event);
-
-    switch (event) {
-        case NS_DYN_MEM_NULL_FREE:
-            break;
-        case NS_DYN_MEM_DOUBLE_FREE:
-            break;
-        case NS_DYN_MEM_ALLOCATE_SIZE_NOT_VALID:
-            break;
-        case NS_DYN_MEM_POINTER_NOT_VALID:
-            break;
-        case NS_DYN_MEM_HEAP_SECTOR_CORRUPTED:
-            break;
-        case NS_DYN_MEM_HEAP_SECTOR_UNITIALIZED:
-            break;
-        default:
-            break;
-    }
-
-    while (1);
-}
-
