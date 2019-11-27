@@ -227,7 +227,7 @@ void appl_info_trace(void)
  * \brief The entry point for this application.
  * Sets up the application and starts the border router module.
  */
-int main(int argc, char **argv)
+int main()
 {
     mbed_trace_init(); // set up the tracing library
     mbed_trace_print_function_set(trace_printer);
