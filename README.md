@@ -167,6 +167,7 @@ The Wi-SUN specific parameters are listed below.
 | `root-certificate`                  | Root certificate |
 | `own-certificate`                   | Own certificate |
 | `own-certificate-key`               | Own certificate's key |
+| `GTK0`               | Set GTK0 to predefined value for testing |
 
 Regulatory domain, operating class and operating mode are defined in the Wi-SUN PHY-specification.
 

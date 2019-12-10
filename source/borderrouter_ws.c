@@ -31,6 +31,9 @@
 #ifdef MBED_CONF_APP_CERTIFICATE_HEADER
 #include MBED_CONF_APP_CERTIFICATE_HEADER
 #endif
+#if defined(MBED_CONF_APP_GTK0)
+#include "net_ws_test.h"
+#endif
 
 #include "ns_trace.h"
 #define TRACE_GROUP "brro"
@@ -311,6 +314,17 @@ static int wisun_interface_up(void)
             return -1;
         }
     }
+
+#if defined(MBED_CONF_APP_GTK0)
+    uint8_t gtk0_value[16] = MBED_CONF_APP_GTK0;
+    uint8_t *gtks[4] = {gtk0_value, NULL, NULL, NULL};
+    ret = ws_test_gtk_set(ws_br_handler.ws_interface_id, gtks);
+    if (ret != 0) {
+        tr_error("Test GTK set failed %"PRIi32"", ret);
+        return -1;
+    }
+    tr_info("Test GTK set: %s", trace_array(gtk0_value, 16));
+#endif
 
 #if defined(MBED_CONF_APP_CERTIFICATE_HEADER)
     arm_certificate_chain_entry_s chain_info;
