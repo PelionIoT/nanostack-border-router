@@ -167,7 +167,6 @@ The Wi-SUN specific parameters are listed below.
 | `root-certificate`                  | Root certificate |
 | `own-certificate`                   | Own certificate |
 | `own-certificate-key`               | Own certificate's key |
-| `GTK0`               | Set GTK0 to predefined value for testing |
 
 Regulatory domain, operating class and operating mode are defined in the Wi-SUN PHY-specification.
 
@@ -305,6 +304,28 @@ After changing the radio shield, recompile the application.
 #### Wi-SUN RF shield
 
 Currently, only one radio shield, the STM S2LP radio shield, supports Wi-SUN.
+
+
+### Wi-SUN test configurations
+
+You can set the Border Router to fixed-channel mode by setting the channel function to fixed-channel, by defining the channel number and by setting the broadcast intervals:
+
+```
+        "uc-channel-function": 0,
+        "bc-channel-function": 0, 
+        "uc-fixed-channel": 11,
+        "bc-fixed-channel": 11,
+        "bc-dwell-interval": 255,
+        "bc-interval": 1020,
+```
+
+You can set the EAPOL group transient key (GTK) to a predefined value by setting the GTK0:
+
+```
+        "GTK0": "{0xBB, 0x06, 0x08, 0x57, 0x2C, 0xE1, 0x4D, 0x7B, 0xA2, 0xD1, 0x55, 0x49, 0x9C, 0xC8, 0x51, 0x9B}",
+```
+
+For the predefined GTK, the Wireshark IEEE 802.15.4 network decryption key can be calculated using SHA-256('Network name' || GTK0).
 
 ## File system support
 
