@@ -140,8 +140,10 @@ void backhaul_driver_init(void (*backhaul_driver_status_cb)(uint8_t, int8_t))
     /* Let the core code choose address - either from board or EMAC (for
      * ETH and SLIP we pass in the board address already in mac[]) */
     nsapi_error_t err = Nanostack::get_instance().add_ethernet_interface(emac, true, &ns_if);
-    /* Read back what they chose into our mac[] */
-    ns_if->get_mac_address(mac);
+    if (err == NSAPI_ERROR_OK) {
+        /* Read back what they chose into our mac[] */
+        ns_if->get_mac_address(mac);
+    }
 #else
     nsapi_error_t err = Nanostack::get_instance().add_ethernet_interface(emac, true, &ns_if, mac);
 #endif
