@@ -32,7 +32,6 @@ def toolchains = [
 def configurations = [
   LOWPAN: "6lowpan_Atmel_RF.json",
   THREAD: "Thread_Atmel_RF.json",
-  THREAD_SLIP: "Thread_SLIP_Atmel_RF.json",
   WI_SUN: "Wisun_Stm_s2lp_RF.json"
   ]
 

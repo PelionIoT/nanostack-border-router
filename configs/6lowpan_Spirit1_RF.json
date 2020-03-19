@@ -5,7 +5,7 @@
             "value": "SPIRIT1"
         },
         "backhaul-driver": {
-            "help": "options are ETH, SLIP, EMAC, CELL",
+            "help": "options are ETH, EMAC, CELL",
             "value": "EMAC"
         },
         "mesh-mode": {
