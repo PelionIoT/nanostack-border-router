@@ -8,7 +8,6 @@
 #include "mbed.h"
 #include "borderrouter_tasklet.h"
 #include "drivers/eth_driver.h"
-#include "sal-stack-nanostack-slip/Slip.h"
 
 #include "Nanostack.h"
 #include "NanostackEthernetInterface.h"
