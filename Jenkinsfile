@@ -24,8 +24,7 @@ def targets = [
 // Map toolchains to CI labels
 def toolchains = [
   ARM: "armc6",
-  GCC_ARM: "arm-none-eabi-gcc",
-  IAR: "iar_arm"
+  GCC_ARM: "arm-none-eabi-gcc"
   ]
 
 // Configurations
