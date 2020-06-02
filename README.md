@@ -1,6 +1,6 @@
 # Nanostack Border Router
 
-Nanostack Border Router is a generic Mbed border router implementation that provides the 6LoWPAN ND, Thread or Wi-SUN border router initialization logic.
+Nanostack Border Router is a generic Mbed border router implementation that provides the 6LoWPAN ND or Wi-SUN border router initialization logic.
 
 A border router is a network gateway between a wireless 6LoWPAN mesh network and a backhaul network. It controls and relays traffic between the two networks. In a typical setup, a 6LoWPAN border router is connected to another router in the backhaul network (over Ethernet, Cellular or a serial line) which in turn forwards traffic to and from the internet or a private company LAN, for instance.
 
@@ -131,21 +131,6 @@ Nanostack Border Router offers the following configuration options for RPL:
 | rpl-pcs                             | The number of bits that may be allocated to the path control field. |
 | rpl-ocp                             | The Objective Function (OF) to use, values: 1=OF0 (default), 2=MRHOF |
 
-### Thread configuration
-
-The Thread-specific parameters are listed below.
-
-| Field                               | Description                                                   |
-|-------------------------------------|---------------------------------------------------------------|
-| `commissioning-dataset-timestamp`   | Used for updating the Thread network parameters. The device with the highest value propagates the parameters to the network (in the same Realm-Local scope). |
-| `pan-id`                            | 2-byte Personal Area Network ID. |
-| `extended-pan-id`                   | 8-byte value used to identify Thread networks in range. |
-| `mesh-local-prefix`                 | ULA prefix used for communication within the Thread network. |
-| `network-name`                      | A human-readable name for the network. |
-| `pskc`                              | Preshared Key for the commissioner. |
-| `pskd`                              | Preshared Key for the device. |
-| `thread-master-key`                 | A key used to derive security material for MAC and MLE protection. |
-
 ### Wi-SUN configuration
 
 The Wi-SUN specific parameters are listed below.
@@ -169,14 +154,6 @@ The Wi-SUN specific parameters are listed below.
 | `own-certificate-key`               | Own certificate's key |
 
 Regulatory domain, operating class and operating mode are defined in the Wi-SUN PHY-specification.
-
-
-For the Thread Border Router, there are example configuration files for `SLIP` and `ETH` backhaul connectivity:
-
- * [configs/Thread_Atmel_RF.json](configs/Thread_Atmel_RF.json).
- * [configs/Thread_SLIP_Atmel_RF.json](configs/Thread_SLIP_Atmel_RF.json).
-
-The [mbedtls_thread_config.h](source/mbedtls_thread_config.h) file configures Mbed TLS for Thread use.
 
 <span class="notes">**Note:** The configuration examples are for testing purposes only; do not use them for production or expose them.</span>
 
@@ -211,7 +188,7 @@ You can also set the backhaul bootstrap mode (field `backhaul-dynamic-bootstrap`
 
 If you use the static bootstrap mode, you need to configure a default route on the backhaul interface to properly forward packets between the backhaul and the 6LoWPAN mesh network. In addition to this, you need to set a backhaul prefix. The static mode creates a site-local IPv6 network from which packets cannot be routed outside.
 
-When using the autonomous mode in the 6LoWPAN ND configuration, you can set the `prefix-from-backhaul` option to `true` to use the same backhaul prefix on the mesh network side as well. This allows the mesh nodes to be directly connectable from the outside of the mesh network. In the Thread network, it is enough that `backhaul-dynamic-bootstrap` is set to true.
+When using the autonomous mode in the 6LoWPAN ND configuration, you can set the `prefix-from-backhaul` option to `true` to use the same backhaul prefix on the mesh network side as well. This allows the mesh nodes to be directly connectable from the outside of the mesh network.
 
 For `CELL` backhaul, no configuration options for addresses are provided. Cellular backhaul device works always in autonomous mode and the border router learns the IPv6 prefix information from the cellular access.
 
@@ -331,11 +308,11 @@ For the predefined GTK, the Wireshark IEEE 802.15.4 network decryption key can b
 
 The application can use the file system as instructed in [Mbed OS storage documentation](https://os.mbed.com/docs/latest/reference/storage.html). The file system is not enabled by default due to a variety of possible configurations.
 
-Thread network stack is able to write and read network configuration settings to and from the file system after the feature is activated. Activation happens by telling the file system the root path to Nanostack. To set the root path, use the function:
+File system activation happens by telling the file system the root path to Nanostack. To set the root path, use the function:
 
 `ns_file_system_set_root_path(root-path)`
 
-After you have set the root path, Thread stack reads the configuration settings from the file system. Thread stack writes the configuration back to the file system after the configuration changes.
+After you have set the root path, Wi-SUN stack reads the configuration settings from the file system. Wi-SUN stack writes the configuration back to the file system after the configuration changes.
 
 ## Running the border router application
 
