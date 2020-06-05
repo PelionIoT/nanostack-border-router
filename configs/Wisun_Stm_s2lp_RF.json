@@ -84,6 +84,19 @@
             "kinetis-emac.tx-ring-len":4,
             "kinetis-emac.rx-ring-len":4
         },
+        "MTB_STM_S2LP": {
+            "s2lp.SPI_SDI"  : "PA_7",
+            "s2lp.SPI_SDO"  : "PA_6",
+            "s2lp.SPI_SCLK" : "PA_5",
+            "s2lp.SPI_CS"   : "PC_0",
+            "s2lp.SPI_SDN"  : "PF_13",
+            "s2lp.SPI_GPIO0": "PA_3",
+            "s2lp.SPI_GPIO1": "PC_3",
+            "s2lp.SPI_GPIO2": "PF_3",
+            "s2lp.SPI_GPIO3": "PF_10",
+            "s2lp.I2C_SDA"  : "PB_7",
+            "s2lp.I2C_SCL"  : "PB_6"
+        },
         "K64F_STATIC_BR": {
             "kinetis-emac.tx-ring-len":4,
             "kinetis-emac.rx-ring-len":4,
