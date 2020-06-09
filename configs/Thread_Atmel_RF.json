@@ -75,6 +75,19 @@
             "LED": "LED_GREEN",
             "kinetis-emac.tx-ring-len":4,
             "kinetis-emac.rx-ring-len":4
+        },
+        "K64F_STATIC_BR": {
+            "LED": "LED_GREEN",
+            "SERIAL_TX": "PTE0",
+            "SERIAL_RX": "PTE1",
+            "SERIAL_CTS": "PTE2",
+            "SERIAL_RTS": "PTE3",
+            "kinetis-emac.tx-ring-len":4,
+            "kinetis-emac.rx-ring-len":4,
+            "rf-channel": 26,
+            "debug-trace": true,
+            "pan-id": "0xBAAB",
+            "mbed-mesh-api.heap-size": 100000
         }
     }
 }
