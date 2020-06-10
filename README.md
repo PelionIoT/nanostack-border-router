@@ -1,3 +1,4 @@
+![](./resources/official_armmbed_example_badge.png)
 # Nanostack Border Router
 
 Nanostack Border Router is a generic Mbed border router implementation that provides the 6LoWPAN ND or Wi-SUN border router initialization logic.
