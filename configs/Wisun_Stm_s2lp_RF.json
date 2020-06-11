@@ -83,6 +83,16 @@
         "K66F": {
             "kinetis-emac.tx-ring-len":4,
             "kinetis-emac.rx-ring-len":4
+        },
+        "K64F_STATIC_BR": {
+            "kinetis-emac.tx-ring-len":4,
+            "kinetis-emac.rx-ring-len":4,
+            "network-name": "\"ARM-WS-LAB-NWK\"",
+            "mbed-mesh-api.heap-size": 100000
+        },
+        "DISCO_F769NI_STATIC_BR": {
+            "network-name": "\"ARM-WS-LAB-NWK\"",
+            "mbed-mesh-api.heap-size": 100000
         }
     }
 }

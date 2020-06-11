@@ -1,0 +1,8 @@
+{
+    "DISCO_F769NI_STATIC_BR": {
+        "inherits"                          : ["DISCO_F769NI"]
+    },
+    "K64F_STATIC_BR": {
+        "inherits"                          : ["K64F"]
+    }
+}
