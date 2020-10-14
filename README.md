@@ -40,7 +40,7 @@ $ mbed deploy
 
 $ mbed target K64F
  OR
-$ mbed target NUCLEO_F429ZI
+$ mbed target DISCO_F769NI
 
 $ mbed toolchain GCC_ARM
 
@@ -360,6 +360,11 @@ In the PuTTY main screen, save the session, and click **Open**. This opens a con
 [INFO][brro]:    [2] 2001:999:21:9ce:0:ff:fe00:face
 [INFO][brro]: 6LoWPAN Border Router Bootstrap Complete.
 ```
+
+## Known Issues
+
+- RF shield is using Serial Peripheral Interface (SPI) for communication. Some NUCLEO boards (like NUCLEO_F429ZI) may have a pin [conflict](https://os.mbed.com/teams/ST/wiki/Nucleo-144pins-ethernet-spi-conflict) when SPI is used. 
+
 
 ## License and contributions
 
