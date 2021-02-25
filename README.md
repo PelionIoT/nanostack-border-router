@@ -1,7 +1,7 @@
-![](./resources/official_armmbed_example_badge.png)
 # Nanostack Border Router
 
-Nanostack Border Router is a generic Mbed border router implementation that provides the 6LoWPAN ND or Wi-SUN border router initialization logic.
+Nanostack Border Router is a generic Mbed border router implementation that provides the 6LoWPAN ND or Wi-SUN border router initialization logic. Pelion Device Management enabled border router for Wi-SUN can be found from repository [https://github.com/PelionIoT/pelion-border-router](https://github.com/PelionIoT/pelion-border-router).
+
 
 A border router is a network gateway between a wireless 6LoWPAN mesh network and a backhaul network. It controls and relays traffic between the two networks. In a typical setup, a 6LoWPAN border router is connected to another router in the backhaul network (over Ethernet, Cellular or a serial line) which in turn forwards traffic to and from the internet or a private company LAN, for instance.
 
