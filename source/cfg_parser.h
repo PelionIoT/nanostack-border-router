@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 ARM Limited. All rights reserved.
+ * Copyright (c) 2016-2017, Pelion and affiliates.
  */
 #ifndef CFG_PARSER_H
 #define CFG_PARSER_H

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2019 ARM Limited. All rights reserved.
+ * Copyright (c) 2016, 2019, Pelion and affiliates.
  */
 
 #ifndef MBEDTLS_WISUN_CONFIG_H_
