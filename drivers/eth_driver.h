@@ -1,3 +1,6 @@
+/*
+ * Copyright (c) 2017, Pelion and affiliates.
+ */
 #ifndef ETH_DRIVER_H
 #define ETH_DRIVER_H
 

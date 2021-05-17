@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited. All rights reserved.
+ * Copyright (c) 2017, Pelion and affiliates.
  */
 
 #ifndef _THREAD_BBR_EXT_

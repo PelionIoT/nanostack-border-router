@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited. All rights reserved.
+ * Copyright (c) 2019, Pelion and affiliates.
  */
 
 #ifndef NANOSTACK_HEAP_REGION_H
